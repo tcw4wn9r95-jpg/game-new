@@ -8,8 +8,8 @@ import { sellPrice } from '../sim/production';
 import { carried } from '../sim/modes';
 import { AGES, TECH_DEFS, type TechId, buildingCost, buildingMaxHp, researchBlock, techsAt, unitCost, unitStats } from '../sim/techs';
 import type { World } from '../sim/world';
-import { ICONS, techIcon } from './icons';
-import { portrait } from './portraits';
+import { ICONS } from './icons';
+import { artIcon, portrait, techArt } from './portraits';
 import { hideTip, tip } from './tooltip';
 
 const RES_NAMES = { food: 'Food', wood: 'Wood', gold: 'Gold', stone: 'Stone' } as const;
@@ -21,7 +21,7 @@ const CAP = 10;
 const TABS: Array<{ key: string; name: string; icon: string; types: BuildingType[] }> = [
   { key: 'economy', name: 'Economy', icon: ICONS.economy, types: ['house', 'farm', 'mill', 'lumber_camp', 'mining_camp', 'market', 'wonder'] },
   { key: 'military', name: 'Military', icon: ICONS.military, types: ['barracks', 'archery_range', 'stable', 'blacksmith', 'monastery', 'university', 'siege_workshop'] },
-  { key: 'defense', name: 'Defense', icon: ICONS.meleeArmor, types: ['palisade_wall', 'palisade_gate', 'stone_wall', 'gate', 'watch_tower', 'castle'] },
+  { key: 'defense', name: 'Defense', icon: ICONS.defense, types: ['palisade_wall', 'palisade_gate', 'stone_wall', 'gate', 'watch_tower', 'castle'] },
   { key: 'naval', name: 'Naval', icon: ICONS.ship, types: ['dock'] },
   // Fishing ships' own short list.
   { key: 'water', name: 'Water', icon: ICONS.fish_trap, types: ['fish_trap'] },
@@ -205,7 +205,7 @@ export class CommandCenter {
         const cost = buildingCost(this.world, this.player, type) as Record<string, number>;
         const locked = def.age > age;
         return {
-          icon: ICON[type],
+          icon: artIcon(type, this.player),
           label: def.name,
           caption: locked ? AGES[def.age].numeral : Object.values(cost).join('/'),
           run: () => {
@@ -346,7 +346,7 @@ export class CommandCenter {
     const res = this.world.players[this.player].resources;
     const why = () => researchBlock(this.world, this.player, id);
     return {
-      icon: techIcon(id),
+      icon: techArt(id, this.player),
       label: `Research ${t.name}`,
       caption: Object.values(cost).join('/'),
       run: () => this.ctl.command({ type: 'research', id: b.id, tech: id }),
@@ -399,7 +399,7 @@ export class CommandCenter {
       const cost = unitCost(this.world, this.player, unit) as Record<string, number>;
       const locked = u.age > p.age;
       actions.push({
-        icon: ICON[unit],
+        icon: artIcon(unit, this.player),
         label: `Train ${UNIT_DEFS[unit].name}`,
         caption: locked ? AGES[u.age].numeral : Object.values(cost).join('/'),
         run: () => this.ctl.command({ type: 'train', id: b.id, unit }),
@@ -564,7 +564,7 @@ export class CommandCenter {
           const sig = cur.queue.map((q) => q.unit ?? q.tech).join(',');
           if (sig !== queueSig) {
             queueSig = sig;
-            headBar = this.renderQueue(queueEl, cur.id, cur.queue.map((q) => (q.unit ? ICON[q.unit] : techIcon(q.tech!))));
+            headBar = this.renderQueue(queueEl, cur.id, cur.queue.map((q) => (q.unit ? artIcon(q.unit, this.player) : techArt(q.tech!, this.player))));
           }
           if (headBar && cur.queue[0]) headBar.style.width = `${cur.queue[0].progress * 100}%`;
         }

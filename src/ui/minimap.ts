@@ -3,7 +3,7 @@ import { PLAYER_COLORS } from '../render/palette';
 import type { Fog } from '../sim/fog';
 import type { World } from '../sim/world';
 import { mapImage } from './mapImage';
-import { drawCrownIcon, drawRelicIcon } from '../render/icons2d';
+import { drawCommanderIcon, drawIntelIcon } from '../render/icons2d';
 
 const REDRAW_MS = 120;
 const BASE_REFRESH_MS = 3000;
@@ -134,7 +134,7 @@ export class Minimap {
       g.fillRect(x - dot / 2, y - dot / 2, dot, dot);
     }
 
-    // Domination sites in their holder's colour; relics lying about as gold specks.
+    // Domination sites in their holder's colour; intel drives lying about as small cases.
     for (const st of this.world.modeState.sites) {
       if (!this.fog.isExplored(st.x, st.y)) continue;
       const [x, y] = at(st.x, st.y);
@@ -149,9 +149,9 @@ export class Minimap {
     for (const r of this.world.resources()) {
       if (r.type !== 'relic' || r.holder || !this.fog.isExplored(r.x, r.y)) continue;
       const [x, y] = at(r.x, r.y);
-      drawRelicIcon(g, x, y, Math.max(2.5, ax * 2));
+      drawIntelIcon(g, x, y, Math.max(2.5, ax * 2));
     }
-    // Your King: a pulsing crown (an enemy King only while in sight).
+    // Your Commander: a pulsing star (an enemy Commander only while in sight).
     for (const u of this.world.units()) {
       if (u.type !== 'king') continue;
       const holder = u.inside ? this.world.building(u.inside) : undefined;
@@ -159,7 +159,7 @@ export class Minimap {
       if (u.owner !== this.player && (holder || !this.fog.isVisible(px, py))) continue;
       const [x, y] = at(px, py);
       const pulse = 1 + 0.2 * Math.sin((now / 1000) * 5);
-      drawCrownIcon(g, x, y - 2, Math.max(4, ax * 3) * (u.owner === this.player ? pulse : 1));
+      drawCommanderIcon(g, x, y - 2, Math.max(4, ax * 3) * (u.owner === this.player ? pulse : 1));
     }
 
     // Alert pings: red rings pulsing outward.

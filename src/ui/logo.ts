@@ -1,78 +1,67 @@
-// The Hearth & Crown emblem and wordmark: a heater shield bearing a stone
-// hearth with a living fire, crowned, over crossed swords. Drawn as SVG so it
-// stays sharp from the menu title to the splash screen and the app icon.
+// The Steel & Signal emblem and wordmark: a chamfered steel shield holding a
+// radar scope with a sweeping beam, signal arcs and a star, under rank
+// chevrons. Drawn as SVG so it stays sharp from the menu title to the splash
+// screen and the app icon.
 
 let uid = 0;
 
-/** The emblem as SVG markup. `animated` lets the fire flicker and the gems glint (CSS in ui.css). */
+/** The emblem as SVG markup. `animated` sweeps the radar and pulses the signal (CSS in ui.css). */
 export function emblemSvg(opts: { animated?: boolean; className?: string } = {}): string {
   const p = `em${uid++}`;
   return `<svg class="emblem ${opts.animated ? 'emblem-live' : ''} ${opts.className ?? ''}" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <defs>
     <linearGradient id="${p}g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fff2b8"/><stop offset=".35" stop-color="#e8b84a"/><stop offset=".7" stop-color="#b07c22"/><stop offset="1" stop-color="#6e4810"/>
+      <stop offset="0" stop-color="#e9fbff"/><stop offset=".35" stop-color="#9fb4c2"/><stop offset=".7" stop-color="#55687a"/><stop offset="1" stop-color="#2a3644"/>
     </linearGradient>
     <linearGradient id="${p}f" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#2c4f8c"/><stop offset=".55" stop-color="#1a3060"/><stop offset="1" stop-color="#0d1a38"/>
+      <stop offset="0" stop-color="#11324a"/><stop offset=".55" stop-color="#0a1e30"/><stop offset="1" stop-color="#050d17"/>
     </linearGradient>
-    <linearGradient id="${p}s" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#8b959b"/><stop offset=".45" stop-color="#f4f8fa"/><stop offset="1" stop-color="#6d777d"/>
-    </linearGradient>
-    <radialGradient id="${p}glow" cx=".5" cy=".72" r=".45">
-      <stop offset="0" stop-color="#ffb347" stop-opacity=".75"/><stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/>
+    <radialGradient id="${p}glow" cx=".5" cy=".55" r=".5">
+      <stop offset="0" stop-color="#38d6ff" stop-opacity=".55"/><stop offset="1" stop-color="#0a8fd0" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="${p}fl" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0" stop-color="#ff5a14"/><stop offset=".5" stop-color="#ff9a24"/><stop offset="1" stop-color="#ffe066"/>
+    <linearGradient id="${p}sw" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#38d6ff" stop-opacity="0"/><stop offset="1" stop-color="#7fe9ff" stop-opacity=".85"/>
     </linearGradient>
-    <clipPath id="${p}c"><path d="M18 46h84v34c0 30-18 50-42 62-24-12-42-32-42-62z"/></clipPath>
+    <linearGradient id="${p}st" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4c4"/><stop offset=".5" stop-color="#ffc83a"/><stop offset="1" stop-color="#d0870a"/>
+    </linearGradient>
+    <clipPath id="${p}c"><path d="M30 40h60l14 14v40c0 22-18 38-44 50-26-12-44-28-44-50V54z"/></clipPath>
   </defs>
-  <!-- Crossed swords behind the shield -->
-  <g stroke="#1b0f05" stroke-width="1.2">
-    <path d="M8 22l92 112 3-3L12 18z" fill="url(#${p}s)"/>
-    <path d="M112 22L20 134l-3-3L108 18z" fill="url(#${p}s)"/>
-    <path d="M4 34l12-12 4 4-12 12z M116 34l-12-12-4 4 12 12z" fill="url(#${p}g)"/>
-    <circle cx="5" cy="17" r="3.6" fill="url(#${p}g)"/><circle cx="115" cy="17" r="3.6" fill="url(#${p}g)"/>
+  <!-- Rank chevrons above the shield -->
+  <g fill="url(#${p}g)" stroke="#04070b" stroke-width="1.2" stroke-linejoin="round">
+    <path d="M22 26l38-18 38 18v8L60 16 22 34z"/>
+    <path d="M30 36l30-14 30 14v7L60 29 30 43z"/>
   </g>
-  <!-- The shield: gold rim, blue field -->
-  <path d="M14 42h92v38c0 34-21 56-46 68-25-12-46-34-46-68z" fill="url(#${p}g)" stroke="#1b0f05" stroke-width="1.6"/>
-  <path d="M18 46h84v34c0 30-18 50-42 62-24-12-42-32-42-62z" fill="url(#${p}f)"/>
+  <!-- The shield: steel rim, deep navy field -->
+  <path d="M28 36h64l16 16v42c0 26-21 43-48 56-27-13-48-30-48-56V52z" fill="url(#${p}g)" stroke="#04070b" stroke-width="1.6"/>
+  <path d="M30 40h60l14 14v40c0 22-18 38-44 50-26-12-44-28-44-50V54z" fill="url(#${p}f)"/>
   <g clip-path="url(#${p}c)">
-    <!-- Faint diaper pattern on the field -->
-    <path d="M18 60l42 42 42-42M18 84l42 42 42-42M18 108l42 42 42-42" fill="none" stroke="#ffffff" stroke-opacity=".06" stroke-width="1"/>
-    <!-- Firelight -->
-    <ellipse cx="60" cy="112" rx="40" ry="34" fill="url(#${p}glow)" class="em-glow"/>
-    <!-- The hearth: a stone arch over a fire -->
-    <path d="M32 136V100c0-17 12-28 28-28s28 11 28 28v36z" fill="#7b7468" stroke="#1b0f05" stroke-width="1.2"/>
-    <path d="M40 136v-34c0-12 9-20 20-20s20 8 20 20v34z" fill="#1d1208"/>
-    <g fill="none" stroke="#4d473e" stroke-width="1.1">
-      <path d="M32 112h8M80 112h8M32 124h8M80 124h8M36 92l6 4M84 92l-6 4M47 77l4 7M73 77l-4 7M60 72v10"/>
+    <ellipse cx="60" cy="90" rx="44" ry="44" fill="url(#${p}glow)" class="em-glow"/>
+    <!-- Radar scope: rings, cross-hairs and a sweeping beam -->
+    <g fill="none" stroke="#38d6ff" stroke-opacity=".45" stroke-width="1">
+      <circle cx="60" cy="90" r="12"/><circle cx="60" cy="90" r="24"/><circle cx="60" cy="90" r="36"/>
+      <path d="M60 50v80M20 90h80"/>
     </g>
-    <g class="em-fire">
-      <path class="em-flame em-flame-a" d="M60 134c-13 0-17-9-13-18 3-7 9-9 8-19 7 5 13 12 12 21 4-3 4-8 4-11 6 7 6 14 3 19-2 5-7 8-14 8z" fill="url(#${p}fl)"/>
-      <path class="em-flame em-flame-b" d="M60 134c-7 0-10-5-8-10 2-4 5-6 5-12 5 4 8 9 7 14 2-1 3-3 3-5 3 4 3 8 1 10-1 2-4 3-8 3z" fill="#ffe680"/>
+    <g class="em-flame em-flame-a"><path d="M60 90L96 74A40 40 0 0 1 100 90z" fill="url(#${p}sw)"/></g>
+    <!-- Contacts on the scope -->
+    <g class="em-gems">
+      <circle cx="82" cy="78" r="2.4" fill="#7fe9ff"/><circle cx="38" cy="104" r="2" fill="#ff5a4a"/><circle cx="46" cy="70" r="1.8" fill="#7fe9ff"/>
     </g>
-    <!-- Logs -->
-    <path d="M44 133l32-5M44 128l32 5" stroke="#5a3a1c" stroke-width="3.2" stroke-linecap="round"/>
+    <!-- Signal arcs from the star -->
+    <g class="em-flame em-flame-b" fill="none" stroke="#bff4ff" stroke-width="2.2" stroke-linecap="round">
+      <path d="M44 72a22 22 0 0 0 0 36M76 72a22 22 0 0 1 0 36"/>
+      <path d="M37 64a32 32 0 0 0 0 52M83 64a32 32 0 0 1 0 52" stroke-opacity=".55"/>
+    </g>
+    <!-- The star -->
+    <path d="M60 74l4.7 10.6 11.5 1.2-8.6 7.7 2.5 11.3L60 99l-10.1 5.8 2.5-11.3-8.6-7.7 11.5-1.2z" fill="url(#${p}st)" stroke="#04070b" stroke-width="1"/>
   </g>
-  <!-- Inner gold rule -->
-  <path d="M18 46h84v34c0 30-18 50-42 62-24-12-42-32-42-62z" fill="none" stroke="#f6df98" stroke-opacity=".55" stroke-width="1"/>
-  <!-- The crown -->
-  <g stroke="#1b0f05" stroke-width="1.4" stroke-linejoin="round">
-    <path d="M28 44l-4-26 15 12 9-22 12 18 12-18 9 22 15-12-4 26z" fill="url(#${p}g)"/>
-    <path d="M27 40h66v8H27z" fill="url(#${p}g)"/>
-    <circle cx="24" cy="16" r="3.4" fill="url(#${p}g)"/><circle cx="48" cy="7" r="3.4" fill="url(#${p}g)"/><circle cx="72" cy="7" r="3.4" fill="url(#${p}g)"/><circle cx="96" cy="16" r="3.4" fill="url(#${p}g)"/>
-    <circle cx="60" cy="25" r="4" fill="url(#${p}g)"/>
-  </g>
-  <g class="em-gems" stroke="#1b0f05" stroke-width=".8">
-    <rect x="56.5" y="40.5" width="7" height="7" transform="rotate(45 60 44)" fill="#c0262c"/>
-    <circle cx="40" cy="44" r="2.6" fill="#2a64c8"/><circle cx="80" cy="44" r="2.6" fill="#2a64c8"/>
-    <circle cx="31" cy="44" r="1.8" fill="#3d9a4a"/><circle cx="89" cy="44" r="1.8" fill="#3d9a4a"/>
-  </g>
-  <path d="M30 41.5h60" stroke="#fff6d8" stroke-opacity=".7" stroke-width=".9"/>
+  <!-- Inner rule -->
+  <path d="M30 40h60l14 14v40c0 22-18 38-44 50-26-12-44-28-44-50V54z" fill="none" stroke="#7fe9ff" stroke-opacity=".6" stroke-width="1"/>
+  <path d="M30 40h60" stroke="#e9fbff" stroke-opacity=".7" stroke-width=".9"/>
 </svg>`;
 }
 
-/** "Hearth & Crown" in engraved gold, the ampersand as a flourish of flame. */
+/** "Steel & Signal" in brushed steel, the ampersand lit like a signal. */
 export function wordmarkHtml(className = ''): string {
   return `<span class="wordmark ${className}"><span class="wm-word">Steel</span><span class="wm-amp">&amp;</span><span class="wm-word">Signal</span></span>`;
 }

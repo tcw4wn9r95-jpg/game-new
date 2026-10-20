@@ -1,6 +1,6 @@
 :root {
   --bg: #0e1426;
-  --ink: #f4ecd8;
+  --ink: #d8ecf4;
   --chip: rgba(10, 14, 28, 0.72);
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
@@ -16,7 +16,7 @@ body {
   overscroll-behavior: none;
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Alegreya Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, sans-serif;
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;

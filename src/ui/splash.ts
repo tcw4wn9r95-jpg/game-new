@@ -1,5 +1,5 @@
 // The title card shown when the game starts: the emblem with its fire alight,
-// the wordmark, drifting embers and "Tap to deploy". The tap also unlocks
+// the wordmark, drifting motes of light and "Tap to deploy". The tap also unlocks
 // sound on iOS, so the fanfare that greets it is the first thing heard.
 import { audio } from './audio';
 import { emblemSvg, wordmarkHtml } from './logo';

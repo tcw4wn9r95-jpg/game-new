@@ -23,7 +23,7 @@ import { headingOf } from './shipFigures';
 import { setBanners } from './buildingSprites';
 import { FACTIONS, type FactionId } from '../sim/techs';
 import { CAPTURE_TIME, SITE_RADIUS, type Site } from '../sim/modes';
-import { drawCrownIcon, drawRelicIcon } from './icons2d';
+import { drawCommanderIcon, drawIntelIcon } from './icons2d';
 
 /** Alpha channel of a sprite canvas, read once (for hit tests and occlusion). */
 const masks = new WeakMap<HTMLCanvasElement, Uint8Array>();
@@ -477,7 +477,7 @@ export class Renderer {
     const hurt = u.attackedAt > this.world.tick - 50 && u.hp < maxHp;
     if (selected || hurt) this.hpBar(v, px, py - S * UNIT_K * (unitHeight(u.type) + 0.15), S * 0.7, u.hp / maxHp, u.owner);
     // The King wears a floating crown so he is easy to find in a crowd.
-    if (u.type === 'king') drawCrownIcon(this.view.ctx, px, py - S * UNIT_K * (unitHeight(u.type) + 0.45), Math.max(5, S * 0.18));
+    if (u.type === 'king') drawCommanderIcon(this.view.ctx, px, py - S * UNIT_K * (unitHeight(u.type) + 0.45), Math.max(5, S * 0.18));
   }
 
   /** How many are aboard a transport. */
@@ -653,7 +653,7 @@ export class Renderer {
     ctx.fillRect(X - S * size, Y - S * size * 1.3, S * size * 2, S * size * 2);
   }
 
-  /** An arrow (or javelin) on its arc, with its shadow on the ground. */
+  /** A round in flight: tracers for small arms, shells for guns, missiles with exhaust trails. */
   private drawProjectile(v: FrameView, p: World['projectiles'][number], t: number): void {
     const { ctx } = this.view;
     const { S } = v;
@@ -667,71 +667,90 @@ export class Renderer {
     const l = Math.hypot(dx, dy) || 1;
     dx /= l;
     dy /= l;
-    if (p.from === 'fire_ship') {
-      // A gout of burning pitch.
-      const sy = a.Y - a.Z, r = S * 0.16;
-      const fire = ctx.createRadialGradient(a.X, sy, 0, a.X, sy, r * 1.6);
-      fire.addColorStop(0, 'rgba(255,250,210,0.95)');
-      fire.addColorStop(0.35, 'rgba(255,160,40,0.85)');
-      fire.addColorStop(1, 'rgba(180,40,10,0)');
+    const hx = a.X, hy = a.Y - a.Z;
+    const missile = p.from === 'trebuchet' || p.from === 'siege_barge';
+    if (p.splash && missile) {
+      // A missile: smoke trail behind, a flaring motor, and the white body.
+      for (let k = 6; k >= 1; k--) {
+        const q = Math.max(0, t - k * 0.025);
+        const c = at(q);
+        const r = S * (0.08 + k * 0.035);
+        ctx.fillStyle = `rgba(220,220,215,${0.45 - k * 0.06})`;
+        ctx.beginPath();
+        ctx.arc(c.X, c.Y - c.Z, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      const len = S * (p.from === 'trebuchet' ? 0.6 : 0.42);
+      const fire = ctx.createRadialGradient(hx - dx * len * 0.55, hy - dy * len * 0.55, 0, hx - dx * len * 0.55, hy - dy * len * 0.55, S * 0.22);
+      fire.addColorStop(0, 'rgba(255,255,220,1)');
+      fire.addColorStop(0.4, 'rgba(255,170,50,0.9)');
+      fire.addColorStop(1, 'rgba(255,80,20,0)');
       ctx.fillStyle = fire;
       ctx.beginPath();
-      ctx.arc(a.X, sy, r * 1.6, 0, Math.PI * 2);
+      ctx.arc(hx - dx * len * 0.55, hy - dy * len * 0.55, S * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#eef0f0';
+      ctx.lineWidth = Math.max(2, S * 0.09);
+      ctx.beginPath();
+      ctx.moveTo(hx - dx * len * 0.5, hy - dy * len * 0.5);
+      ctx.lineTo(hx + dx * len * 0.5, hy + dy * len * 0.5);
+      ctx.stroke();
+      ctx.strokeStyle = '#2a2d31';
+      ctx.beginPath();
+      ctx.moveTo(hx + dx * len * 0.35, hy + dy * len * 0.35);
+      ctx.lineTo(hx + dx * len * 0.5, hy + dy * len * 0.5);
+      ctx.stroke();
+      // Shadow racing along the ground.
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.beginPath();
+      ctx.ellipse(a.X, a.Y, len * 0.4, len * 0.1, 0, 0, Math.PI * 2);
       ctx.fill();
       return;
     }
     if (p.splash) {
-      // A stone or boulder tumbling on its arc, with its shadow racing along the ground.
-      const r = S * (p.from === 'trebuchet' ? 0.2 : p.from === 'siege_barge' ? 0.15 : 0.13);
-      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      // An artillery shell: a dark ogive with a faint heat streak.
+      const r = S * 0.08;
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
       ctx.beginPath();
-      ctx.ellipse(a.X, a.Y, r * 1.1, r * 0.45, 0, 0, Math.PI * 2);
+      ctx.ellipse(a.X, a.Y, r * 1.6, r * 0.5, 0, 0, Math.PI * 2);
       ctx.fill();
-      const sy = a.Y - a.Z;
-      const rock = ctx.createRadialGradient(a.X - r * 0.35, sy - r * 0.4, r * 0.1, a.X, sy, r);
-      rock.addColorStop(0, '#c9c4b8');
-      rock.addColorStop(1, '#4e4a44');
-      ctx.fillStyle = rock;
-      ctx.beginPath();
-      ctx.arc(a.X, sy, r, 0, Math.PI * 2);
-      ctx.fill();
-      return;
-    }
-    const javelin = p.from === 'skirmisher' || p.from === 'scorpion';
-    const len = S * (p.from === 'scorpion' ? 0.75 : javelin ? 0.55 : 0.4);
-    // Shadow.
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.beginPath();
-    ctx.ellipse(a.X, a.Y, len * 0.35, len * 0.08, 0, 0, Math.PI * 2);
-    ctx.fill();
-    const hx = a.X + dx * len * 0.5, hy = a.Y - a.Z + dy * len * 0.5;
-    const tx = a.X - dx * len * 0.5, ty = a.Y - a.Z - dy * len * 0.5;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = 'rgba(20,12,4,0.8)';
-    ctx.lineWidth = Math.max(1.2, S * (javelin ? 0.06 : 0.04));
-    ctx.beginPath();
-    ctx.moveTo(tx, ty);
-    ctx.lineTo(hx, hy);
-    ctx.stroke();
-    ctx.strokeStyle = p.from === 'scorpion' ? '#3a2614' : javelin ? '#8a6038' : '#c9a46a';
-    ctx.lineWidth = Math.max(0.8, S * (javelin ? 0.035 : 0.022));
-    ctx.stroke();
-    // Steel head and (for arrows) pale fletching.
-    ctx.fillStyle = '#d4dadd';
-    ctx.beginPath();
-    ctx.moveTo(hx + dx * S * 0.08, hy + dy * S * 0.08);
-    ctx.lineTo(hx - dy * S * 0.03, hy + dx * S * 0.03);
-    ctx.lineTo(hx + dy * S * 0.03, hy - dx * S * 0.03);
-    ctx.closePath();
-    ctx.fill();
-    if (!javelin) {
-      ctx.strokeStyle = '#f0ebe0';
+      ctx.strokeStyle = 'rgba(255,200,120,0.45)';
       ctx.lineWidth = Math.max(1, S * 0.04);
       ctx.beginPath();
-      ctx.moveTo(tx, ty);
-      ctx.lineTo(tx + dx * S * 0.08, ty + dy * S * 0.08);
+      ctx.moveTo(hx - dx * S * 0.5, hy - dy * S * 0.5);
+      ctx.lineTo(hx, hy);
       ctx.stroke();
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#3a3f44';
+      ctx.lineWidth = Math.max(2, r * 1.6);
+      ctx.beginPath();
+      ctx.moveTo(hx - dx * r * 1.4, hy - dy * r * 1.4);
+      ctx.lineTo(hx + dx * r * 1.4, hy + dy * r * 1.4);
+      ctx.stroke();
+      return;
     }
+    // Tracer rounds: a glowing streak with a hot core; heavy guns fire bigger, orange ones.
+    const heavy = p.from === 'scorpion' || p.from === 'fire_ship' || p.from === 'galley';
+    const len = S * (heavy ? 0.7 : 0.5);
+    const color = heavy ? '255,150,50' : '255,230,120';
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = `rgba(${color},0.35)`;
+    ctx.lineWidth = Math.max(2.5, S * (heavy ? 0.12 : 0.08));
+    ctx.beginPath();
+    ctx.moveTo(hx - dx * len, hy - dy * len);
+    ctx.lineTo(hx, hy);
+    ctx.stroke();
+    ctx.strokeStyle = `rgba(${color},0.95)`;
+    ctx.lineWidth = Math.max(1.2, S * (heavy ? 0.05 : 0.035));
+    ctx.beginPath();
+    ctx.moveTo(hx - dx * len * 0.7, hy - dy * len * 0.7);
+    ctx.lineTo(hx, hy);
+    ctx.stroke();
+    ctx.fillStyle = '#fffbe6';
+    ctx.beginPath();
+    ctx.arc(hx, hy, Math.max(1, S * 0.03), 0, Math.PI * 2);
+    ctx.fill();
   }
 
   /** Where a working unit's job is, to face it. */
@@ -1014,13 +1033,13 @@ export class Renderer {
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = '#fff6d8';
-      ctx.font = `700 ${Math.round(r * 1.2)}px 'Alegreya Sans', sans-serif`;
+      ctx.font = `700 ${Math.round(r * 1.2)}px 'Rajdhani', sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(String(b.garrison.length), bx, by - r * 0.1);
       ctx.textBaseline = 'alphabetic';
       // The King is inside: a crown over the badge.
-      if (b.owner === this.player && b.garrison.some((id) => this.world.unit(id)?.type === 'king')) drawCrownIcon(ctx, bx, by - r * 1.9, r * 0.9);
+      if (b.owner === this.player && b.garrison.some((id) => this.world.unit(id)?.type === 'king')) drawCommanderIcon(ctx, bx, by - r * 1.9, r * 0.9);
     }
     if (b.type === 'monastery' && b.complete) {
       let n = 0;
@@ -1028,12 +1047,12 @@ export class Renderer {
       const S2 = Math.max(6, S * 0.22);
       for (let k = 0; k < n; k++) {
         const X = this.sx(v, b.x + b.size / 2, b.y + b.size / 2) + (k - (n - 1) / 2) * S2 * 2.2;
-        drawRelicIcon(ctx, X, ny - S * (0.3 + b.size * 0.5) * ZK, S2);
+        drawIntelIcon(ctx, X, ny - S * (0.3 + b.size * 0.5) * ZK, S2);
       }
     }
   }
 
-  /** A relic: a small gilded casket, on the ground or held up by its monk. */
+  /** An intel drive: a rugged case, on the ground or held up by its agent. */
   private drawRelic(v: FrameView, x: number, y: number, lift: number): void {
     const r = Math.max(4, v.S * 0.2);
     const X = this.sx(v, x, y), Y = this.sy(v, x, y) - lift;
@@ -1041,12 +1060,12 @@ export class Renderer {
     if (!lift) {
       // A soft glow so it can be spotted.
       const glow = ctx.createRadialGradient(X, Y - r, 1, X, Y - r, r * 3.5);
-      glow.addColorStop(0, 'rgba(255,230,140,0.55)');
-      glow.addColorStop(1, 'rgba(255,230,140,0)');
+      glow.addColorStop(0, 'rgba(110,230,255,0.55)');
+      glow.addColorStop(1, 'rgba(110,230,255,0)');
       ctx.fillStyle = glow;
       ctx.fillRect(X - r * 3.5, Y - r * 4.5, r * 7, r * 7);
     }
-    drawRelicIcon(ctx, X, Y - r, r);
+    drawIntelIcon(ctx, X, Y - r, r);
   }
 
   /** The capture circle of a Domination site, in the holder's colour. */
@@ -1076,37 +1095,72 @@ export class Renderer {
     ctx.restore();
   }
 
-  /** The site's banner pole: a tall staff with a flag in the holder's colour. */
+  /** The control point's uplink mast: a lattice tower with a dish and a beacon in the holder's colour. */
   private drawSitePole(v: FrameView, st: Site): void {
     const { ctx } = this.view;
+    const { S } = v;
     const X = this.sx(v, st.x, st.y), Y = this.sy(v, st.x, st.y);
-    const h = v.S * 2.2;
-    const col = st.owner >= 0 ? PLAYER_COLORS[st.owner % PLAYER_COLORS.length] : '#e8e2d2';
+    const h = S * 2.2;
+    const col = st.owner >= 0 ? PLAYER_COLORS[st.owner % PLAYER_COLORS.length] : '#d8e2ea';
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.beginPath();
-    ctx.ellipse(X, Y, v.S * 0.35, v.S * 0.17, 0, 0, Math.PI * 2);
+    ctx.ellipse(X, Y, S * 0.4, S * 0.2, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Stone base, pole and gilt finial.
-    ctx.fillStyle = '#8e897e';
-    ctx.fillRect(X - v.S * 0.18, Y - v.S * 0.18, v.S * 0.36, v.S * 0.2);
-    ctx.fillStyle = '#4a3019';
-    ctx.fillRect(X - Math.max(1, v.S * 0.03), Y - h, Math.max(2, v.S * 0.06), h);
-    ctx.fillStyle = '#e0b54a';
+    // Concrete plinth with an equipment cabinet.
+    ctx.fillStyle = '#9a978e';
+    ctx.fillRect(X - S * 0.22, Y - S * 0.16, S * 0.44, S * 0.18);
+    ctx.fillStyle = '#5b636b';
+    ctx.fillRect(X + S * 0.05, Y - S * 0.38, S * 0.16, S * 0.24);
+    // Tapering lattice.
+    ctx.strokeStyle = '#4b5258';
+    ctx.lineWidth = Math.max(1, S * 0.03);
     ctx.beginPath();
-    ctx.arc(X, Y - h, Math.max(2, v.S * 0.07), 0, Math.PI * 2);
+    ctx.moveTo(X - S * 0.14, Y - S * 0.15);
+    ctx.lineTo(X - S * 0.03, Y - h);
+    ctx.moveTo(X + S * 0.14, Y - S * 0.15);
+    ctx.lineTo(X + S * 0.03, Y - h);
+    ctx.stroke();
+    ctx.lineWidth = Math.max(0.6, S * 0.015);
+    for (let k = 0; k < 6; k++) {
+      const f0 = k / 6, f1 = (k + 1) / 6;
+      const w0 = S * (0.14 - 0.11 * f0), w1 = S * (0.14 - 0.11 * f1);
+      const y0 = Y - S * 0.15 - (h - S * 0.15) * f0, y1 = Y - S * 0.15 - (h - S * 0.15) * f1;
+      ctx.beginPath();
+      ctx.moveTo(X - w0, y0);
+      ctx.lineTo(X + w1, y1);
+      ctx.moveTo(X + w0, y0);
+      ctx.lineTo(X - w1, y1);
+      ctx.stroke();
+    }
+    // A dish and a team panel.
+    ctx.fillStyle = '#e8eaea';
+    ctx.beginPath();
+    ctx.ellipse(X - S * 0.16, Y - h * 0.7, S * 0.09, S * 0.18, 0, 0, Math.PI * 2);
     ctx.fill();
-    const wave = Math.sin(v.now * 3 + st.x) * v.S * 0.06;
     ctx.fillStyle = col;
+    ctx.fillRect(X + S * 0.04, Y - h * 0.55, S * 0.22, S * 0.32);
     ctx.strokeStyle = 'rgba(0,0,0,0.45)';
     ctx.lineWidth = 1;
+    ctx.strokeRect(X + S * 0.04, Y - h * 0.55, S * 0.22, S * 0.32);
+    // Pulsing beacon and signal rings.
+    const pulse = 0.5 + 0.5 * Math.sin(v.now * 4 + st.x);
+    const glow = ctx.createRadialGradient(X, Y - h, 0, X, Y - h, S * 0.35);
+    glow.addColorStop(0, col);
+    glow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.globalAlpha = 0.5 + pulse * 0.5;
+    ctx.fillStyle = glow;
     ctx.beginPath();
-    ctx.moveTo(X, Y - h * 0.95);
-    ctx.quadraticCurveTo(X + v.S * 0.4, Y - h * 0.95 - wave, X + v.S * 0.8, Y - h * 0.93);
-    ctx.lineTo(X + v.S * 0.8, Y - h * 0.68);
-    ctx.quadraticCurveTo(X + v.S * 0.4, Y - h * 0.7 + wave, X, Y - h * 0.68);
-    ctx.closePath();
+    ctx.arc(X, Y - h, S * 0.35, 0, Math.PI * 2);
     ctx.fill();
+    ctx.globalAlpha = 1;
+    const ring = (v.now * 0.8 + st.x * 0.1) % 1;
+    ctx.strokeStyle = col;
+    ctx.globalAlpha = 1 - ring;
+    ctx.lineWidth = Math.max(1, S * 0.03);
+    ctx.beginPath();
+    ctx.arc(X, Y - h, S * (0.2 + ring * 0.6), -Math.PI * 0.8, -Math.PI * 0.2);
     ctx.stroke();
+    ctx.globalAlpha = 1;
   }
 
   /** Neighbour joins, damage, gate state and tower level for a fortification sprite. */
@@ -1244,28 +1298,43 @@ export class Renderer {
       const px = this.sx(v, e.x, e.y), py = this.sy(v, e.x, e.y);
       ctx.globalAlpha = 1 - t * t;
       if (e.kind === 'blast') {
-        // Dust and debris thrown up where a stone lands or a petard blows.
-        const r = S * (e.size ?? 0.8) * (0.6 + t * 1.2);
-        const dust = ctx.createRadialGradient(px, py - r * 0.3, 0, px, py - r * 0.3, r);
-        dust.addColorStop(0, `rgba(150,130,100,${0.7 * (1 - t)})`);
-        dust.addColorStop(1, 'rgba(150,130,100,0)');
-        ctx.fillStyle = dust;
-        ctx.beginPath();
-        ctx.ellipse(px, py - r * 0.3, r, r * 0.7, 0, 0, Math.PI * 2);
-        ctx.fill();
-        if (t < 0.3) {
-          ctx.fillStyle = `rgba(255,200,90,${1 - t / 0.3})`;
+        // An explosion: a flash and fireball, a shock ring, then a column of dark smoke and debris.
+        const sz = e.size ?? 0.8;
+        const r = S * sz * (0.6 + t * 1.2);
+        if (t < 0.35) {
+          const f = t / 0.35;
+          const fr = S * sz * (0.35 + f * 0.6);
+          const fire = ctx.createRadialGradient(px, py - fr * 0.4, 0, px, py - fr * 0.4, fr);
+          fire.addColorStop(0, `rgba(255,255,230,${1 - f})`);
+          fire.addColorStop(0.35, `rgba(255,190,60,${0.95 - f * 0.6})`);
+          fire.addColorStop(0.75, `rgba(230,80,20,${0.7 - f * 0.5})`);
+          fire.addColorStop(1, 'rgba(120,30,10,0)');
+          ctx.fillStyle = fire;
           ctx.beginPath();
-          ctx.arc(px, py - S * 0.2, S * 0.25 * (e.size ?? 1), 0, Math.PI * 2);
+          ctx.arc(px, py - fr * 0.4, fr, 0, Math.PI * 2);
           ctx.fill();
+          ctx.strokeStyle = `rgba(255,240,210,${0.6 * (1 - f)})`;
+          ctx.lineWidth = Math.max(1, S * 0.05);
+          ctx.beginPath();
+          ctx.ellipse(px, py, S * sz * (0.4 + f * 1.4), S * sz * (0.2 + f * 0.7), 0, 0, Math.PI * 2);
+          ctx.stroke();
         }
-        ctx.fillStyle = '#4a3c2c';
-        for (let k = 0; k < 6; k++) {
-          const a2 = k * 1.05;
-          ctx.fillRect(px + Math.cos(a2) * r * t * 1.2, py - S * 0.4 - Math.sin(a2) * r * 0.8 * (1 - t) + t * t * S, Math.max(1, S * 0.06), Math.max(1, S * 0.06));
+        const sy = py - S * sz * (0.3 + t * 1.1);
+        const smoke = ctx.createRadialGradient(px, sy, 0, px, sy, r);
+        smoke.addColorStop(0, `rgba(55,52,50,${0.75 * (1 - t)})`);
+        smoke.addColorStop(0.6, `rgba(80,76,70,${0.45 * (1 - t)})`);
+        smoke.addColorStop(1, 'rgba(90,86,80,0)');
+        ctx.fillStyle = smoke;
+        ctx.beginPath();
+        ctx.ellipse(px, sy, r, r * 0.8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#2b2622';
+        for (let k = 0; k < 7; k++) {
+          const a2 = k * 0.9 + 0.3;
+          ctx.fillRect(px + Math.cos(a2) * r * t * 1.3, py - S * 0.5 - Math.sin(a2) * r * 0.9 * (1 - t) + t * t * S, Math.max(1, S * 0.05), Math.max(1, S * 0.05));
         }
       } else if (e.kind === 'text') {
-        ctx.font = `700 ${Math.round(Math.max(11, S * 0.55))}px 'Alegreya Sans', sans-serif`;
+        ctx.font = `700 ${Math.round(Math.max(11, S * 0.55))}px 'Rajdhani', sans-serif`;
         ctx.textAlign = 'center';
         ctx.lineWidth = Math.max(2, S / 10);
         ctx.strokeStyle = 'rgba(10,6,2,0.85)';

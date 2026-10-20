@@ -1,61 +1,67 @@
-// Small screen-space emblems drawn over the map and the minimap: the King's
-// crown and relics.
+// Small screen-space emblems drawn over the map and the minimap: the
+// Commander's star and intel drives.
 
-/** A gold crown centred on (x, y), r across half its width. */
-export function drawCrownIcon(g: CanvasRenderingContext2D, x: number, y: number, r: number): void {
-  g.save();
+function star(g: CanvasRenderingContext2D, x: number, y: number, r: number): void {
   g.beginPath();
-  g.moveTo(x - r, y + r * 0.55);
-  g.lineTo(x - r, y - r * 0.45);
-  g.lineTo(x - r * 0.55, y + r * 0.05);
-  g.lineTo(x, y - r * 0.75);
-  g.lineTo(x + r * 0.55, y + r * 0.05);
-  g.lineTo(x + r, y - r * 0.45);
-  g.lineTo(x + r, y + r * 0.55);
+  for (let k = 0; k < 10; k++) {
+    const a = -Math.PI / 2 + (k * Math.PI) / 5;
+    const rr = k % 2 ? r * 0.42 : r;
+    if (k) g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    else g.moveTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+  }
   g.closePath();
-  const gold = g.createLinearGradient(x - r, y, x + r, y);
-  gold.addColorStop(0, '#b58a1c');
-  gold.addColorStop(0.45, '#ffe58a');
-  gold.addColorStop(1, '#9a7212');
-  g.fillStyle = gold;
-  g.fill();
-  g.strokeStyle = 'rgba(40,24,0,0.85)';
-  g.lineWidth = Math.max(1, r * 0.14);
-  g.stroke();
-  g.fillStyle = '#c0262c';
+}
+
+/** The Commander's insignia, a gold star on a dark disc, centred on (x, y), r across half its width. */
+export function drawCommanderIcon(g: CanvasRenderingContext2D, x: number, y: number, r: number): void {
+  g.save();
+  g.fillStyle = 'rgba(10,16,24,0.85)';
   g.beginPath();
-  g.arc(x, y + r * 0.2, r * 0.16, 0, Math.PI * 2);
+  g.arc(x, y, r * 1.05, 0, Math.PI * 2);
+  g.fill();
+  g.strokeStyle = '#ffd34a';
+  g.lineWidth = Math.max(1, r * 0.12);
+  g.stroke();
+  star(g, x, y + r * 0.04, r * 0.78);
+  const gold = g.createLinearGradient(x - r, y - r, x + r, y + r);
+  gold.addColorStop(0, '#fff2b0');
+  gold.addColorStop(0.5, '#ffd34a');
+  gold.addColorStop(1, '#c08a10');
+  g.fillStyle = gold;
   g.fill();
   g.restore();
 }
 
-/** A relic: a gilded casket with a cross on its lid. */
-export function drawRelicIcon(g: CanvasRenderingContext2D, x: number, y: number, r: number): void {
+/** An intel drive: a black rugged case with a glowing cyan status light. */
+export function drawIntelIcon(g: CanvasRenderingContext2D, x: number, y: number, r: number): void {
   g.save();
-  g.fillStyle = '#c8962a';
-  g.strokeStyle = 'rgba(40,24,0,0.9)';
-  g.lineWidth = Math.max(1, r * 0.15);
+  g.fillStyle = '#1c2026';
+  g.strokeStyle = 'rgba(0,0,0,0.9)';
+  g.lineWidth = Math.max(1, r * 0.14);
   g.beginPath();
-  g.rect(x - r, y - r * 0.4, r * 2, r * 1.2);
+  g.roundRect(x - r, y - r * 0.7, r * 2, r * 1.4, r * 0.25);
   g.fill();
   g.stroke();
-  // Pitched lid.
-  g.fillStyle = '#f0cf5a';
+  // Handle, latches and the glowing light.
+  g.strokeStyle = '#4a525c';
+  g.lineWidth = Math.max(1, r * 0.2);
   g.beginPath();
-  g.moveTo(x - r * 1.1, y - r * 0.4);
-  g.lineTo(x - r * 0.6, y - r);
-  g.lineTo(x + r * 0.6, y - r);
-  g.lineTo(x + r * 1.1, y - r * 0.4);
-  g.closePath();
+  g.moveTo(x - r * 0.4, y - r * 0.7);
+  g.lineTo(x - r * 0.4, y - r * 1.05);
+  g.lineTo(x + r * 0.4, y - r * 1.05);
+  g.lineTo(x + r * 0.4, y - r * 0.7);
+  g.stroke();
+  g.fillStyle = '#9aa3ab';
+  g.fillRect(x - r * 0.8, y - r * 0.15, r * 0.3, r * 0.3);
+  g.fillRect(x + r * 0.5, y - r * 0.15, r * 0.3, r * 0.3);
+  const glow = g.createRadialGradient(x, y + r * 0.25, 0, x, y + r * 0.25, r * 0.7);
+  glow.addColorStop(0, 'rgba(120,240,255,1)');
+  glow.addColorStop(1, 'rgba(60,200,255,0)');
+  g.fillStyle = glow;
+  g.beginPath();
+  g.arc(x, y + r * 0.25, r * 0.7, 0, Math.PI * 2);
   g.fill();
-  g.stroke();
-  g.strokeStyle = '#fff6d8';
-  g.lineWidth = Math.max(1, r * 0.18);
-  g.beginPath();
-  g.moveTo(x, y - r * 0.2);
-  g.lineTo(x, y + r * 0.6);
-  g.moveTo(x - r * 0.3, y + r * 0.1);
-  g.lineTo(x + r * 0.3, y + r * 0.1);
-  g.stroke();
+  g.fillStyle = '#d8fbff';
+  g.fillRect(x - r * 0.25, y + r * 0.18, r * 0.5, r * 0.14);
   g.restore();
 }

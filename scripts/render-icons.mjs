@@ -12,7 +12,7 @@ const shot = async (size, scale, file, bg = true) => {
   const h = Math.round(size * scale), w = Math.round(h * 120 / 150);
   await page.setViewportSize({ width: size, height: size });
   await page.setContent(`<html><body style="margin:0;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;
-    background:${bg ? 'radial-gradient(circle at 50% 42%, #3d2a14 0%, #1e1309 55%, #0c0704 100%)' : 'transparent'}">
+    background:${bg ? 'radial-gradient(circle at 50% 42%, #173048 0%, #0b1622 55%, #04080d 100%)' : 'transparent'}">
     <div style="width:${w}px;height:${h}px;filter:drop-shadow(0 ${size / 60}px ${size / 40}px rgba(0,0,0,.8))">${svg.replace('<svg', '<svg width="100%" height="100%"')}</div></body></html>`);
   await page.screenshot({ path: `${out}/${file}`, omitBackground: !bg });
 };

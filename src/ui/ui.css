@@ -1,25 +1,26 @@
-/* Hearth & Crown UI theme: dark carved wood, gilded frames, engraved serif titles. */
+/* Steel & Signal UI theme: dark gunmetal glass, cyan-lit tactical frames, technical type. */
 :root {
   --mm-w: min(52vh, 204px);
-  --gold-hi: #f6df98;
-  --gold: #d6a849;
-  --gold-lo: #8a5f1c;
-  --cream: #f6ead0;
-  --ink-dark: #1b0f05;
+  --gold-hi: #96dbf8;
+  --gold: #45adda;
+  --gold-lo: #196a8d;
+  --cream: #d2eaf4;
+  --ink-dark: #0a0f14;
   --wood: repeating-linear-gradient(
       93deg,
-      rgba(255, 226, 170, 0.035) 0 3px,
+      rgba(187, 223, 238, 0.035) 0 3px,
       rgba(0, 0, 0, 0.06) 3px 7px,
-      rgba(255, 226, 170, 0.02) 7px 12px
+      rgba(187, 223, 238, 0.02) 7px 12px
     ),
-    linear-gradient(180deg, #4b331d 0%, #2f1f10 55%, #22160a 100%);
+    linear-gradient(180deg, #222f41 0%, #141d27 55%, #0e141b 100%);
   --wood-dark: repeating-linear-gradient(
       93deg,
-      rgba(255, 226, 170, 0.025) 0 3px,
+      rgba(187, 223, 238, 0.025) 0 3px,
       rgba(0, 0, 0, 0.07) 3px 8px
     ),
-    linear-gradient(180deg, #2c1d0f, #1a1007);
-  --title-font: 'Cinzel', Georgia, 'Times New Roman', serif;
+    linear-gradient(180deg, #131b25, #0b0f15);
+  --title-font: 'Rajdhani', 'Segoe UI', sans-serif;
+  --display-font: 'Orbitron', 'Rajdhani', sans-serif;
 }
 
 .frame {
@@ -47,8 +48,9 @@
   padding: 0 18px;
   border: 7px solid transparent;
   border-image: var(--frame-thin) 7 / 7px stretch;
-  font: 700 15px/1 var(--title-font);
-  letter-spacing: 0.06em;
+  font: 700 16px/1 var(--title-font);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: transform 0.06s, filter 0.12s;
 }
@@ -59,17 +61,17 @@
 }
 
 .btn-gold {
-  background: linear-gradient(180deg, #ffe9a6 0%, #e0b04e 48%, #b07b25 52%, #c99536 100%);
+  background: linear-gradient(180deg, #b8dded 0%, #4ab6e4 48%, #2288b3 52%, #329ecd 100%);
   background-origin: border-box;
   color: var(--ink-dark);
-  text-shadow: 0 1px 0 rgba(255, 245, 210, 0.6);
+  text-shadow: 0 1px 0 rgba(219, 238, 246, 0.6);
 }
 
 .btn-wood {
   background: var(--wood);
   background-origin: border-box;
   color: var(--gold-hi);
-  text-shadow: 0 1px 1px #000;
+  text-shadow: 0 1px 1px #000000;
 }
 
 .round-btn {
@@ -79,9 +81,9 @@
   flex: none;
   padding: 9px;
   border-radius: 50%;
-  border: 2px solid #120a03;
-  background: radial-gradient(circle at 50% 35%, #5a3d22, #24160a 75%);
-  box-shadow: inset 0 0 0 2px var(--gold), inset 0 0 0 3px #4a3110, 0 3px 8px rgba(0, 0, 0, 0.6);
+  border: 2px solid #070a0d;
+  background: radial-gradient(circle at 50% 35%, #28384d, #0f151d 75%);
+  box-shadow: inset 0 0 0 2px var(--gold), inset 0 0 0 3px #1d2938, 0 3px 8px rgba(0, 0, 0, 0.6);
   cursor: pointer;
 }
 
@@ -149,15 +151,15 @@
 
 .stat-v,
 .clock span:last-child {
-  font: 700 17px/1 'Alegreya Sans', sans-serif;
+  font: 700 17px/1 'Rajdhani', sans-serif;
   font-variant-numeric: tabular-nums;
   color: var(--cream);
-  text-shadow: 0 1px 1px #000, 0 0 6px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 1px #000000, 0 0 6px rgba(0, 0, 0, 0.5);
 }
 
 .stat-pop {
   padding-left: 10px;
-  border-left: 1px solid rgba(214, 168, 73, 0.35);
+  border-left: 1px solid rgba(69, 173, 218, 0.35);
 }
 
 .ageplate {
@@ -172,7 +174,7 @@
   width: 26px;
   height: 26px;
   display: block;
-  filter: drop-shadow(0 1px 1px #000);
+  filter: drop-shadow(0 1px 1px #000000);
 }
 
 .ageplate-text {
@@ -182,13 +184,13 @@
   font: 700 13px/1 var(--title-font);
   letter-spacing: 0.05em;
   color: var(--gold-hi);
-  text-shadow: 0 1px 1px #000;
+  text-shadow: 0 1px 1px #000000;
   white-space: nowrap;
 }
 
 .ageplate-text b {
   font-size: 16px;
-  color: #fff3c4;
+  color: #d0e9f3;
 }
 
 .clock {
@@ -224,8 +226,8 @@
 }
 
 .hud-chip {
-  background: rgba(10, 8, 4, 0.75);
-  border: 1px solid rgba(214, 168, 73, 0.5);
+  background: rgba(5, 6, 9, 0.75);
+  border: 1px solid rgba(69, 173, 218, 0.5);
   border-radius: 6px;
   padding: 3px 7px;
   font: 600 12px/1.2 ui-monospace, Menlo, monospace;
@@ -241,7 +243,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at center, rgba(5, 4, 2, 0.45), rgba(5, 4, 2, 0.8));
+  background: radial-gradient(ellipse at center, rgba(2, 3, 4, 0.45), rgba(2, 3, 4, 0.8));
   pointer-events: auto;
   z-index: 5;
 }
@@ -257,10 +259,11 @@
 .panel-title {
   margin: 0 0 4px;
   text-align: center;
-  font: 700 22px var(--title-font);
+  font: 800 18px var(--display-font);
   color: var(--gold-hi);
-  letter-spacing: 0.08em;
-  text-shadow: 0 2px 2px #000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 2px #000000;
 }
 
 /* ---------- Setup screen ---------- */
@@ -275,7 +278,7 @@
   justify-content: center;
   padding: calc(var(--safe-t) + 6px) calc(var(--safe-r) + 12px) calc(var(--safe-b) + 6px)
     calc(var(--safe-l) + 12px);
-  background: radial-gradient(ellipse at 50% 45%, rgba(8, 6, 3, 0.15) 30%, rgba(8, 6, 3, 0.75) 100%);
+  background: radial-gradient(ellipse at 50% 45%, rgba(4, 5, 7, 0.15) 30%, rgba(4, 5, 7, 0.75) 100%);
   overflow-y: auto;
 }
 
@@ -310,14 +313,14 @@
   width: 30px;
   height: 30px;
   display: block;
-  filter: drop-shadow(0 2px 2px #000);
+  filter: drop-shadow(0 2px 2px #000000);
 }
 
 .setup-title h1 {
   margin: 0;
   font: 700 24px/1.1 var(--title-font);
   letter-spacing: 0.06em;
-  background: linear-gradient(180deg, #fff1bd, #e2b24f 55%, #a7741f);
+  background: linear-gradient(180deg, #cae6f2, #4bb7e6 55%, #1c80aa);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -346,7 +349,7 @@
   padding: 0 0 4px;
   border: 5px solid transparent;
   border-image: var(--frame-thin) 7 / 5px stretch;
-  background: #150d05;
+  background: #080c10;
   background-origin: border-box;
   cursor: pointer;
   filter: saturate(0.55) brightness(0.8);
@@ -368,7 +371,7 @@
 .card[aria-pressed='true'] {
   filter: none;
   transform: translateY(-1px);
-  box-shadow: 0 0 0 2px rgba(255, 220, 130, 0.55), 0 0 14px rgba(255, 200, 90, 0.45);
+  box-shadow: 0 0 0 2px rgba(130, 217, 255, 0.55), 0 0 14px rgba(90, 205, 255, 0.45);
 }
 
 .seg {
@@ -376,7 +379,7 @@
   gap: 4px;
   padding: 3px;
   background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(214, 168, 73, 0.35);
+  border: 1px solid rgba(69, 173, 218, 0.35);
   border-radius: 4px;
 }
 
@@ -394,9 +397,9 @@
 }
 
 .seg-btn[aria-pressed='true'] {
-  background: linear-gradient(180deg, #ffe9a6, #d9a743 55%, #b8862f);
+  background: linear-gradient(180deg, #b8dded, #3faddd 55%, #2c90bb);
   color: var(--ink-dark);
-  box-shadow: inset 0 0 0 1px #5c3f12;
+  box-shadow: inset 0 0 0 1px #243245;
 }
 
 .setup-right {
@@ -407,8 +410,8 @@
 
 .preview-wrap {
   padding: 3px;
-  background: #0b0703;
-  box-shadow: inset 0 0 0 1px var(--gold-lo), 0 0 0 1px #000;
+  background: #050609;
+  box-shadow: inset 0 0 0 1px var(--gold-lo), 0 0 0 1px #000000;
   line-height: 0;
 }
 
@@ -423,14 +426,14 @@
   font: 700 14px var(--title-font);
   color: var(--gold-hi);
   letter-spacing: 0.04em;
-  text-shadow: 0 1px 1px #000;
+  text-shadow: 0 1px 1px #000000;
 }
 
 .map-desc {
   font-size: 13px;
   line-height: 1.2;
   text-align: center;
-  color: rgba(246, 234, 208, 0.85);
+  color: rgba(210, 234, 244, 0.85);
   min-height: 2.4em;
 }
 
@@ -439,7 +442,7 @@
   align-items: center;
   gap: 8px;
   font: 600 12px ui-monospace, Menlo, monospace;
-  color: rgba(246, 234, 208, 0.7);
+  color: rgba(210, 234, 244, 0.7);
 }
 
 .setup-right .start {
@@ -450,8 +453,8 @@
 .setup-build {
   margin-top: 4px;
   font: 11px ui-monospace, Menlo, monospace;
-  color: rgba(246, 234, 208, 0.45);
-  text-shadow: 0 1px 1px #000;
+  color: rgba(210, 234, 244, 0.45);
+  text-shadow: 0 1px 1px #000000;
 }
 
 /* ---------- Command centre (bottom left) ---------- */
@@ -487,7 +490,7 @@
 .socket {
   border-radius: 3px;
   background: radial-gradient(circle at 50% 40%, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55));
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(214, 168, 73, 0.18);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(69, 173, 218, 0.18);
 }
 
 .cmd-btn {
@@ -497,7 +500,7 @@
   padding: 6px;
   border: 5px solid transparent;
   border-image: var(--frame-thin) 7 / 5px stretch;
-  background: radial-gradient(circle at 50% 30%, #6a4a2c, #2a190b 80%);
+  background: radial-gradient(circle at 50% 30%, #31445e, #111821 80%);
   background-origin: border-box;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.6);
   cursor: pointer;
@@ -515,10 +518,10 @@
   left: -5px;
   right: -5px;
   bottom: -6px;
-  font: 700 9px/11px 'Alegreya Sans', sans-serif;
-  color: #fff2c8;
+  font: 700 9px/11px 'Rajdhani', sans-serif;
+  color: #d3eaf4;
   text-align: center;
-  text-shadow: 0 1px 1px #000, 0 0 3px #000;
+  text-shadow: 0 1px 1px #000000, 0 0 3px #000000;
 }
 
 .cmd-btn:active {
@@ -546,15 +549,15 @@
 .pf-frame {
   flex: none;
   padding: 3px;
-  background: linear-gradient(180deg, #f6df98, #9a6b22);
-  box-shadow: 0 0 0 1px #120a03, 0 2px 5px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, #96dbf8, #1f779d);
+  box-shadow: 0 0 0 1px #070a0d, 0 2px 5px rgba(0, 0, 0, 0.6);
 }
 
 .pf {
   width: 70px;
   height: 70px;
   background: var(--parchment);
-  box-shadow: inset 0 0 0 1px #120a03, inset 0 0 10px rgba(70, 40, 10, 0.5);
+  box-shadow: inset 0 0 0 1px #070a0d, inset 0 0 10px rgba(26, 36, 50, 0.5);
   overflow: hidden;
 }
 
@@ -584,7 +587,7 @@
   font: 700 15px var(--title-font);
   color: var(--gold-hi);
   letter-spacing: 0.04em;
-  text-shadow: 0 1px 1px #000;
+  text-shadow: 0 1px 1px #000000;
   white-space: nowrap;
 }
 
@@ -592,16 +595,16 @@
   display: flex;
   gap: 6px;
   font-size: 11px;
-  color: rgba(246, 234, 208, 0.7);
+  color: rgba(210, 234, 244, 0.7);
   white-space: nowrap;
 }
 
 .hp {
   position: relative;
   height: 13px;
-  background: #160c04;
-  border: 1px solid #000;
-  box-shadow: inset 0 0 0 1px rgba(214, 168, 73, 0.4), 0 1px 0 rgba(255, 220, 150, 0.15);
+  background: #080c10;
+  border: 1px solid #000000;
+  box-shadow: inset 0 0 0 1px rgba(69, 173, 218, 0.4), 0 1px 0 rgba(150, 223, 255, 0.15);
 }
 
 .hp-fill {
@@ -611,20 +614,20 @@
 }
 
 .hp-fill.low {
-  background: linear-gradient(180deg, #ff9e80, #c43a2c 60%, #8a2219);
+  background: linear-gradient(180deg, #80d9ff, #c43a2c 60%, #8a2219);
 }
 
 .hp-fill.build {
-  background: linear-gradient(180deg, #ffe7a0, #d9a63c 60%, #9a6b1c);
+  background: linear-gradient(180deg, #a0e2ff, #38abdd 60%, #19759d);
 }
 
 .hp-text {
   position: relative;
   display: block;
-  font: 700 10px/13px 'Alegreya Sans', sans-serif;
-  color: #fff;
+  font: 700 10px/13px 'Rajdhani', sans-serif;
+  color: #ffffff;
   text-align: center;
-  text-shadow: 0 1px 1px #000;
+  text-shadow: 0 1px 1px #000000;
 }
 
 .stats {
@@ -637,7 +640,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  font: 700 12px 'Alegreya Sans', sans-serif;
+  font: 700 12px 'Rajdhani', sans-serif;
   color: var(--cream);
 }
 
@@ -663,7 +666,7 @@
 }
 
 .ci-status-text.dim {
-  color: rgba(246, 234, 208, 0.65);
+  color: rgba(210, 234, 244, 0.65);
   white-space: normal;
 }
 
@@ -672,7 +675,7 @@
   align-items: center;
   gap: 4px;
   margin-left: auto;
-  font: 700 11px 'Alegreya Sans', sans-serif;
+  font: 700 11px 'Rajdhani', sans-serif;
 }
 
 .carry .icon,
@@ -684,14 +687,14 @@
 .carry-bar {
   width: 40px;
   height: 6px;
-  background: #160c04;
-  border: 1px solid #000;
+  background: #080c10;
+  border: 1px solid #000000;
 }
 
 .carry-bar span {
   display: block;
   height: 100%;
-  background: linear-gradient(180deg, #ffe7a0, #c8962a);
+  background: linear-gradient(180deg, #a0e2ff, #269acc);
 }
 
 .pgrid {
@@ -707,7 +710,7 @@
   width: 36px;
   height: 36px;
   padding: 0;
-  border: 1px solid #120a03;
+  border: 1px solid #070a0d;
   background: var(--parchment);
   box-shadow: inset 0 0 0 1px var(--gold-lo);
   cursor: pointer;
@@ -726,7 +729,7 @@
   right: 2px;
   bottom: 2px;
   height: 4px;
-  background: #160c04;
+  background: #080c10;
 }
 
 .ptile-hp span {
@@ -739,8 +742,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font: 700 13px 'Alegreya Sans', sans-serif;
-  color: #3a2410;
+  font: 700 13px 'Rajdhani', sans-serif;
+  color: #18222e;
 }
 
 /* ---------- Buttons beside the minimap ---------- */
@@ -762,7 +765,7 @@
   padding: 5px 8px;
   border: 5px solid transparent;
   border-image: var(--frame-thin) 7 / 5px stretch;
-  background: radial-gradient(circle at 50% 30%, #6a4a2c, #2a190b 80%);
+  background: radial-gradient(circle at 50% 30%, #31445e, #111821 80%);
   background-origin: border-box;
   cursor: pointer;
 }
@@ -774,7 +777,7 @@
 }
 
 .side-btn.has-idle {
-  box-shadow: 0 0 10px rgba(255, 210, 110, 0.8);
+  box-shadow: 0 0 10px rgba(110, 211, 255, 0.8);
 }
 
 .side-btn[disabled] {
@@ -790,10 +793,10 @@
   padding: 0 3px;
   box-sizing: border-box;
   border-radius: 9px;
-  background: #4a3a2a;
-  border: 1.5px solid #120a03;
-  font: 700 11px/14px 'Alegreya Sans', sans-serif;
-  color: #fff;
+  background: #293545;
+  border: 1.5px solid #070a0d;
+  font: 700 11px/14px 'Rajdhani', sans-serif;
+  color: #ffffff;
   text-align: center;
 }
 
@@ -807,8 +810,8 @@
   padding: 0 4px;
   border-radius: 7px;
   background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(214, 168, 73, 0.45);
-  font: 700 10px/13px 'Alegreya Sans', sans-serif;
+  border: 1px solid rgba(69, 173, 218, 0.45);
+  font: 700 10px/13px 'Rajdhani', sans-serif;
   color: #d8e8ff;
 }
 
@@ -861,8 +864,8 @@
   padding: 2px 10px;
   border-width: 7px;
   border-image-width: 7px;
-  font: 700 14px 'Alegreya Sans', sans-serif;
-  color: #ffd9c8;
+  font: 700 14px 'Rajdhani', sans-serif;
+  color: #d3eaf4;
   transition: opacity 0.5s;
 }
 
@@ -882,7 +885,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font: 700 13px 'Alegreya Sans', sans-serif;
+  font: 700 13px 'Rajdhani', sans-serif;
   color: var(--cream);
 }
 
@@ -910,8 +913,8 @@
   width: 22px;
   height: 22px;
   padding: 2px;
-  border: 1px solid #120a03;
-  background: radial-gradient(circle at 50% 30%, #6a4a2c, #2a190b 80%);
+  border: 1px solid #070a0d;
+  background: radial-gradient(circle at 50% 30%, #31445e, #111821 80%);
   box-shadow: inset 0 0 0 1px var(--gold-lo);
   cursor: pointer;
 }
@@ -919,7 +922,7 @@
 .qitem.head {
   width: 26px;
   height: 26px;
-  box-shadow: inset 0 0 0 1px var(--gold), 0 0 6px rgba(255, 210, 110, 0.5);
+  box-shadow: inset 0 0 0 1px var(--gold), 0 0 6px rgba(110, 211, 255, 0.5);
 }
 
 .qitem svg {
@@ -934,25 +937,25 @@
   right: 1px;
   bottom: -5px;
   height: 4px;
-  background: #160c04;
-  border: 1px solid #000;
+  background: #080c10;
+  border: 1px solid #000000;
 }
 
 .qbar span {
   display: block;
   height: 100%;
-  background: linear-gradient(180deg, #ffe7a0, #c8962a);
+  background: linear-gradient(180deg, #a0e2ff, #269acc);
 }
 
 .qmore {
-  font: 700 12px 'Alegreya Sans', sans-serif;
+  font: 700 12px 'Rajdhani', sans-serif;
   color: var(--cream);
 }
 
 .cmd-btn.active {
-  background: radial-gradient(circle at 50% 30%, #9a7a3a, #4a3010 80%);
+  background: radial-gradient(circle at 50% 30%, #387e9c, #1d2938 80%);
   background-origin: border-box;
-  box-shadow: 0 0 10px rgba(255, 210, 110, 0.75);
+  box-shadow: 0 0 10px rgba(110, 211, 255, 0.75);
 }
 
 .cmd-btn.armed {
@@ -990,7 +993,7 @@
   display: block;
   height: 100%;
   width: 0;
-  background: linear-gradient(90deg, #c8962a, #ffe28a);
+  background: linear-gradient(90deg, #269acc, #8adcff);
 }
 
 .age-banner {
@@ -1001,7 +1004,7 @@
   padding: 10px 34px 12px;
   text-align: center;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, rgba(40, 22, 6, 0.92), rgba(40, 22, 6, 0.6) 70%, rgba(40, 22, 6, 0));
+  background: radial-gradient(ellipse at center, rgba(15, 21, 29, 0.92), rgba(15, 21, 29, 0.6) 70%, rgba(15, 21, 29, 0));
   animation: banner-in 0.6s ease-out;
   transition: opacity 1s;
 }
@@ -1011,17 +1014,18 @@
 }
 
 .age-banner-title {
-  font: 700 26px/1.1 var(--title-font);
-  letter-spacing: 0.08em;
-  color: #ffe9a8;
-  text-shadow: 0 2px 2px #000, 0 0 18px rgba(255, 200, 80, 0.6);
+  font: 800 22px/1.1 var(--display-font);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #b9deee;
+  text-shadow: 0 2px 2px #000000, 0 0 18px rgba(80, 202, 255, 0.6);
 }
 
 .age-banner-sub {
   margin-top: 4px;
-  font: 600 14px/1.2 var(--body-font, 'Alegreya Sans', sans-serif);
-  color: #f1e3c0;
-  text-shadow: 0 1px 1px #000;
+  font: 600 14px/1.2 var(--body-font, 'Rajdhani', sans-serif);
+  color: #c1e2f0;
+  text-shadow: 0 1px 1px #000000;
 }
 
 @keyframes banner-in {
@@ -1057,9 +1061,9 @@
   align-items: baseline;
   padding: 8px 12px;
   text-align: left;
-  border: 1px solid rgba(232, 196, 110, 0.45);
+  border: 1px solid rgba(107, 197, 235, 0.45);
   border-radius: 6px;
-  background: linear-gradient(#4a3420, #2e1f12);
+  background: linear-gradient(#223042, #151d28);
   color: var(--cream);
   cursor: pointer;
 }
@@ -1067,7 +1071,7 @@
 .slot:active,
 .slot.armed {
   border-color: var(--gold-hi);
-  background: linear-gradient(#6a4a26, #3e2a16);
+  background: linear-gradient(#2f425a, #1b2634);
 }
 
 .slot-name {
@@ -1142,7 +1146,7 @@
 .setup-note {
   min-height: 14px;
   font-size: 12px;
-  color: rgba(246, 234, 208, 0.75);
+  color: rgba(210, 234, 244, 0.75);
 }
 
 /* ---------- End of match ---------- */
@@ -1154,12 +1158,12 @@
 
 .end-panel.won .panel-title {
   font-size: 30px;
-  color: #ffe27a;
+  color: #7ad7ff;
 }
 
 .end-panel.lost .panel-title {
   font-size: 30px;
-  color: #e9a08a;
+  color: #88cdeb;
 }
 
 .end-detail {
@@ -1179,9 +1183,9 @@
   gap: 10px;
   padding: 4px 10px;
   border-radius: 4px;
-  background: rgba(10, 6, 2, 0.72);
-  border: 1px solid rgba(214, 168, 73, 0.45);
-  font: 700 13px/1 'Alegreya Sans', sans-serif;
+  background: rgba(4, 5, 7, 0.72);
+  border: 1px solid rgba(69, 173, 218, 0.45);
+  font: 700 13px/1 'Rajdhani', sans-serif;
   color: var(--cream);
   white-space: nowrap;
   pointer-events: none;
@@ -1210,11 +1214,11 @@
 
 .ms-team b {
   font-variant-numeric: tabular-nums;
-  color: #ffe9a6;
+  color: #b8dded;
 }
 
 .ms-dim {
-  color: rgba(246, 234, 208, 0.6);
+  color: rgba(210, 234, 244, 0.6);
   font-weight: 400;
 }
 
@@ -1232,13 +1236,13 @@
 
 .speed-btn {
   padding: 0;
-  font: 700 14px/1 'Alegreya Sans', sans-serif;
+  font: 700 14px/1 'Rajdhani', sans-serif;
   color: var(--gold-hi);
-  text-shadow: 0 1px 1px #000;
+  text-shadow: 0 1px 1px #000000;
 }
 
 .round-btn.active {
-  box-shadow: 0 0 10px rgba(255, 210, 110, 0.85);
+  box-shadow: 0 0 10px rgba(110, 211, 255, 0.85);
 }
 
 .paused-chip {
@@ -1247,9 +1251,9 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 6px 18px;
-  border: 1px solid rgba(214, 168, 73, 0.6);
+  border: 1px solid rgba(69, 173, 218, 0.6);
   border-radius: 4px;
-  background: rgba(10, 6, 2, 0.75);
+  background: rgba(4, 5, 7, 0.75);
   font: 700 18px/1 var(--title-font);
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -1346,16 +1350,16 @@
 }
 
 .tut-text {
-  font: 400 13.5px/1.3 'Alegreya Sans', sans-serif;
+  font: 400 13.5px/1.3 'Rajdhani', sans-serif;
 }
 
 .tut-text b {
-  color: #ffe9a6;
+  color: #b8dded;
 }
 
 .tut-progress {
   margin-top: 5px;
-  font: 700 13px/1 'Alegreya Sans', sans-serif;
+  font: 700 13px/1 'Rajdhani', sans-serif;
   color: #9fe07a;
 }
 
@@ -1375,8 +1379,8 @@
   margin-left: auto;
   border: 0;
   background: none;
-  color: rgba(246, 234, 208, 0.6);
-  font: 400 12px/1 'Alegreya Sans', sans-serif;
+  color: rgba(210, 234, 244, 0.6);
+  font: 400 12px/1 'Rajdhani', sans-serif;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -1390,10 +1394,10 @@
 @keyframes tut-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 2px rgba(255, 220, 120, 0.9), 0 0 6px 2px rgba(255, 200, 80, 0.55);
+    box-shadow: 0 0 0 2px rgba(120, 214, 255, 0.9), 0 0 6px 2px rgba(80, 202, 255, 0.55);
   }
   50% {
-    box-shadow: 0 0 0 3px rgba(255, 236, 160, 1), 0 0 18px 6px rgba(255, 200, 80, 0.85);
+    box-shadow: 0 0 0 3px rgba(160, 226, 255, 1), 0 0 18px 6px rgba(80, 202, 255, 0.85);
   }
 }
 
@@ -1405,7 +1409,7 @@ button.clock {
 }
 
 button.clock.active {
-  box-shadow: 0 0 10px rgba(255, 210, 110, 0.85);
+  box-shadow: 0 0 10px rgba(110, 211, 255, 0.85);
 }
 
 /* ---------- Phones: fit the top bar between the notch insets ---------- */
@@ -1485,9 +1489,9 @@ button.clock.active {
   width: 100%;
   min-height: 38px;
   padding: 0 28px 0 10px;
-  border: 1px solid rgba(214, 168, 73, 0.55);
+  border: 1px solid rgba(69, 173, 218, 0.55);
   border-radius: 4px;
-  background: linear-gradient(180deg, rgba(255, 233, 166, 0.14), rgba(0, 0, 0, 0.35)),
+  background: linear-gradient(180deg, rgba(184, 221, 237, 0.14), rgba(0, 0, 0, 0.35)),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23f6df98' stroke-width='2' fill='none'/%3E%3C/svg%3E") right 10px center no-repeat,
     rgba(0, 0, 0, 0.45);
   font: 700 13px var(--title-font);
@@ -1499,7 +1503,7 @@ button.clock.active {
 }
 
 .pick option {
-  color: #111;
+  color: #111111;
 }
 
 .setup-build {
@@ -1747,36 +1751,35 @@ button.clock.active {
 }
 
 .wm-word {
-  font: 700 1em/1 var(--title-font);
-  letter-spacing: 0.07em;
+  font: 800 0.86em/1 var(--display-font);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  background: linear-gradient(180deg, #fff6cf 0%, #f3cf6e 38%, #c18a2a 62%, #8a5c16 100%);
+  background: linear-gradient(180deg, #d9edf5 0%, #6bccf6 38%, #2695c5 62%, #13688d 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 2px 0 #1b0f05) drop-shadow(0 0 6px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 2px 0 #0a0f14) drop-shadow(0 0 6px rgba(0, 0, 0, 0.6));
 }
 
-/* The ampersand: a flourish in firelight. */
+/* The ampersand: a lit signal glyph. */
 .wm-amp {
-  font: italic 400 1.25em/1 Georgia, 'Times New Roman', serif;
-  background: linear-gradient(180deg, #ffe680 0%, #ff9a24 55%, #d4471a 100%);
+  font: 600 0.9em/1 var(--display-font);
+  background: linear-gradient(180deg, #80d9ff 0%, #24bdff 55%, #159ed9 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 0 4px rgba(255, 140, 40, 0.55)) drop-shadow(0 2px 0 #1b0f05);
+  filter: drop-shadow(0 0 4px rgba(40, 190, 255, 0.55)) drop-shadow(0 2px 0 #0a0f14);
 }
 
-/* A living fire and glinting gems where the emblem is shown large. */
-.emblem-live .em-flame {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: em-flicker 0.9s ease-in-out infinite alternate;
+/* A sweeping radar beam, pulsing signal arcs and blinking contacts where the emblem is shown large. */
+.emblem-live .em-flame-a {
+  transform-box: view-box;
+  transform-origin: 60px 90px;
+  animation: em-sweep 3s linear infinite;
 }
 
 .emblem-live .em-flame-b {
-  animation-duration: 0.6s;
-  animation-delay: -0.3s;
+  animation: em-pulse 1.2s ease-in-out infinite alternate;
 }
 
 .emblem-live .em-glow {
@@ -1784,21 +1787,21 @@ button.clock.active {
 }
 
 .emblem-live .em-gems {
-  animation: em-glint 3.2s ease-in-out infinite;
+  animation: em-glint 3s ease-in-out infinite;
 }
 
-@keyframes em-flicker {
-  0% {
-    transform: scale(1, 1) skewX(0deg);
+@keyframes em-sweep {
+  to {
+    transform: rotate(360deg);
   }
-  35% {
-    transform: scale(0.94, 1.08) skewX(3deg);
+}
+
+@keyframes em-pulse {
+  from {
+    opacity: 0.35;
   }
-  70% {
-    transform: scale(1.05, 0.95) skewX(-2deg);
-  }
-  100% {
-    transform: scale(0.97, 1.05) skewX(1deg);
+  to {
+    opacity: 1;
   }
 }
 
@@ -1830,7 +1833,7 @@ button.clock.active {
   align-items: center;
   justify-content: center;
   padding: calc(var(--safe-t) + 8px) calc(var(--safe-r) + 12px) calc(var(--safe-b) + 8px) calc(var(--safe-l) + 12px);
-  background: radial-gradient(ellipse at 50% 60%, #3a2410 0%, #1a0f06 45%, #070402 100%);
+  background: radial-gradient(ellipse at 50% 60%, #18222e 0%, #0a0f14 45%, #030406 100%);
   overflow: hidden;
   cursor: pointer;
   transition: opacity 0.6s ease, transform 0.6s ease;
@@ -1853,7 +1856,7 @@ button.clock.active {
 .splash-emblem {
   width: auto;
   height: min(44vh, 260px);
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 28px rgba(255, 150, 50, 0.25));
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 28px rgba(50, 193, 255, 0.25));
 }
 
 .splash-title {
@@ -1861,8 +1864,8 @@ button.clock.active {
 }
 
 .splash-tag {
-  font: italic 400 clamp(13px, 3.6vh, 18px) / 1.2 'Alegreya Sans', Georgia, serif;
-  color: rgba(246, 234, 208, 0.75);
+  font: italic 400 clamp(13px, 3.6vh, 18px) / 1.2 'Rajdhani', Georgia, serif;
+  color: rgba(210, 234, 244, 0.75);
   letter-spacing: 0.04em;
   text-align: center;
   animation: splash-in 1.1s 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -1892,8 +1895,8 @@ button.clock.active {
   position: absolute;
   bottom: -10px;
   border-radius: 50%;
-  background: #ffb347;
-  box-shadow: 0 0 6px 2px rgba(255, 140, 40, 0.7);
+  background: #47c8ff;
+  box-shadow: 0 0 6px 2px rgba(40, 190, 255, 0.7);
   opacity: 0;
   animation: ember linear infinite;
 }
@@ -1999,8 +2002,8 @@ button.clock.active {
 .menu-grid .campaigns-btn {
   grid-column: 1 / -1;
   border-image-source: var(--frame-thin);
-  background: linear-gradient(180deg, #7a3a14, #4a1e08);
-  color: #ffe3a6;
+  background: linear-gradient(180deg, #2e4159, #1b2533);
+  color: #b8dded;
 }
 
 .campaigns .setup-main {
@@ -2035,7 +2038,7 @@ button.clock.active {
   text-align: left;
   border: 5px solid transparent;
   border-image: var(--frame-thin) 7 / 5px stretch;
-  background: #150d05;
+  background: #080c10;
   background-origin: border-box;
   color: var(--cream);
   cursor: pointer;
@@ -2044,7 +2047,7 @@ button.clock.active {
 
 .camp-card.on {
   filter: none;
-  box-shadow: 0 0 0 2px rgba(255, 220, 130, 0.55), 0 0 14px rgba(255, 200, 90, 0.4);
+  box-shadow: 0 0 0 2px rgba(130, 217, 255, 0.55), 0 0 14px rgba(90, 205, 255, 0.4);
 }
 
 .camp-name {
@@ -2060,8 +2063,8 @@ button.clock.active {
 }
 
 .camp-blurb {
-  font: 400 12px/1.25 'Alegreya Sans', sans-serif;
-  color: rgba(246, 234, 208, 0.82);
+  font: 400 12px/1.25 'Rajdhani', sans-serif;
+  color: rgba(210, 234, 244, 0.82);
 }
 
 .camp-pips {
@@ -2074,16 +2077,16 @@ button.clock.active {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  border: 1px solid rgba(214, 168, 73, 0.6);
+  border: 1px solid rgba(69, 173, 218, 0.6);
   background: rgba(0, 0, 0, 0.5);
 }
 
 .camp-pips i.open {
-  background: rgba(214, 168, 73, 0.35);
+  background: rgba(69, 173, 218, 0.35);
 }
 
 .camp-pips i.done {
-  background: #e8b84a;
+  background: #46baec;
 }
 
 .chap-tabs {
@@ -2098,7 +2101,7 @@ button.clock.active {
   align-items: center;
   gap: 5px;
   padding: 5px 6px;
-  border: 1px solid rgba(214, 168, 73, 0.4);
+  border: 1px solid rgba(69, 173, 218, 0.4);
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.4);
   color: var(--cream);
@@ -2115,7 +2118,7 @@ button.clock.active {
 }
 
 .chap-tab.on {
-  background: linear-gradient(180deg, #ffe9a6, #d9a743 55%, #b8862f);
+  background: linear-gradient(180deg, #b8dded, #3faddd 55%, #2c90bb);
   color: var(--ink-dark);
 }
 
@@ -2149,14 +2152,14 @@ button.clock.active {
 
 .chap-brief p {
   margin: 0 0 6px;
-  font: 400 13px/1.32 'Alegreya Sans', sans-serif;
-  color: rgba(246, 234, 208, 0.9);
+  font: 400 13px/1.32 'Rajdhani', sans-serif;
+  color: rgba(210, 234, 244, 0.9);
 }
 
 .chap-note {
   margin-top: 3px;
   font-size: 12px;
-  color: rgba(246, 234, 208, 0.7);
+  color: rgba(210, 234, 244, 0.7);
 }
 
 .chap-actions {
@@ -2183,7 +2186,7 @@ button.clock.active {
   display: flex;
   gap: 6px;
   align-items: baseline;
-  font: 400 13px/1.3 'Alegreya Sans', sans-serif;
+  font: 400 13px/1.3 'Rajdhani', sans-serif;
 }
 
 .obj-list li i {
@@ -2199,20 +2202,20 @@ button.clock.active {
 }
 
 .obj-list li.done span {
-  color: rgba(246, 234, 208, 0.55);
+  color: rgba(210, 234, 244, 0.55);
   text-decoration: line-through;
 }
 
 .obj-list b {
-  color: #ffe9a6;
+  color: #b8dded;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .obj-wave {
   margin-top: 5px;
-  font: 700 13px/1 'Alegreya Sans', sans-serif;
-  color: #ffb08a;
+  font: 700 13px/1 'Rajdhani', sans-serif;
+  color: #8adcff;
 }
 
 .obj-wave.soon {
@@ -2226,7 +2229,7 @@ button.clock.active {
 .toast.story {
   max-width: min(520px, 70vw);
   font-style: italic;
-  border-color: rgba(214, 168, 73, 0.7);
+  border-color: rgba(69, 173, 218, 0.7);
 }
 
 @media (max-height: 430px) {

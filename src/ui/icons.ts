@@ -1,10 +1,15 @@
-// Hand-drawn inline SVG icons (original art).
+// Hand-drawn inline SVG icons (original art), in a steel-and-cyan tactical style.
 const svg = (body: string, vb = '0 0 24 24') =>
   `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${body}</svg>`;
 
-const INK = '#2a1606';
+const INK = '#0a1018';
 
 export const ICONS = {
+  defense: svg(`
+    <path d="M2 21v-9h4v-2h3v2h6v-2h3v2h4v9z" fill="#9f9c93" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>
+    <path d="M5 4h6v8H5z" fill="#7f878d" stroke="${INK}" stroke-width="1"/><path d="M11 6.5h6" stroke="${INK}" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M2 15h20" stroke="#5b636b" stroke-width="1"/><path d="M9 21v-4h6v4z" fill="#e8b51c" stroke="${INK}" stroke-width=".9"/>
+    <path d="M9 18h6" stroke="${INK}" stroke-width=".8"/>`),
   food: svg(`
     <line x1="11.5" y1="12.5" x2="5" y2="19" stroke="${INK}" stroke-width="4.6" stroke-linecap="round"/>
     <circle cx="4.1" cy="17.6" r="2.4" fill="${INK}"/><circle cx="6.4" cy="19.9" r="2.4" fill="${INK}"/>
@@ -36,38 +41,35 @@ export const ICONS = {
   pop: svg(`
     <circle cx="12" cy="7.5" r="3.8" fill="#ecdcb6" stroke="${INK}" stroke-width="1.2"/>
     <path d="M4.5 20.5c.6-4.6 3.6-7.2 7.5-7.2s6.9 2.6 7.5 7.2z" fill="#3f6fb0" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
-    <path d="M9 15.5l3 2.5 3-2.5" stroke="#f1d48a" stroke-width="1.2" fill="none"/>`),
+    <path d="M9 15.5l3 2.5 3-2.5" stroke="#a8e8ff" stroke-width="1.2" fill="none"/>`),
   clock: svg(`
-    <path d="M6 3h12M6 21h12" stroke="#c99a3c" stroke-width="2.2" stroke-linecap="round"/>
-    <path d="M7.5 3.5c0 5 4.5 6 4.5 8.5S7.5 15.5 7.5 20.5h9c0-5-4.5-6-4.5-8.5s4.5-3.5 4.5-8.5z" fill="#f4ead2" fill-opacity=".25" stroke="#e8d7ae" stroke-width="1.3"/>
-    <path d="M9.5 19.5c.5-2 2.5-3 2.5-3s2 1 2.5 3z M10 7.5h4c-.5 1.5-2 2.4-2 2.4s-1.5-.9-2-2.4z" fill="#e2bb5c"/>`),
+    <circle cx="12" cy="13.5" r="8" fill="#16222e" stroke="#7fd8f5" stroke-width="1.8"/>
+    <path d="M10 3h4M12 3v2.5M18.5 6.5l1.6-1.6" stroke="#7fd8f5" stroke-width="2" stroke-linecap="round"/>
+    <path d="M12 13.5V8.5M12 13.5l3.2 2" stroke="#e9fbff" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="12" cy="13.5" r="1.2" fill="#ffc83a"/>`),
   crown: svg(`
-    <path d="M3 18l-1-11 5.5 4.5L12 4l4.5 7.5L22 7l-1 11z" fill="#f2c94c" stroke="${INK}" stroke-width="1.3" stroke-linejoin="round"/>
-    <rect x="3" y="18" width="18" height="3" rx="1" fill="#c8962a" stroke="${INK}" stroke-width="1.2"/>
-    <circle cx="12" cy="14.5" r="1.8" fill="#c0283c" stroke="${INK}" stroke-width=".8"/>
-    <circle cx="2" cy="7" r="1.4" fill="#f2c94c" stroke="${INK}" stroke-width=".8"/>
-    <circle cx="12" cy="4" r="1.4" fill="#f2c94c" stroke="${INK}" stroke-width=".8"/>
-    <circle cx="22" cy="7" r="1.4" fill="#f2c94c" stroke="${INK}" stroke-width=".8"/>`),
+    <path d="M12 2.5l2.9 6.2 6.8.7-5.1 4.6 1.5 6.7L12 17.3l-6.1 3.4 1.5-6.7-5.1-4.6 6.8-.7z" fill="#ffc83a" stroke="${INK}" stroke-width="1.3" stroke-linejoin="round"/>
+    <path d="M12 5.5l1.8 4" stroke="#fff4c4" stroke-width="1.2" stroke-linecap="round"/>`),
   bell: svg(`
-    <path d="M12 2.5c.9 0 1.6.7 1.6 1.6v.6c3 .8 4.7 3.4 4.7 6.7v3.2l1.9 2.7c.4.6 0 1.4-.7 1.4H4.5c-.7 0-1.1-.8-.7-1.4l1.9-2.7v-3.2c0-3.3 1.7-5.9 4.7-6.7v-.6c0-.9.7-1.6 1.6-1.6z" fill="#e2b84a" stroke="#2a1606" stroke-width="1.2" stroke-linejoin="round"/>
-    <path d="M8.2 11c.2-2 1.3-3.4 3-3.9" stroke="#fff3c4" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-    <circle cx="12" cy="20.2" r="2" fill="#8a5f1c" stroke="#2a1606" stroke-width="1"/>`),
+    <path d="M5 18h14v3H5z" fill="#3a4450" stroke="${INK}" stroke-width="1.1"/>
+    <path d="M7 18v-6a5 5 0 0110 0v6z" fill="#e8402e" stroke="${INK}" stroke-width="1.2"/>
+    <path d="M9.5 12a2.5 2.5 0 012.5-2.5" stroke="#ffb0a0" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    <path d="M12 2v2.5M4 5l2 2M20 5l-2 2M1.5 11h2.5M20 11h2.5" stroke="#ffc83a" stroke-width="1.6" stroke-linecap="round"/>`),
   gear: svg(`
-    <path d="M10.3 2h3.4l.5 2.6 1.9.8 2.2-1.5 2.4 2.4-1.5 2.2.8 1.9 2.6.5v3.4l-2.6.5-.8 1.9 1.5 2.2-2.4 2.4-2.2-1.5-1.9.8-.5 2.6h-3.4l-.5-2.6-1.9-.8-2.2 1.5-2.4-2.4 1.5-2.2-.8-1.9L2 13.7v-3.4l2.6-.5.8-1.9-1.5-2.2 2.4-2.4 2.2 1.5 1.9-.8z" fill="#c8962a" stroke="#2a1606" stroke-width="1.1" stroke-linejoin="round"/>
-    <circle cx="12" cy="12" r="3.4" fill="#2a1606"/>`),
+    <path d="M10.3 2h3.4l.5 2.6 1.9.8 2.2-1.5 2.4 2.4-1.5 2.2.8 1.9 2.6.5v3.4l-2.6.5-.8 1.9 1.5 2.2-2.4 2.4-2.2-1.5-1.9.8-.5 2.6h-3.4l-.5-2.6-1.9-.8-2.2 1.5-2.4-2.4 1.5-2.2-.8-1.9L2 13.7v-3.4l2.6-.5.8-1.9-1.5-2.2 2.4-2.4 2.2 1.5 1.9-.8z" fill="#7fa2b8" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>
+    <circle cx="12" cy="12" r="3.4" fill="#0e1822" stroke="#7fd8f5" stroke-width="1"/>`),
   pause: svg(`
-    <path d="M7 5h3.4v14H7zM13.6 5H17v14h-3.4z" fill="#f1d48a" stroke="#2a1606" stroke-width="1.2" stroke-linejoin="round"/>`),
+    <path d="M7 5h3.4v14H7zM13.6 5H17v14h-3.4z" fill="#a8e8ff" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>`),
   play: svg(`
-    <path d="M7.5 4.5l11 7.5-11 7.5z" fill="#f1d48a" stroke="#2a1606" stroke-width="1.2" stroke-linejoin="round"/>`),
+    <path d="M7.5 4.5l11 7.5-11 7.5z" fill="#a8e8ff" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>`),
   menu: svg(`
-    <path d="M5 7h14M5 12h14M5 17h14" stroke="#2a1606" stroke-width="4" stroke-linecap="round"/>
-    <path d="M5 7h14M5 12h14M5 17h14" stroke="#f1d48a" stroke-width="2.2" stroke-linecap="round"/>`),
+    <path d="M5 7h14M5 12h14M5 17h14" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
+    <path d="M5 7h14M5 12h14M5 17h14" stroke="#a8e8ff" stroke-width="2.2" stroke-linecap="round"/>`),
   villager: svg(`
-    <circle cx="12" cy="6.5" r="3.4" fill="#e0b48c" stroke="${INK}" stroke-width="1.1"/>
-    <path d="M8.6 6c0-2.6 1.6-4 3.4-4s3.4 1.4 3.4 4z" fill="#7a5a36"/>
-    <path d="M6 21l1.6-8.5c.4-2 2.2-3 4.4-3s4 1 4.4 3L18 21z" fill="#3f6fb0" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>
-    <path d="M7.5 15.5h9" stroke="#5a3a1c" stroke-width="1.4"/>
-    <path d="M17 9l4-4" stroke="#6b4a2a" stroke-width="1.6" stroke-linecap="round"/><path d="M19.5 3.5l2.5 1-1 2.5z" fill="#a8b0b6" stroke="${INK}" stroke-width=".6"/>`),
+    <circle cx="12" cy="8.5" r="3.4" fill="#e0b48c" stroke="${INK}" stroke-width="1.1"/>
+    <path d="M7 7.5c0-3 2.2-5 5-5s5 2 5 5z" fill="#ffc83a" stroke="${INK}" stroke-width="1.1"/><path d="M6 7.5h12" stroke="${INK}" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M5.5 21l1.6-7c.4-1.8 2.4-2.8 4.9-2.8s4.5 1 4.9 2.8l1.6 7z" fill="#2f78c8" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>
+    <path d="M7 16.5h10M6.6 19h10.8" stroke="#e8ecf0" stroke-width="1.2"/>`),
   scout: svg(`
     <path d="M3 17c0-3 2-5 6-5h6l3-4 3 1-2 5v4" fill="#8a5a30" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>
     <path d="M5 17v4M9 17v4M15 17v4M18 17v4" stroke="${INK}" stroke-width="1.6" stroke-linecap="round"/>
@@ -105,28 +107,30 @@ export const ICONS = {
   stop: svg(`
     <path d="M8 2h8l6 6v8l-6 6H8l-6-6V8z" fill="#b8352b" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
     <rect x="7" y="10.5" width="10" height="3" rx="1" fill="#f6ead0"/>`),
-  close: svg(`<path d="M6 6l12 12M18 6L6 18" stroke="${INK}" stroke-width="4.2" stroke-linecap="round"/><path d="M6 6l12 12M18 6L6 18" stroke="#f1d48a" stroke-width="2.2" stroke-linecap="round"/>`),
+  close: svg(`<path d="M6 6l12 12M18 6L6 18" stroke="${INK}" stroke-width="4.2" stroke-linecap="round"/><path d="M6 6l12 12M18 6L6 18" stroke="#a8e8ff" stroke-width="2.2" stroke-linecap="round"/>`),
   check: svg(`<path d="M4 12.5l5 5L20 6.5" fill="none" stroke="${INK}" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#9cf59a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`),
   sheep: svg(`<ellipse cx="11" cy="13" rx="7" ry="5" fill="#f3f2ea" stroke="${INK}" stroke-width="1.1"/><ellipse cx="18.5" cy="11" rx="2.6" ry="2" fill="#3a3a3a"/><path d="M7 17.5v3M14 17.5v3" stroke="${INK}" stroke-width="1.6"/>`),
   deer: svg(`<ellipse cx="11" cy="13" rx="7" ry="3.6" fill="#9b6a3c" stroke="${INK}" stroke-width="1.1"/><path d="M16 11l3-6 2 1-2 6" fill="#9b6a3c" stroke="${INK}" stroke-width="1"/><path d="M19 5l-1-3M20 5l2-2" stroke="#d8c6a4" stroke-width="1.1"/><path d="M6 16v5M9 16v5M14 16v5M16 16v5" stroke="${INK}" stroke-width="1.4"/>`),
   fish: svg(`<path d="M3 12c4-5 10-5 14 0-4 5-10 5-14 0z" fill="#6aa7c9" stroke="${INK}" stroke-width="1.1"/><path d="M17 12l4-4v8z" fill="#6aa7c9" stroke="${INK}" stroke-width="1.1"/><circle cx="7" cy="11" r="1" fill="${INK}"/>`),
   attack: svg(`
-    <path d="M19.5 2.5l2 2L9 17l-2-2z" fill="#c9d1d6" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>
-    <path d="M18 4l2 2" stroke="#fff" stroke-width=".8"/>
-    <path d="M4.5 13.5l6 6M6 19l-3 3" stroke="${INK}" stroke-width="3.4" stroke-linecap="round"/>
-    <path d="M4.5 13.5l6 6" stroke="#c8962a" stroke-width="2" stroke-linecap="round"/><path d="M6 19l-3 3" stroke="#6b4a2a" stroke-width="2" stroke-linecap="round"/>`),
+    <circle cx="12" cy="12" r="7.5" fill="none" stroke="${INK}" stroke-width="3.6"/>
+    <circle cx="12" cy="12" r="7.5" fill="none" stroke="#ff6a4a" stroke-width="1.8"/>
+    <path d="M12 1.5v6M12 16.5v6M1.5 12h6M16.5 12h6" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M12 2v5M12 17v5M2 12h5M17 12h5" stroke="#ffd2c8" stroke-width="1.4" stroke-linecap="round"/>
+    <circle cx="12" cy="12" r="1.6" fill="#ff6a4a"/>`),
   meleeArmor: svg(`
-    <path d="M12 2l8 3v6c0 5.5-3.5 9-8 11-4.5-2-8-5.5-8-11V5z" fill="#8a96a0" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
-    <path d="M12 4.2l6 2.3v4.6c0 4.2-2.6 7-6 8.6z" fill="#b8c2c8"/><path d="M12 6v13" stroke="${INK}" stroke-width="1"/>`),
+    <path d="M7 3h3.5l1.5 2 1.5-2H17l3 4-2 2v12H6V9L4 7z" fill="#5d6344" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M8 11h8v4H8z" fill="#7a8058" stroke="${INK}" stroke-width=".9"/><path d="M8 17h3v3H8zM13 17h3v3h-3z" fill="#4a4f36" stroke="${INK}" stroke-width=".8"/>`),
   pierceArmor: svg(`
-    <path d="M12 2l8 3v6c0 5.5-3.5 9-8 11-4.5-2-8-5.5-8-11V5z" fill="#8a6a42" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
-    <path d="M12 4.2l6 2.3v4.6c0 4.2-2.6 7-6 8.6z" fill="#b08a58"/>
-    <path d="M3 21L15 9" stroke="${INK}" stroke-width="2.6" stroke-linecap="round"/><path d="M3 21L15 9" stroke="#d8c6a4" stroke-width="1.2" stroke-linecap="round"/>
-    <path d="M13 7l4.5-1.5L16 10z" fill="#c9d1d6" stroke="${INK}" stroke-width=".8"/>`),
+    <path d="M12 2l8 3v6c0 5.5-3.5 9-8 11-4.5-2-8-5.5-8-11V5z" fill="#3a4450" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M12 4.2l6 2.3v4.6c0 4.2-2.6 7-6 8.6z" fill="#56636f"/>
+    <circle cx="9" cy="10" r="1.6" fill="#ffc83a" stroke="${INK}" stroke-width=".7"/><circle cx="14" cy="14" r="1.6" fill="#ffc83a" stroke="${INK}" stroke-width=".7"/>
+    <path d="M9 10l-1.2-1.2M14 14l1.2 1.2" stroke="#bfe9ff" stroke-width="1"/>`),
   range: svg(`
-    <path d="M6 2c8 3 12 9 12 20" fill="none" stroke="${INK}" stroke-width="3.6" stroke-linecap="round"/>
-    <path d="M6 2c8 3 12 9 12 20" fill="none" stroke="#9b6a3c" stroke-width="2" stroke-linecap="round"/>
-    <path d="M6 2l12 20" stroke="#efe6cc" stroke-width="1"/><path d="M2 14h14M13 11l4 3-4 3" fill="none" stroke="${INK}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`),
+    <circle cx="12" cy="12" r="9" fill="#16222e" stroke="#7fd8f5" stroke-width="1.6"/>
+    <circle cx="12" cy="12" r="4.5" fill="none" stroke="#7fd8f5" stroke-width="1" stroke-opacity=".7"/>
+    <path d="M12 3v5.5M12 15.5V21M3 12h5.5M15.5 12H21" stroke="#e9fbff" stroke-width="1.2"/>
+    <circle cx="12" cy="12" r="1.2" fill="#ff5a4a"/>`),
   speed: svg(`
     <path d="M7 3h6l-1 9 8 3.5c1.5.7 1.6 2.5 1.5 4.5H4l1-8z" fill="#7a5230" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
     <path d="M4 18h17.6" stroke="${INK}" stroke-width="1.6"/><path d="M8 6h4" stroke="#b08a58" stroke-width="1.3"/>
@@ -135,10 +139,11 @@ export const ICONS = {
     <path d="M1.5 12C5 6.5 8.5 5 12 5s7 1.5 10.5 7C19 17.5 15.5 19 12 19s-7-1.5-10.5-7z" fill="#efe6cc" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
     <circle cx="12" cy="12" r="4.4" fill="#4a7ab0" stroke="${INK}" stroke-width="1.1"/><circle cx="12" cy="12" r="1.8" fill="${INK}"/><circle cx="10.6" cy="10.6" r="1" fill="#fff"/>`),
   military: svg(`
-    <path d="M3 3l14 14M21 3L7 17" stroke="${INK}" stroke-width="3.6" stroke-linecap="round"/>
-    <path d="M3 3l14 14M21 3L7 17" stroke="#c9d1d6" stroke-width="1.8" stroke-linecap="round"/>
-    <path d="M15 19l4-4M9 19l-4-4" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
-    <path d="M17.5 17.5l3 3M6.5 17.5l-3 3" stroke="#c8962a" stroke-width="2.4" stroke-linecap="round"/>`),
+    <g stroke="${INK}" stroke-width="1" stroke-linejoin="round">
+    <path d="M3 4.5l1.6-1.5 14 14.2-1.8 1.6z" fill="#3a4048"/><path d="M21 4.5L19.4 3 5.4 17.2l1.8 1.6z" fill="#3a4048"/>
+    <path d="M14.5 13l3.5 3.5-3 3-3.5-3.5zM9.5 13L6 16.5l3 3 3.5-3.5z" fill="#5f6870"/></g>
+    <path d="M15.5 18l2.5 3M8.5 18L6 21" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="12" cy="11" r="1.4" fill="#7fd8f5"/>`),
   economy: svg(`
     <path d="M3 21v-7h12v7z" fill="#d8c8a0" stroke="${INK}" stroke-width="1.1"/>
     <path d="M1.5 14.5L5 9h8l3.5 5.5z" fill="#d1ae5c" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>
@@ -146,14 +151,16 @@ export const ICONS = {
     <path d="M15 6l6 6-1.6 1.6-6-6" fill="#8a5a30" stroke="${INK}" stroke-width="1"/>
     <path d="M12 7.5l4.5-4.5 3 3L15 10.5z" fill="#a8b0b6" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>`),
   helmet: svg(`
-    <path d="M4 15c0-6 3.5-11 8-11s8 5 8 11v3H4z" fill="#a8b0b6" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
-    <path d="M11 9h2v10h-2z" fill="#6d777d" stroke="${INK}" stroke-width=".8"/><path d="M4 15h16" stroke="${INK}" stroke-width="1.2"/>
-    <path d="M7 7c1.5-1.5 3-2 5-2" stroke="#eef3f5" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-    <path d="M12 4c2-3 5-3 6-2" stroke="#b8352b" stroke-width="2.2" fill="none" stroke-linecap="round"/>`),
+    <path d="M3.5 15c0-6 3.8-10 8.5-10s8.5 4 8.5 10z" fill="#6b6a4c" stroke="${INK}" stroke-width="1.3" stroke-linejoin="round"/>
+    <path d="M2.5 15h19v2.5h-19z" fill="#4f5340" stroke="${INK}" stroke-width="1.1"/>
+    <rect x="10" y="6.5" width="4" height="3" rx=".5" fill="#1e2124"/><path d="M6 11c.6-2.4 2.2-4 4-4.6" stroke="#a8a985" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path d="M5 17.5c0 2 1.4 3.5 3.4 3.5M19 17.5c0 2-1.4 3.5-3.4 3.5" stroke="${INK}" stroke-width="1.2" fill="none"/>`),
   ship: svg(`
-    <path d="M2 15h20l-3 5H5z" fill="#7a5230" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
-    <path d="M12 2v13" stroke="${INK}" stroke-width="1.6"/><path d="M12 3l7 9h-7z" fill="#efe6cc" stroke="${INK}" stroke-width="1"/>
-    <path d="M12 5l-6 7h6z" fill="#d8ccae" stroke="${INK}" stroke-width="1"/><path d="M1 21c3 1.5 6-1.5 11 0s8-1.5 11 0" stroke="#4a8ac0" stroke-width="1.4" fill="none"/>`),
+    <path d="M1.5 14h21l-3.5 6H5z" fill="#7f8b94" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>
+    <path d="M7 14V9.5h8l2 4.5" fill="#a9b4bc" stroke="${INK}" stroke-width="1" stroke-linejoin="round"/>
+    <path d="M9 11.5h5" stroke="#203342" stroke-width="1.6"/><path d="M11 9.5V4M8.5 5.5h5" stroke="${INK}" stroke-width="1.2"/>
+    <path d="M17.5 14l3-2.2" stroke="${INK}" stroke-width="1.4" stroke-linecap="round"/><path d="M3 16.5h17" stroke="#2f78c8" stroke-width="1.2"/>
+    <path d="M1 22c3 1.4 6-1.4 11 0s8-1.4 11 0" stroke="#4aa3e0" stroke-width="1.4" fill="none"/>`),
   dock: svg(`<path d="M1 18h22v2H1z" fill="#8a6038" stroke="${INK}" stroke-width="1"/><path d="M3 20v3M8 20v3M16 20v3M21 20v3" stroke="#4e331b" stroke-width="1.4"/><path d="M3 18V10h10v8z" fill="#d3c39f" stroke="${INK}" stroke-width="1.1"/><path d="M2 10.5L8 5l6 5.5z" fill="#bf9f55" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M6 18v-4h4v4z" fill="#2a1a0c"/><path d="M18 18V4M18 5h5M22.5 5v6" stroke="#6b4626" stroke-width="1.6" stroke-linecap="round"/><rect x="21" y="11" width="3" height="2.4" fill="#8a6a42" stroke="${INK}" stroke-width=".6"/>`),
   fish_trap: svg(`<ellipse cx="12" cy="15" rx="10" ry="5.5" fill="#2f6f9f" stroke="${INK}" stroke-width="1"/><path d="M3 15v-5M6 19v-5M12 20.5v-5M18 19v-5M21 15v-5M7 10.5v-5M12 9.5v-5M17 10.5v-5" stroke="#6b4626" stroke-width="1.6" stroke-linecap="round"/><path d="M3 12c3 2 15 2 18 0M6 16c3 2 9 2 12 0" stroke="#e6dcc0" stroke-width=".8" fill="none"/><path d="M9 14.5c1.5-1.4 3.5-1.4 5 0-1.5 1.4-3.5 1.4-5 0zm5 0l2-1.3v2.6z" fill="#cfd8dc" stroke="${INK}" stroke-width=".6"/>`),
   fishing_ship: svg(`<path d="M3 16h18l-3 4H6z" fill="#86603a" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M11 16V3" stroke="${INK}" stroke-width="1.4"/><path d="M11 4l-7 10h7z" fill="#e8dcc0" stroke="${INK}" stroke-width="1"/><path d="M16 9l5 9" stroke="#4a3020" stroke-width="1.2"/><path d="M19 15l3 4-4 1z" fill="none" stroke="#e6dcc0" stroke-width=".9"/><path d="M1 21.5c3 1.5 6-1.5 11 0s8-1.5 11 0" stroke="#4a8ac0" stroke-width="1.4" fill="none"/>`),
@@ -162,7 +169,7 @@ export const ICONS = {
   fire_ship: svg(`<path d="M2 15h20l-3 5H5z" fill="#4c3424" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M9 15V4" stroke="${INK}" stroke-width="1.4"/><path d="M4 5h10v7H4z" fill="#d8cdb0" stroke="${INK}" stroke-width="1"/><path d="M18 14c-3-2-2-5 0-8 0 3 3 3 3 6 0 1.5-1.2 2-3 2z" fill="#f08a24" stroke="${INK}" stroke-width=".9"/><path d="M18.5 13c-1-1-.6-2.5.3-3.6.3 1.4 1.4 1.6 1.2 2.7-.1.6-.7.9-1.5.9z" fill="#ffe08a"/><path d="M1 21.5c3 1.5 6-1.5 11 0s8-1.5 11 0" stroke="#4a8ac0" stroke-width="1.4" fill="none"/>`),
   demolition_raft: svg(`<path d="M2 16h20v3H2z" fill="#7c6440" stroke="${INK}" stroke-width="1.1"/><path d="M6 16v3M10 16v3M14 16v3M18 16v3" stroke="#4e331b" stroke-width=".8"/><ellipse cx="9" cy="12.5" rx="3" ry="3.5" fill="#5a3a20" stroke="${INK}" stroke-width="1"/><ellipse cx="15" cy="12.5" rx="3" ry="3.5" fill="#5a3a20" stroke="${INK}" stroke-width="1"/><path d="M8 11h2M14 11h2" stroke="#2d2925" stroke-width="1"/><path d="M12 9c1-3 3-4 5-5" stroke="#3a3020" stroke-width=".9" fill="none"/><circle cx="17.5" cy="3.8" r="1.6" fill="#ffb030"/><path d="M1 21.5c3 1.5 6-1.5 11 0s8-1.5 11 0" stroke="#4a8ac0" stroke-width="1.4" fill="none"/>`),
   siege_barge: svg(`<path d="M1 15h22l-2 5H3z" fill="#6a4a2e" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M5 15l4-8 4 8M5 11h8" stroke="#5a3c22" stroke-width="1.6" stroke-linejoin="round" fill="none"/><path d="M9 13L20 4" stroke="#6e4a2a" stroke-width="1.8" stroke-linecap="round"/><circle cx="20.5" cy="3.5" r="2" fill="#8a8680" stroke="${INK}" stroke-width=".8"/><path d="M1 21.5c3 1.5 6-1.5 11 0s8-1.5 11 0" stroke="#4a8ac0" stroke-width="1.4" fill="none"/>`),
-  back: svg(`<path d="M14 5l-7 7 7 7" fill="none" stroke="${INK}" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5l-7 7 7 7" fill="none" stroke="#f1d48a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`),
+  back: svg(`<path d="M14 5l-7 7 7 7" fill="none" stroke="${INK}" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5l-7 7 7 7" fill="none" stroke="#a8e8ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`),
   militia: svg(`
     <circle cx="11" cy="7" r="3.4" fill="#e0b48c" stroke="${INK}" stroke-width="1.1"/>
     <path d="M7.2 6.5L8.5 3l2.5-1.5L13.5 3l1.3 3.5z" fill="#b8c2c8" stroke="${INK}" stroke-width="1"/>
@@ -220,20 +227,18 @@ export const ICONS = {
     <path d="M7.5 12.5l1-6h5l1 6z" fill="#7d868b" stroke="${INK}" stroke-width="1"/>
     <path d="M7 8c0-2 2-4 4.5-4S16 6 16 8c-1 1-8 1-9 0z" fill="#563824" stroke="${INK}" stroke-width=".8"/><circle cx="8" cy="4.6" r="1.2" fill="#563824"/><circle cx="15" cy="4.6" r="1.2" fill="#563824"/>`),
   king: svg(`
-    <path d="M7.5 7l-.8-4 2.6 2L12 1.8 14.7 5l2.6-2-.8 4z" fill="#f2c94c" stroke="${INK}" stroke-width=".9" stroke-linejoin="round"/>
-    <circle cx="12" cy="9.5" r="3" fill="#e0b48c" stroke="${INK}" stroke-width="1"/>
-    <path d="M5 22l2-8.5c.5-1.8 2.5-2.8 5-2.8s4.5 1 5 2.8L19 22z" fill="#2f5aa0" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>
-    <path d="M5 21h14M8 12.5h8" stroke="#f4f1ea" stroke-width="1.8"/>
-    <path d="M18.5 20l2-10" stroke="#d9b041" stroke-width="1.4"/><circle cx="20.6" cy="9.4" r="1.5" fill="#f0cf5a" stroke="${INK}" stroke-width=".6"/>`),
+    <circle cx="12" cy="12" r="10" fill="#0e1822" stroke="#ffc83a" stroke-width="1.6"/>
+    <path d="M12 4.5l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5L4.8 9.7l5-.6z" fill="#ffc83a" stroke="${INK}" stroke-width=".9" stroke-linejoin="round"/>`),
   relic: svg(`
-    <path d="M4 10h16v10H4z" fill="#c8962a" stroke="${INK}" stroke-width="1.2"/>
-    <path d="M3 10l3-5h12l3 5z" fill="#f0cf5a" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
-    <path d="M12 12v6M9.5 14.5h5" stroke="#fff6d8" stroke-width="1.6" stroke-linecap="round"/>`),
+    <rect x="3" y="7" width="18" height="12" rx="2" fill="#1c2026" stroke="${INK}" stroke-width="1.2"/>
+    <path d="M9 7V4.5h6V7" fill="none" stroke="#4a525c" stroke-width="1.6"/>
+    <rect x="5" y="11.5" width="2.5" height="2.5" fill="#9aa3ab"/><rect x="16.5" y="11.5" width="2.5" height="2.5" fill="#9aa3ab"/>
+    <rect x="9.5" y="15" width="5" height="1.6" rx=".8" fill="#7fe9ff"/>`),
   wonder: svg(`
-    <path d="M2 21h20v-2H2zM4 19h16v-2H4z" fill="#e3dccb" stroke="${INK}" stroke-width=".9"/>
-    <path d="M6 17V10h12v7z" fill="#efe9dc" stroke="${INK}" stroke-width="1"/><path d="M8 11v6M10.7 11v6M13.3 11v6M16 11v6" stroke="#a89f8c" stroke-width="1"/>
-    <path d="M7.5 10L12 3l4.5 7z" fill="#3d6f8f" stroke="${INK}" stroke-width="1" stroke-linejoin="round"/>
-    <path d="M12 3V.8" stroke="#d9b041" stroke-width="1.4"/><circle cx="12" cy="1" r="1" fill="#f0cf5a"/>`),
+    <path d="M12 1.5c2.6 2.4 3.5 6 3.5 9.5v7h-7v-7c0-3.5.9-7.1 3.5-9.5z" fill="#eef0f0" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>
+    <path d="M8.5 12l-3 4v3h3zM15.5 12l3 4v3h-3z" fill="#9aa3a8" stroke="${INK}" stroke-width="1"/>
+    <path d="M8.5 13h7" stroke="#2f78c8" stroke-width="2"/><circle cx="12" cy="8" r="1.5" fill="#203342"/>
+    <path d="M10 18.5l-1 3.5M12 18.5V23M14 18.5l1 3.5" stroke="#ff9a24" stroke-width="1.6" stroke-linecap="round"/>`),
   monk: svg(`
     <circle cx="12" cy="6.5" r="3.3" fill="#e0b48c" stroke="${INK}" stroke-width="1.1"/>
     <path d="M9.2 5.2a3 2 0 015.6 0" fill="none" stroke="#6b4a28" stroke-width="1.4"/>
@@ -257,7 +262,7 @@ export const ICONS = {
     <path d="M15 21V8h5v13z" fill="#b5ae9f" stroke="${INK}" stroke-width="1.1"/><path d="M14.5 8.5l3-3.5 3 3.5z" fill="#8a5a40" stroke="${INK}" stroke-width="1"/>
     <path d="M17.5 5V1.5M16.2 2.8h2.6" stroke="#d9b44a" stroke-width="1"/>
     <path d="M7.5 21v-4a1.5 1.5 0 013 0v4z" fill="#3a2412"/><circle cx="9" cy="13.5" r="1.4" fill="#2f5aa0" stroke="${INK}" stroke-width=".6"/>`),
-  more: svg(`<circle cx="5" cy="12" r="2.6" fill="#f1d48a" stroke="${INK}" stroke-width="1.2"/><circle cx="12" cy="12" r="2.6" fill="#f1d48a" stroke="${INK}" stroke-width="1.2"/><circle cx="19" cy="12" r="2.6" fill="#f1d48a" stroke="${INK}" stroke-width="1.2"/>`),
+  more: svg(`<circle cx="5" cy="12" r="2.6" fill="#a8e8ff" stroke="${INK}" stroke-width="1.2"/><circle cx="12" cy="12" r="2.6" fill="#a8e8ff" stroke="${INK}" stroke-width="1.2"/><circle cx="19" cy="12" r="2.6" fill="#a8e8ff" stroke="${INK}" stroke-width="1.2"/>`),
   buy: svg(`
     <circle cx="9" cy="14" r="6.5" fill="#f5c842" stroke="${INK}" stroke-width="1.2"/><circle cx="9" cy="14" r="4" fill="none" stroke="#b9871a" stroke-width="1"/>
     <path d="M17 13V3M13.5 6.5L17 3l3.5 3.5" fill="none" stroke="${INK}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -309,11 +314,20 @@ export const ICONS = {
     <path d="M12 2.5V0" stroke="${INK}" stroke-width="1"/><path d="M12 0.5h3l-1 1 1 1h-3" fill="#2f5aa0"/>
     <path d="M9.5 21v-4a2.5 2.5 0 015 0v4z" fill="#3a2412"/>`),
   attackGround: svg(`
-    <ellipse cx="12" cy="18" rx="9" ry="3.5" fill="none" stroke="${INK}" stroke-width="3"/><ellipse cx="12" cy="18" rx="9" ry="3.5" fill="none" stroke="#ff8a6a" stroke-width="1.4"/>
-    <circle cx="12" cy="7" r="4.4" fill="#8a857c" stroke="${INK}" stroke-width="1.2"/><circle cx="10.6" cy="5.6" r="1.2" fill="#c9c4b8"/>
-    <path d="M12 12v4" stroke="${INK}" stroke-width="1.4" stroke-dasharray="1.4 1"/>`),
-  pack: svg(`<rect x="3" y="12" width="18" height="5" rx="1" fill="#7a5430" stroke="${INK}" stroke-width="1.1"/><circle cx="7" cy="19" r="2.6" fill="#4e331b" stroke="${INK}"/><circle cx="17" cy="19" r="2.6" fill="#4e331b" stroke="${INK}"/><path d="M2 10l20-2" stroke="#a77a45" stroke-width="2.4" stroke-linecap="round"/>`),
-  unpack: svg(`<path d="M5 21L12 6l7 15" fill="none" stroke="#7a5430" stroke-width="2.6"/><path d="M3 21h18" stroke="#4e331b" stroke-width="2.4"/><path d="M12 6L3 3M12 6l8 6" stroke="#a77a45" stroke-width="2.2" stroke-linecap="round"/><rect x="17" y="12" width="5" height="5" fill="#5a3a1c" stroke="${INK}"/>`),
+    <ellipse cx="12" cy="17" rx="9" ry="4" fill="none" stroke="${INK}" stroke-width="3"/>
+    <ellipse cx="12" cy="17" rx="9" ry="4" fill="none" stroke="#ff6a4a" stroke-width="1.5"/>
+    <path d="M12 2v10" stroke="${INK}" stroke-width="3" stroke-linecap="round"/><path d="M12 2v10" stroke="#ffd2c8" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M8.5 9l3.5 4 3.5-4" fill="none" stroke="#ff6a4a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`),
+  pack: svg(`
+    <rect x="2" y="13" width="15" height="4" rx="1" fill="#5d6344" stroke="${INK}" stroke-width="1"/>
+    <path d="M4 11.5h12l3 1.5-3 1.5H4z" fill="#eef0f0" stroke="${INK}" stroke-width=".9"/>
+    <path d="M17 13h4l1 4h-5z" fill="#5d6344" stroke="${INK}" stroke-width="1"/>
+    <circle cx="5" cy="19" r="2.2" fill="#1d1f22"/><circle cx="11" cy="19" r="2.2" fill="#1d1f22"/><circle cx="18.5" cy="19" r="2.2" fill="#1d1f22"/>`),
+  unpack: svg(`
+    <rect x="2" y="15" width="15" height="3" rx="1" fill="#5d6344" stroke="${INK}" stroke-width="1"/>
+    <path d="M6 15L13.5 2.5l2.4 1.4-1.6 3.3L8.5 16z" fill="#eef0f0" stroke="${INK}" stroke-width=".9" stroke-linejoin="round"/>
+    <path d="M17 14h4l1 4h-5z" fill="#5d6344" stroke="${INK}" stroke-width="1"/>
+    <path d="M3 18v4M15 18v4" stroke="#3a3f45" stroke-width="1.8"/><circle cx="9" cy="20" r="2" fill="#1d1f22"/>`),
   ram: svg(`<path d="M2 15l9-9 9 9z" fill="#8a6038" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M1 13h20" stroke="#6b4626" stroke-width="3" stroke-linecap="round"/><circle cx="22" cy="13" r="1.8" fill="#d9b27a" stroke="${INK}" stroke-width=".8"/><circle cx="6" cy="19" r="2.6" fill="#4e331b" stroke="${INK}"/><circle cx="16" cy="19" r="2.6" fill="#4e331b" stroke="${INK}"/>`),
   mangonel: svg(`<path d="M2 17h20" stroke="#4e331b" stroke-width="3"/><path d="M10 17V9" stroke="#7a5430" stroke-width="2.4"/><path d="M8 15L4 3" stroke="#7a5430" stroke-width="2.2" stroke-linecap="round"/><circle cx="4" cy="3.5" r="2.4" fill="#8a857c" stroke="${INK}"/><circle cx="6" cy="19.5" r="2.4" fill="#4e331b" stroke="${INK}"/><circle cx="18" cy="19.5" r="2.4" fill="#4e331b" stroke="${INK}"/>`),
   scorpion: svg(`<path d="M5 21l7-10 7 10" fill="none" stroke="#7a5430" stroke-width="2"/><path d="M2 10h20" stroke="#4e331b" stroke-width="3"/><path d="M17 2c3 3 3 13 0 16" fill="none" stroke="#8a6038" stroke-width="2"/><path d="M17 2L6 10l11 8" fill="none" stroke="#f1e9d6" stroke-width=".8"/><path d="M20 10l3 0-1.6-1.4" stroke="#c9d1d6" stroke-width="1.4"/>`),
@@ -346,12 +360,12 @@ export const ICONS = {
     <g stroke="#e3c35a" stroke-width="1.3" stroke-linecap="round"><path d="M6 19l1-4M9 19l.5-4M12 19v-4M15 19l-.5-4M18 19l-1-4"/><path d="M6.5 13l.6-2.5M10 13l.3-2.5M13.5 13l-.2-2.5M17 13l-.5-2.5"/></g>`),
   repeat: svg(`
     <path d="M5 11a7 7 0 0112-4.5M19 13a7 7 0 01-12 4.5" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
-    <path d="M5 11a7 7 0 0112-4.5M19 13a7 7 0 01-12 4.5" fill="none" stroke="#f1d48a" stroke-width="2.2" stroke-linecap="round"/>
-    <path d="M18.5 2.5l-.8 5-4.8-1z" fill="#f1d48a" stroke="${INK}" stroke-width=".9"/><path d="M5.5 21.5l.8-5 4.8 1z" fill="#f1d48a" stroke="${INK}" stroke-width=".9"/>`),
+    <path d="M5 11a7 7 0 0112-4.5M19 13a7 7 0 01-12 4.5" fill="none" stroke="#a8e8ff" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M18.5 2.5l-.8 5-4.8-1z" fill="#a8e8ff" stroke="${INK}" stroke-width=".9"/><path d="M5.5 21.5l.8-5 4.8 1z" fill="#a8e8ff" stroke="${INK}" stroke-width=".9"/>`),
   trash: svg(`
     <path d="M5 7h14l-1.4 14H6.4z" fill="#8a5a30" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
     <path d="M3 6h18" stroke="${INK}" stroke-width="2.6" stroke-linecap="round"/><path d="M9 6V3.5h6V6" fill="none" stroke="${INK}" stroke-width="1.4"/>
-    <path d="M9.5 10v8M12 10v8M14.5 10v8" stroke="#2a1606" stroke-width="1.2"/>`),
+    <path d="M9.5 10v8M12 10v8M14.5 10v8" stroke="${INK}" stroke-width="1.2"/>`),
   reseed: svg(`
     <path d="M12 21V9" stroke="#7d8f3a" stroke-width="1.8"/>
     <path d="M12 9c-3-.5-5-3-5-6 3 0 5 2.5 5 6zM12 13c3-.5 5-3 5-6-3 0-5 2.5-5 6zM12 16c-3-.5-5-3-5-6 3 0 5 2.5 5 6z" fill="#e3c35a" stroke="${INK}" stroke-width="1"/>
@@ -406,24 +420,24 @@ const TECH_GLYPH: Record<string, string> = {
   net: `<path d="M3 4c6 3 12 3 18 0v10c-6 4-12 4-18 0z" fill="none" stroke="#6b4626" stroke-width="1.4"/><path d="M3 7c6 3 12 3 18 0M3 10.5c6 3 12 3 18 0M7 5v13M12 6v13M17 5v13" stroke="#d8ccae" stroke-width=".9" fill="none"/><path d="M8 16c2-1.6 5-1.6 7 0-2 1.6-5 1.6-7 0zm7 0l3-1.8v3.6z" fill="#cfd8dc" stroke="${INK}" stroke-width=".7"/>`,
   hull: `<path d="M2 9h20l-3 9H5z" fill="#7a5230" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/><path d="M3 12h18M4 15h16" stroke="#4e331b" stroke-width=".9"/><path d="M14 3l6 6-2 2-6-6z" fill="#9aa3a8" stroke="${INK}" stroke-width=".9"/>`,
   drydock: `<path d="M2 21V9M22 21V9" stroke="#6b4626" stroke-width="2"/><path d="M2 12h20" stroke="#4e331b" stroke-width="1.2"/><path d="M4 15h16l-3 5H7z" fill="#7a5230" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M12 15V5M12 6l6 7h-6z" stroke="${INK}" stroke-width="1" fill="#efe6cc"/>`,
-  adze: `<path d="M4 20l12-12" stroke="#7a5430" stroke-width="2.4" stroke-linecap="round"/><path d="M13 4c3-1 6 0 7 3l-3 1-3-3z" fill="#c9d1d6" stroke="${INK}" stroke-width="1.1"/><path d="M2 21h10" stroke="#8a6038" stroke-width="2.6" stroke-linecap="round"/>`,
-  hotshot: `<path d="M3 21L17 7" stroke="#7a5430" stroke-width="2" stroke-linecap="round"/><path d="M17 7l4-4-1 5z" fill="#c9d1d6" stroke="${INK}" stroke-width=".9"/><path d="M14 12c-3-1-3-5 0-8 0 3 4 3 3 6-.3 1.3-1.6 2.3-3 2z" fill="#f08a24" stroke="${INK}" stroke-width=".8"/>`,
-  axe: `<path d="M6 21L16 7" stroke="#7a5430" stroke-width="2.2" stroke-linecap="round"/><path d="M13 4c3 0 6 2 7 5l-4 2-4-5z" fill="#c9d1d6" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>`,
-  saw: `<path d="M3 15l14-8 3 5-14 8z" fill="#c9d1d6" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M5 18l1-2 1.5 1 1-2 1.5 1 1-2 1.5 1 1-2 1.5 1" fill="none" stroke="${INK}" stroke-width=".8"/><path d="M17 7l3-3 2 3-2 5" fill="#7a5430" stroke="${INK}" stroke-width="1"/>`,
+  adze: `<g stroke="${INK}" stroke-width="1"><rect x="3" y="13" width="8" height="7" fill="#9aa1a6"/><rect x="11" y="13" width="8" height="7" fill="#7f878d"/><rect x="7" y="6" width="8" height="7" fill="#b9c0c5"/></g><path d="M19 4l3 3" stroke="#e8b51c" stroke-width="2" stroke-linecap="round"/>`,
+  hotshot: `<path d="M3 21L15 9" stroke="${INK}" stroke-width="4" stroke-linecap="round"/><path d="M3 21L15 9" stroke="#eef0f0" stroke-width="2.4" stroke-linecap="round"/><path d="M15 9l4-1-1 4z" fill="#3a3f45" stroke="${INK}" stroke-width=".8"/><path d="M4 18l-2 0M6 20v2" stroke="#ff9a24" stroke-width="1.6" stroke-linecap="round"/><circle cx="18" cy="17" r="3" fill="#ff6a3a" stroke="${INK}" stroke-width=".8"/>`,
+  axe: `<path d="M3 15l9-5 4 1 1 4-9 5z" fill="#e8661c" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M15 12l6-3 1 2-6 3z" fill="#c9d1d6" stroke="${INK}" stroke-width=".9"/><path d="M5 12l3-2" stroke="${INK}" stroke-width="1.6" stroke-linecap="round"/>`,
+  saw: `<circle cx="12" cy="12" r="8" fill="#c9d1d6" stroke="${INK}" stroke-width="1.1"/><path d="M12 2l1.5 2.5L16 3l.5 3 3-.5-1 3 3 1.5-2.5 2 2 2.5-3 .5" fill="none" stroke="${INK}" stroke-width=".8"/><circle cx="12" cy="12" r="2.6" fill="#e8661c" stroke="${INK}" stroke-width=".9"/>`,
   pick: `<path d="M12 21V8" stroke="#7a5430" stroke-width="2.2" stroke-linecap="round"/><path d="M3 9c4-4 14-4 18 0-5-2-13-2-18 0z" fill="#9aa3a8" stroke="${INK}" stroke-width="1.1"/>`,
   gold: `<path d="M12 21V8" stroke="#7a5430" stroke-width="2.2" stroke-linecap="round"/><path d="M3 9c4-4 14-4 18 0-5-2-13-2-18 0z" fill="#9aa3a8" stroke="${INK}" stroke-width="1.1"/><circle cx="17" cy="17" r="3.4" fill="#f5c842" stroke="${INK}" stroke-width="1"/>`,
   stone: `<path d="M12 21V8" stroke="#7a5430" stroke-width="2.2" stroke-linecap="round"/><path d="M3 9c4-4 14-4 18 0-5-2-13-2-18 0z" fill="#9aa3a8" stroke="${INK}" stroke-width="1.1"/><path d="M14 20l1-4 4-1 2 3-2 3z" fill="#b8b8b0" stroke="${INK}" stroke-width="1"/>`,
-  plow: `<path d="M3 8h9l5 6" fill="none" stroke="#7a5430" stroke-width="2" stroke-linecap="round"/><path d="M14 12l7 4-4 4-5-3z" fill="#9aa3a8" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M2 21h12" stroke="#6b4a2a" stroke-width="1.6"/>`,
-  collar: `<path d="M6 19c-2-6 0-14 6-14s8 8 6 14" fill="none" stroke="${INK}" stroke-width="5"/><path d="M6 19c-2-6 0-14 6-14s8 8 6 14" fill="none" stroke="#8a5a30" stroke-width="3"/><circle cx="12" cy="5" r="1.6" fill="#d9b44a"/>`,
+  plow: `<rect x="3" y="9" width="10" height="7" rx="1" fill="#3d8a3a" stroke="${INK}" stroke-width="1.1"/><path d="M8 9V5h4l1 4" fill="#203342" stroke="${INK}" stroke-width="1"/><circle cx="7" cy="18" r="3.4" fill="#1d1f22" stroke="${INK}"/><circle cx="17" cy="18.5" r="2.4" fill="#1d1f22" stroke="${INK}"/><path d="M13 12h6l1 4h-4" fill="#3d8a3a" stroke="${INK}" stroke-width="1"/>`,
+  collar: `<path d="M6 7h12l1 14H5z" fill="#e2e0d8" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M8 4h8l-2 3h-4z" fill="#c9c7c0" stroke="${INK}" stroke-width=".9"/><path d="M12 11c-2 2-2 5 0 6 2-1 2-4 0-6z" fill="#3d8a3a"/><path d="M12 17v-6" stroke="#2a6a2a" stroke-width=".8"/>`,
   barrow: `<path d="M4 11h12l-2 6H6z" fill="#8a5a30" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><circle cx="16.5" cy="18" r="3" fill="#6b4a2a" stroke="${INK}" stroke-width="1"/><path d="M4 11L1 9M16 11l5-4" stroke="#6b4a2a" stroke-width="1.6" stroke-linecap="round"/>`,
-  cart: `<path d="M2 9h16v7H2z" fill="#8a5a30" stroke="${INK}" stroke-width="1.1"/><circle cx="6" cy="18" r="3" fill="#6b4a2a" stroke="${INK}" stroke-width="1"/><circle cx="14" cy="18" r="3" fill="#6b4a2a" stroke="${INK}" stroke-width="1"/><path d="M18 11l4-2" stroke="#6b4a2a" stroke-width="1.6"/>`,
-  loom: `<ellipse cx="12" cy="12" rx="4" ry="8" fill="#e8dcc0" stroke="${INK}" stroke-width="1.1"/><path d="M8 8h8M8 12h8M8 16h8" stroke="#b8a37a" stroke-width="1"/><path d="M12 2v20" stroke="#7a5430" stroke-width="1.6"/>`,
-  watch: `<path d="M2 12c3-5 7-7 10-7s7 2 10 7c-3 5-7 7-10 7s-7-2-10-7z" fill="#f1e9d6" stroke="${INK}" stroke-width="1.2"/><circle cx="12" cy="12" r="3.6" fill="#2f5aa0" stroke="${INK}" stroke-width="1"/><circle cx="11" cy="11" r="1" fill="#fff"/>`,
-  sword: `<path d="M5 19L17 5" stroke="${INK}" stroke-width="3.6" stroke-linecap="round"/><path d="M5 19L17 5" stroke="#d6dde1" stroke-width="1.8" stroke-linecap="round"/><path d="M4 15l5 5" stroke="#c8962a" stroke-width="2.2" stroke-linecap="round"/>`,
-  arrow: `<path d="M4 20L18 6" stroke="${INK}" stroke-width="2.8" stroke-linecap="round"/><path d="M4 20L18 6" stroke="#c9a46a" stroke-width="1.2"/><path d="M15 4l6-1-1 6z" fill="#c9d1d6" stroke="${INK}" stroke-width="1"/><path d="M4 20l-1-4M4 20l4 1" stroke="#f1e9d6" stroke-width="1.6"/>`,
-  mail: `<path d="M6 5h12l2 5-2 1v9H6v-9l-2-1z" fill="#9aa3a8" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M8 9h8M8 12h8M8 15h8M8 18h8" stroke="#5c6468" stroke-width=".9" stroke-dasharray="1.2 1"/>`,
-  barding: `<path d="M3 17c0-3 2-5 6-5h6l3-4 3 1-2 5v4" fill="#8f8a84" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M3 13h14v5H3z" fill="#9aa3a8" stroke="${INK}" stroke-width=".9"/><path d="M5 14.5h10M5 16.5h10" stroke="#5c6468" stroke-width=".8" stroke-dasharray="1.2 1"/>`,
-  padding: `<path d="M12 2l8 3v6c0 5.5-3.5 9-8 11-4.5-2-8-5.5-8-11V5z" fill="#a8885a" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/><path d="M6 9h12M6 13h12M7 17h10" stroke="#6b4a2a" stroke-width=".9"/>`,
+  cart: `<path d="M2 14V9h9l2-3h5l3 4v4z" fill="#c9c2b0" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M14 7h3l2 3h-5z" fill="#203342"/><circle cx="6" cy="16.5" r="2.8" fill="#1d1f22" stroke="${INK}"/><circle cx="17" cy="16.5" r="2.8" fill="#1d1f22" stroke="${INK}"/>`,
+  loom: `<path d="M7 3h3l2 2 2-2h3l3 4-2 2v12H6V9L4 7z" fill="#ffc83a" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><path d="M6 13h12M6 17h12" stroke="#e8ecf0" stroke-width="1.6"/><path d="M12 5v16" stroke="${INK}" stroke-width=".8"/>`,
+  watch: `<path d="M3 6l12 2v6L3 12z" fill="#e8eaea" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><circle cx="15.5" cy="11" r="2.8" fill="#203342" stroke="${INK}"/><circle cx="15" cy="10.5" r=".9" fill="#7fe9ff"/><path d="M8 13l-1 5h-4" stroke="#5b636b" stroke-width="1.6" fill="none"/><circle cx="6" cy="7.6" r=".8" fill="#ff3a2a"/>`,
+  sword: `<g stroke="${INK}" stroke-width="1" stroke-linejoin="round"><path d="M5 9h4v11H5z" fill="#c9a43a"/><path d="M5 9c0-3 1-5 2-6 1 1 2 3 2 6z" fill="#b87333"/><path d="M10 9h4v11h-4z" fill="#c9a43a"/><path d="M10 9c0-3 1-5 2-6 1 1 2 3 2 6z" fill="#b87333"/><path d="M15 9h4v11h-4z" fill="#c9a43a"/><path d="M15 9c0-3 1-5 2-6 1 1 2 3 2 6z" fill="#b87333"/></g><path d="M5 18h14" stroke="#7a5c18" stroke-width="1"/>`,
+  arrow: `<rect x="2" y="9" width="16" height="5" rx="2.5" fill="#25292e" stroke="${INK}" stroke-width="1"/><circle cx="18.5" cy="11.5" r="3.4" fill="#203342" stroke="${INK}" stroke-width="1"/><circle cx="18.5" cy="11.5" r="1.8" fill="#4aa3e0"/><path d="M7 14v4M11 14v4" stroke="#5b636b" stroke-width="1.6"/><path d="M4 11.5h10" stroke="#5b636b" stroke-width=".8"/>`,
+  mail: `<path d="M7 3h3.5l1.5 2 1.5-2H17l3 4-2 2v12H6V9L4 7z" fill="#5d6344" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 10h8v5H8z" fill="#7a8058" stroke="${INK}" stroke-width=".9"/><path d="M8 17h8" stroke="#3a3e2a" stroke-width="1.6"/>`,
+  barding: `<path d="M2 16l3-7h12l4 4v3z" fill="#5d6344" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/><g fill="#7a8058" stroke="${INK}" stroke-width=".8"><rect x="5" y="10" width="3.5" height="3"/><rect x="9" y="10" width="3.5" height="3"/><rect x="13" y="10" width="3.5" height="3"/></g><rect x="2" y="16" width="19" height="4" rx="2" fill="#1d1f22"/><path d="M11 9V6h7" stroke="#3a3f45" stroke-width="2"/>`,
+  padding: `<path d="M5 4h14v15l-7 3-7-3z" fill="#3a4450" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/><path d="M7 7h10v6H7z" fill="#56636f" stroke="${INK}" stroke-width=".9"/><path d="M7 15h3v3H7zM14 15h3v3h-3z" fill="#2a323c" stroke="${INK}" stroke-width=".8"/>`,
   masonry: `<path d="M2 20h20M2 15h20M2 10h20" stroke="${INK}" stroke-width="1"/><path d="M2 10h20v10H2z" fill="#b8b0a2" stroke="${INK}" stroke-width="1.1"/><path d="M8 10v5M16 10v5M5 15v5M12 15v5M19 15v5" stroke="${INK}" stroke-width="1"/><path d="M15 3l4 4-2 2-4-4z" fill="#9aa3a8" stroke="${INK}" stroke-width=".9"/>`,
   crane: `<path d="M5 21V4h2v17zM7 5h13" stroke="#7a5430" stroke-width="2" stroke-linecap="round"/><path d="M18 5v8" stroke="${INK}" stroke-width="1"/><rect x="15.5" y="13" width="5" height="4" fill="#b8b0a2" stroke="${INK}" stroke-width="1"/><circle cx="6" cy="16" r="4" fill="none" stroke="#6b4a2a" stroke-width="1.6"/>`,
 };
@@ -468,23 +482,23 @@ const TECH_GLYPH_OF: Record<string, string> = {
 };
 /** Second-level techs show two pips. */
 const LEVEL2 = new Set(['iron_casting', 'bodkin_arrow', 'chain_mail', 'chain_barding', 'leather_archer', 'bow_saw', 'gold_shaft', 'heavy_plow', 'hand_cart']);
-const UPGRADE_OF: Record<string, string> = { capped_ram: 'ram', onager: 'mangonel', guard_tower: 'watch_tower', keep: 'watch_tower', swordsman: 'militia', pikeman: 'spearman', crossbowman: 'archer', light_cavalry: 'scout', war_galley: 'galley' };
+export const UPGRADE_OF: Record<string, string> = { capped_ram: 'ram', onager: 'mangonel', guard_tower: 'watch_tower', keep: 'watch_tower', swordsman: 'militia', pikeman: 'spearman', crossbowman: 'archer', light_cavalry: 'scout', war_galley: 'galley' };
 const NUMERAL: Record<string, string> = { age2: 'II', age3: 'III', age4: 'IV' };
 
 const cacheTech = new Map<string, string>();
 
-/** Icon for a technology: its tool or armour, a unit with a gold chevron for upgrades, or a crown for ages. */
+/** Icon for a technology: its tool or armour, a unit with an upgrade chevron, or a star for ages. */
 export function techIcon(id: string): string {
   let out = cacheTech.get(id);
   if (out) return out;
   if (NUMERAL[id]) {
     out = svg(`
-      <path d="M3 17l1.5-10 4.5 4.5L12 4l3 7.5L19.5 7 21 17z" fill="#f5c842" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
-      <rect x="3" y="17" width="18" height="4" rx="1" fill="#d9a62a" stroke="${INK}" stroke-width="1.1"/>
-      <text x="12" y="16" text-anchor="middle" font-family="Cinzel, serif" font-weight="700" font-size="${NUMERAL[id].length > 2 ? 6 : 7}" fill="${INK}">${NUMERAL[id]}</text>`);
+      <path d="M12 1.5l2.9 6.2 6.8.7-5.1 4.6 1.5 6.7L12 16.3l-6.1 3.4 1.5-6.7-5.1-4.6 6.8-.7z" fill="#ffc83a" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>
+      <rect x="4" y="17.5" width="16" height="5" rx="1" fill="#16222e" stroke="#7fd8f5" stroke-width="1"/>
+      <text x="12" y="21.7" text-anchor="middle" font-family="Orbitron, sans-serif" font-weight="800" font-size="${NUMERAL[id].length > 2 ? 4.6 : 5}" fill="#e9fbff">${NUMERAL[id]}</text>`);
   } else if (UPGRADE_OF[id]) {
     const base = (ICONS as Record<string, string>)[UPGRADE_OF[id]].replace(/^<svg[^>]*>|<\/svg>$/g, '');
-    out = svg(`${base}<path d="M15 9l4-4 4 4" fill="none" stroke="${INK}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9l4-4 4 4" fill="none" stroke="#f5c842" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`);
+    out = svg(`${base}<path d="M15 9l4-4 4 4" fill="none" stroke="${INK}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9l4-4 4 4" fill="none" stroke="#7fe9ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`);
   } else {
     const pips = LEVEL2.has(id) ? 2 : 1;
     const dots = Array.from({ length: pips }, (_, k) => `<circle cx="${20 - k * 4}" cy="20.5" r="1.6" fill="#f5c842" stroke="${INK}" stroke-width=".7"/>`).join('');
