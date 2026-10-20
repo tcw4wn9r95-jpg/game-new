@@ -148,8 +148,8 @@ export function boxShadow(g: G, x0: number, y0: number, x1: number, y1: number, 
 
 export interface WallStyle {
   base: string;
-  /** Wall material: plaster (default), stone or planks. */
-  mat?: 'plaster' | 'stone' | 'planks';
+  /** Wall material: plaster (default), stone, planks, or a modern finish. */
+  mat?: 'plaster' | 'stone' | 'planks' | 'concrete' | 'metal' | 'glass';
   /** Timber frame colour for half-timbered plaster, or null for plain. */
   frame?: string | null;
   /** Height of a stone footing under plaster or planks, in units. */
@@ -361,12 +361,12 @@ export function boxTop(g: G, x0: number, y0: number, x1: number, y1: number, h: 
 export interface RoofStyle {
   /** Base colour of the roof covering. */
   color: string;
-  kind: 'thatch' | 'shingle' | 'canvas';
+  kind: 'thatch' | 'shingle' | 'canvas' | 'metal';
   /** Team-coloured trim along the eaves (canvas roofs). */
   trim?: string;
 }
 
-const MAT_OF: Record<RoofStyle['kind'], Material> = { thatch: 'thatch', shingle: 'shingle', canvas: 'canvas' };
+const MAT_OF: Record<RoofStyle['kind'], Material> = { thatch: 'thatch', shingle: 'shingle', canvas: 'canvas', metal: 'metal' };
 
 /** Unit-space vector (x, y scaled to units) and its screen projection. */
 const U = (p: V3): V3 => [p[0] * 32, p[1] * 32, p[2]];

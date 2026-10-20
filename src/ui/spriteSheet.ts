@@ -73,11 +73,10 @@ export function drawBuildingSheet(view: View, z = 48): void {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = '#5f8a3e';
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  const list = [
-    ['blacksmith', 3, 0],
-    ['market', 3, 0],
-    ['university', 3, 0],
+  const list: Array<readonly [Parameters<BuildingSprites['get']>[0], number, number]> = [
     ['town_center', 4, 0],
+    ['castle', 4, 0],
+    ['wonder', 5, 0],
     ['house', 2, 0],
     ['mill', 2, 0],
     ['lumber_camp', 2, 0],
@@ -86,8 +85,24 @@ export function drawBuildingSheet(view: View, z = 48): void {
     ['archery_range', 3, 0],
     ['stable', 3, 0],
     ['monastery', 3, 0],
+    ['blacksmith', 3, 0],
+    ['market', 3, 0],
+    ['university', 3, 0],
+    ['siege_workshop', 3, 0],
+    ['dock', 3, 0],
+    ['fish_trap', 3, 3],
     ['farm', 3, 3],
-  ] as const;
+    ['palisade_wall', 1, 17],
+    ['palisade_gate', 1, 17],
+    ['palisade_gate', 1, 17 | 1024],
+    ['stone_wall', 1, 17],
+    ['stone_wall', 1, 68 | 256],
+    ['gate', 1, 17],
+    ['gate', 1, 17 | 1024],
+    ['watch_tower', 1, 0],
+    ['watch_tower', 1, 1 << 12],
+    ['watch_tower', 1, 2 << 12],
+  ];
   let x = 10, y = 10, rowH = 0;
   const ages = Number(new URLSearchParams(location.search).get('age') ?? 0);
   for (const [type, size, variant] of list) {

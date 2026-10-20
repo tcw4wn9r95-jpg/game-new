@@ -1,6 +1,6 @@
-// Ships, drawn as small 3D models: a lofted plank hull, decks, masts, sails,
-// oars and crew, turned to one of eight headings and rolled a little for the
-// swell. Faces are lit by the same sun as the buildings and drawn back to
+// Ships, drawn as small 3D models: a lofted steel hull, decks, superstructure,
+// radar masts, guns and missile cells, turned to one of eight headings and
+// rolled a little for the swell. Faces are lit by the same sun as the buildings and drawn back to
 // front. Coordinates are in tiles: u along the keel (bow +), v across
 // (starboard +), z up from the waterline.
 import { shade } from './figures';
@@ -21,9 +21,9 @@ export interface ShipPose {
   frame: number;
   /** Fishing: net out. */
   work: boolean;
-  /** Firing (fire ship pots blaze, barge arm thrown). */
+  /** Firing (guns flash, missiles launch). */
   attack: boolean;
-  /** Upgraded hull (War Galley). */
+  /** Upgraded hull (Missile Boat). */
   elite: boolean;
 }
 
@@ -39,12 +39,12 @@ interface Hull {
 }
 
 const HULLS: Record<ShipType, Hull> = {
-  fishing_ship: { L: 1.25, B: 0.3, D: 0.17, transom: 0.45, wood: '#86603a', deck: '#b8925e' },
-  transport_ship: { L: 1.75, B: 0.48, D: 0.26, transom: 0.6, wood: '#7a5434', deck: '#b28c58' },
-  galley: { L: 2.0, B: 0.36, D: 0.2, transom: 0.4, wood: '#6e4a2c', deck: '#a8824e' },
-  fire_ship: { L: 1.55, B: 0.36, D: 0.19, transom: 0.45, wood: '#4c3424', deck: '#7a5a3a' },
-  demolition_raft: { L: 1.0, B: 0.42, D: 0.07, transom: 1, wood: '#7c6440', deck: '#9c7c4c' },
-  siege_barge: { L: 1.95, B: 0.6, D: 0.2, transom: 0.85, wood: '#6a4a2e', deck: '#a07c4c' },
+  fishing_ship: { L: 1.3, B: 0.3, D: 0.2, transom: 0.7, wood: '#33465a', deck: '#8e9396' },
+  transport_ship: { L: 1.8, B: 0.48, D: 0.24, transom: 0.95, wood: '#5f6a66', deck: '#7d8380' },
+  galley: { L: 2.0, B: 0.32, D: 0.2, transom: 0.6, wood: '#7f8b94', deck: '#6c757c' },
+  fire_ship: { L: 1.5, B: 0.3, D: 0.17, transom: 0.65, wood: '#6f7b82', deck: '#5f676d' },
+  demolition_raft: { L: 1.0, B: 0.2, D: 0.08, transom: 0.7, wood: '#2c3136', deck: '#3a4046' },
+  siege_barge: { L: 2.5, B: 0.42, D: 0.24, transom: 0.7, wood: '#8a959c', deck: '#737c82' },
 };
 
 /** Sprite bounds, in tiles around the anchor (the ship's centre on the water). */
@@ -209,7 +209,7 @@ class ShipPainter {
   /** Half-beam at a station t (-1 stern .. 1 bow). */
   private beam(t: number): number {
     const { B, transom } = this.h;
-    if (this.type === 'demolition_raft') return B;
+    if (this.type === 'transport_ship') return B * (t > 0.92 ? 0.92 : 1);
     if (t >= 0) return B * Math.pow(Math.max(0, 1 - t * t), 0.6);
     return B * Math.max(transom, Math.sqrt(Math.max(0, 1 - Math.pow(-t, 3))));
   }
@@ -217,8 +217,8 @@ class ShipPainter {
   /** Deck edge height at a station: the sheer rises toward bow and stern. */
   private sheer(t: number): number {
     const { D } = this.h;
-    if (this.type === 'demolition_raft' || this.type === 'siege_barge') return D;
-    return D * (1 + 0.55 * t * t + (t > 0 ? 0.35 * t * t * t : 0));
+    if (this.type === 'transport_ship') return D;
+    return D * (1 + 0.18 * t * t + (t > 0 ? 0.3 * t * t * t : 0));
   }
 
   private hull(): void {
@@ -245,7 +245,7 @@ class ShipPainter {
       },
     });
 
-    const stripe = this.p.elite ? '#d8b048' : this.team;
+    const stripe = this.team;
     for (let i = 0; i < n; i++) {
       const t0 = st[i], t1 = st[i + 1];
       const um = (((t0 + t1) / 2) * L) / 2;
@@ -255,29 +255,17 @@ class ShipPainter {
           out: axis(um),
           after: () => {
             const { g } = this;
-            // Strakes, a dark wale and a painted band under the gunwale.
-            g.lineWidth = Math.max(0.6, this.s * 0.01);
-            g.strokeStyle = 'rgba(28,16,6,0.55)';
-            for (const q of [0.42, 0.66, 0.86]) {
-              const [x0, y0] = this.X(mid(t0, side, q)), [x1, y1] = this.X(mid(t1, side, q));
-              g.beginPath();
-              g.moveTo(x0, y0);
-              g.lineTo(x1, y1);
-              g.stroke();
-            }
-            if (this.type !== 'demolition_raft') {
-              this.path([mid(t0, side, 0.1), mid(t1, side, 0.1), mid(t1, side, 0.26), mid(t0, side, 0.26)]);
-              g.fillStyle = shade(stripe, 0.85);
-              g.fill();
-            }
-            // Wet, darker wood at the waterline.
-            this.path([mid(t0, side, 0.86), mid(t1, side, 0.86), wl(t1, side), wl(t0, side)]);
-            g.fillStyle = 'rgba(20,40,40,0.35)';
+            // A team band under the deck edge and dark anti-fouling at the waterline.
+            this.path([mid(t0, side, 0.1), mid(t1, side, 0.1), mid(t1, side, 0.24), mid(t0, side, 0.24)]);
+            g.fillStyle = shade(stripe, 0.95);
+            g.fill();
+            this.path([mid(t0, side, 0.78), mid(t1, side, 0.78), wl(t1, side), wl(t0, side)]);
+            g.fillStyle = 'rgba(110,30,26,0.75)';
             g.fill();
           },
         });
       }
-      // Deck planking.
+      // Deck, with non-slip panel seams.
       const dk = [top(t0, -1), top(t1, -1), top(t1, 1), top(t0, 1)];
       this.face(dk, shade(deck, 0.88), {
         twoSided: true,
@@ -285,7 +273,7 @@ class ShipPainter {
         edge: null,
         after: () => {
           const { g } = this;
-          g.strokeStyle = 'rgba(60,36,16,0.4)';
+          g.strokeStyle = 'rgba(30,34,38,0.35)';
           g.lineWidth = Math.max(0.5, this.s * 0.008);
           for (const v of [-0.5, 0, 0.5]) {
             const a = this.w((t0 * L) / 2, v * this.beam(t0), this.sheer(t0)), b = this.w((t1 * L) / 2, v * this.beam(t1), this.sheer(t1));
@@ -300,11 +288,14 @@ class ShipPainter {
     }
     // Gunwale rails.
     for (const side of [-1, 1])
-      for (let i = 0; i < n; i++) this.line(top(st[i], side), top(st[i + 1], side), shade(wood, 0.6), 0.025, 0.02);
+      for (let i = 0; i < n; i++) this.line(top(st[i], side), top(st[i + 1], side), shade(wood, 0.55), 0.018, 0.02);
     // Transom.
     if (this.h.transom > 0) this.face([top(-1, -1), top(-1, 1), wl(-1, 1), wl(-1, -1)], shade(wood, 0.9), { out: axis(0) });
-    // Bow stem post.
-    if (this.type !== 'demolition_raft' && this.type !== 'siege_barge') this.line(this.w(L / 2, 0, 0), this.w(L / 2 + 0.06, 0, this.sheer(1) + 0.08), shade(wood, 0.7), 0.04);
+    if (this.type === 'transport_ship') {
+      // The landing craft's bow ramp, raised.
+      const z = this.sheer(1);
+      this.face([this.w(L / 2, -this.h.B * 0.9, 0.02), this.w(L / 2, this.h.B * 0.9, 0.02), this.w(L / 2 + 0.06, this.h.B * 0.9, z + 0.06), this.w(L / 2 + 0.06, -this.h.B * 0.9, z + 0.06)], shade(wood, 0.9), { out: axis(0), twoSided: true });
+    }
   }
 
   // ---------- rigging, crew and fittings ----------
@@ -315,202 +306,162 @@ class ShipPainter {
 
   private mast(u: number, h: number): number {
     const z0 = this.deckZ(u);
-    this.line(this.w(u, 0, z0), this.w(u, 0, z0 + h), '#5a3c22', 0.045, 0.3);
-    // A pennant in the owner's colours, streaming aft.
+    this.line(this.w(u, 0, z0), this.w(u, 0, z0 + h), '#3c4248', 0.035, 0.3);
+    // A spinning radar bar near the top, and the owner's flag streaming aft.
     const top = z0 + h;
+    const spin = this.p.dir * 0.7 + this.p.frame * 1.3;
+    const r = 0.16;
+    this.line(this.w(u + Math.cos(spin) * r, Math.sin(spin) * r, top - 0.12), this.w(u - Math.cos(spin) * r, -Math.sin(spin) * r, top - 0.12), '#d8dcdf', 0.03, 0.32);
     const wave = Math.sin(this.t * 1.5) * 0.04;
-    this.face([this.w(u, 0, top), this.w(u - 0.32, wave, top - 0.05), this.w(u, 0, top - 0.11)], this.team, { twoSided: true, bias: 0.5, edge: null });
+    this.face([this.w(u, 0, top), this.w(u - 0.3, wave, top - 0.04), this.w(u, 0, top - 0.12)], this.team, { twoSided: true, bias: 0.5, edge: null });
     return top;
   }
 
-  /** A square sail on a yard, bellied forward, with a band of team colour. */
-  private squareSail(u: number, zBot: number, zTop: number, half: number): void {
-    const rows = 3, cols = 4;
-    const belly = 0.14;
-    const pt = (i: number, j: number): V3 => {
-      const v = -half + (2 * half * j) / cols;
-      const z = zTop - ((zTop - zBot) * i) / rows;
-      const bow = belly * (1 - Math.pow(v / half, 2)) * Math.sin((Math.PI * (i + 0.6)) / (rows + 0.6));
-      return this.w(u + bow, v, z);
-    };
-    for (let i = 0; i < rows; i++)
-      for (let j = 0; j < cols; j++) {
-        const color = i === 1 ? this.team : this.p.elite ? '#f0e6cc' : '#e6dcc2';
-        this.face([pt(i, j), pt(i, j + 1), pt(i + 1, j + 1), pt(i + 1, j)], color, { twoSided: true, bias: 0.35, edge: 'rgba(80,60,40,0.25)' });
-      }
-    this.line(this.w(u, -half * 1.08, zTop), this.w(u, half * 1.08, zTop), '#4a3020', 0.03, 0.36);
+  /** A box on deck: u0..u1 along the keel, v0..v1 across, rising h from z0. */
+  private block(u0: number, u1: number, v0: number, v1: number, z0: number, h: number, color: string, bias = 0.1, windows = false): void {
+    const c = (u: number, v: number, z: number) => this.w(u, v, z);
+    const out = this.w((u0 + u1) / 2, (v0 + v1) / 2, z0 + h / 2);
+    const z1 = z0 + h;
+    this.face([c(u0, v0, z1), c(u1, v0, z1), c(u1, v1, z1), c(u0, v1, z1)], shade(color, 1.08), { out, bias });
+    const sides: Array<[number, number, number, number]> = [
+      [u0, v0, u1, v0],
+      [u1, v0, u1, v1],
+      [u1, v1, u0, v1],
+      [u0, v1, u0, v0],
+    ];
+    for (const [ua, va, ub, vb] of sides) {
+      const front = ua === u1 && ub === u1;
+      this.face([c(ua, va, z0), c(ub, vb, z0), c(ub, vb, z1), c(ua, va, z1)], color, {
+        out,
+        bias,
+        after: windows
+          ? () => {
+              // A band of dark bridge windows.
+              const { g } = this;
+              const q = (k: number, z: number): V3 => c(ua + (ub - ua) * k, va + (vb - va) * k, z);
+              this.path([q(0.1, z1 - h * 0.45), q(0.9, z1 - h * 0.45), q(0.9, z1 - h * 0.18), q(0.1, z1 - h * 0.18)]);
+              g.fillStyle = front ? 'rgba(20,40,60,0.9)' : 'rgba(25,35,45,0.75)';
+              g.fill();
+            }
+          : undefined,
+      });
+    }
   }
 
-  /** A triangular fore-and-aft sail (fishing boats). */
-  private lateen(u: number, zBot: number, zTop: number, len: number): void {
-    const b = 0.08 * Math.sin(this.t);
-    const a = this.w(u + 0.05, 0, zTop), c = this.w(u - len, 0.1 + b, zBot + 0.05), d = this.w(u + 0.25, 0.04, zBot);
-    this.face([a, c, d], '#e8dcc0', { twoSided: true, bias: 0.35, edge: 'rgba(80,60,40,0.3)' });
-    this.line(this.w(u + 0.3, 0, zBot - 0.02), this.w(u - len - 0.05, 0.1, zBot + 0.25), '#4a3020', 0.025, 0.36);
+  /** A gun turret on deck, its barrel trained along `aim` (radians in ship space). */
+  private turret(u: number, size: number, barrel: number, color: string, firing: boolean, aim = 0): void {
+    const z = this.deckZ(u);
+    this.block(u - size, u + size * 0.8, -size * 0.8, size * 0.8, z, size * 0.9, color, 0.2);
+    const zb = z + size * 0.5;
+    const tip = this.w(u + Math.cos(aim) * barrel, Math.sin(aim) * barrel, zb + 0.02);
+    this.line(this.w(u, 0, zb), tip, '#2e3338', Math.max(0.018, size * 0.28), 0.25);
+    if (firing) this.flash(tip, size * 1.4);
+  }
+
+  private flash(q: V3, r: number, bias = 0.5): void {
+    this.items.push({
+      depth: q[0] + q[1] + q[2] + bias,
+      draw: () => {
+        const { g } = this;
+        const [x, y] = this.X(q);
+        const R = Math.max(2, r * this.s);
+        const grad = g.createRadialGradient(x, y, 0, x, y, R);
+        grad.addColorStop(0, 'rgba(255,255,230,1)');
+        grad.addColorStop(0.35, 'rgba(255,200,70,0.9)');
+        grad.addColorStop(1, 'rgba(255,100,20,0)');
+        g.fillStyle = grad;
+        g.beginPath();
+        g.arc(x, y, R, 0, Math.PI * 2);
+        g.fill();
+      },
+    });
   }
 
   /** A sailor or marine: a body and a head (a helmet for soldiers). */
   private crew(u: number, v: number, cloth: string, helm = false): void {
     const z = this.deckZ(u);
     this.line(this.w(u, v, z), this.w(u, v, z + 0.2), cloth, 0.09, 0.1);
-    this.dot(this.w(u, v, z + 0.25), 0.045, helm ? '#8a8e94' : '#d8aa80', 0.12);
-  }
-
-  private oars(n: number, from: number, to: number, reach: number): void {
-    const { L } = this.h;
-    for (let k = 0; k < n; k++) {
-      const u = (from + ((to - from) * k) / Math.max(1, n - 1)) * (L / 2);
-      const t = (u / L) * 2;
-      const sweep = 0.16 * Math.sin(this.t + 0.3);
-      for (const side of [-1, 1]) {
-        const a = this.w(u, side * this.beam(t), this.sheer(t) - 0.02);
-        const b = this.w(u + sweep, side * (this.beam(t) + reach), -0.02);
-        this.line(a, b, '#6a4a2a', 0.022, 0.01);
-      }
-    }
-  }
-
-  private crate(u: number, v: number, size: number, color: string): void {
-    const z = this.deckZ(u);
-    const hs = size / 2;
-    const c = (du: number, dv: number, dz: number) => this.w(u + du, v + dv, z + dz);
-    const out = this.w(u, v, z + hs);
-    this.face([c(-hs, -hs, size), c(hs, -hs, size), c(hs, hs, size), c(-hs, hs, size)], shade(color, 1.1), { out, bias: 0.1 });
-    for (const [a, b] of [
-      [c(-hs, -hs, 0), c(hs, -hs, 0)],
-      [c(hs, -hs, 0), c(hs, hs, 0)],
-      [c(hs, hs, 0), c(-hs, hs, 0)],
-      [c(-hs, hs, 0), c(-hs, -hs, 0)],
-    ]) {
-      const up = (q: V3): V3 => [q[0], q[1], q[2] + size];
-      this.face([a, b, up(b), up(a)], color, { out, bias: 0.1 });
-    }
-  }
-
-  private flame(q: V3, r: number, bias = 0.4): void {
-    this.items.push({
-      depth: q[0] + q[1] + q[2] + bias,
-      draw: () => {
-        const { g } = this;
-        const [x, y] = this.X(q);
-        const R = r * this.s * (1 + 0.15 * Math.sin(this.t * 2));
-        const grad = g.createRadialGradient(x, y, 0, x, y - R * 0.6, R * 1.4);
-        grad.addColorStop(0, 'rgba(255,248,200,0.95)');
-        grad.addColorStop(0.35, 'rgba(255,170,40,0.9)');
-        grad.addColorStop(1, 'rgba(200,40,10,0)');
-        g.fillStyle = grad;
-        g.beginPath();
-        g.moveTo(x - R * 0.7, y);
-        g.quadraticCurveTo(x - R * 0.5, y - R * 1.4, x + Math.sin(this.t) * R * 0.3, y - R * 2.2);
-        g.quadraticCurveTo(x + R * 0.6, y - R * 1.2, x + R * 0.7, y);
-        g.closePath();
-        g.fill();
-      },
-    });
+    this.dot(this.w(u, v, z + 0.25), 0.045, helm ? '#5d6344' : '#d8aa80', 0.12);
   }
 
   // ---------- types ----------
 
   paint(): void {
     this.hull();
-    const { L } = this.h;
+    const fire = this.p.attack;
     switch (this.type) {
       case 'fishing_ship': {
-        const top = this.mast(0.1, 0.95);
-        this.lateen(0.12, this.deckZ(0) + 0.2, top - 0.05, 0.55);
-        this.crew(-0.35, 0.05, '#6b5a42');
+        // Trawler: wheelhouse forward, an A-frame gantry and net drum aft.
+        this.block(0.1, 0.42, -0.2, 0.2, this.deckZ(0.25), 0.26, '#e8e6e0', 0.1, true);
+        this.mast(0.3, 0.75);
+        const za = this.deckZ(-0.5);
+        this.line(this.w(-0.55, -0.22, za), this.w(-0.55, 0, za + 0.5), '#d0661c', 0.03, 0.2);
+        this.line(this.w(-0.55, 0.22, za), this.w(-0.55, 0, za + 0.5), '#d0661c', 0.03, 0.2);
+        this.dot(this.w(-0.3, 0, this.deckZ(-0.3) + 0.06), 0.08, '#2f78c8', 0.05);
+        this.crew(-0.15, 0.08, '#e8661c');
         if (this.p.work) {
-          // Net cast over the side from a boom.
-          const a = this.w(-0.1, 0.32, this.deckZ(-0.1) + 0.3);
-          this.line(this.w(-0.1, 0, this.deckZ(-0.1) + 0.3), a, '#4a3020', 0.02, 0.2);
+          // Net trailing over the stern from the gantry.
+          const a = this.w(-0.55, 0, za + 0.48);
           const dip = 0.1 * Math.sin(this.t);
-          for (let k = 0; k < 5; k++) this.line(a, this.w(-0.45 + k * 0.18, 0.6 + dip, -0.02), 'rgba(230,220,190,0.75)', 0.01, 0.2);
-          this.line(this.w(-0.45, 0.6 + dip, -0.02), this.w(0.27, 0.6 + dip, -0.02), 'rgba(230,220,190,0.75)', 0.012, 0.2);
-        } else {
-          // Net heaped on the stern.
-          this.dot(this.w(-0.45, -0.05, this.deckZ(-0.45) + 0.04), 0.07, '#9a8c6a', 0.05);
+          for (let k = 0; k < 5; k++) this.line(a, this.w(-1.0 - (k % 2) * 0.1, -0.3 + k * 0.15 + dip, -0.02), 'rgba(230,220,190,0.75)', 0.01, 0.2);
         }
         break;
       }
       case 'transport_ship': {
-        const top = this.mast(0.05, 1.35);
-        this.squareSail(0.08, this.deckZ(0) + 0.35, top - 0.12, 0.42);
-        this.crate(0.45, 0.15, 0.16, '#8a6a42');
-        this.crate(0.42, -0.15, 0.14, '#7c5e3a');
-        this.crate(-0.45, 0.1, 0.18, '#8a6a42');
-        this.dot(this.w(-0.5, -0.2, this.deckZ(-0.5) + 0.07), 0.07, '#6e4a2a', 0.05);
-        this.crew(-0.75, 0, '#575866');
-        // A steering oar over the stern.
-        this.line(this.w(-L / 2 + 0.05, 0.2, this.deckZ(-L / 2) + 0.1), this.w(-L / 2 - 0.15, 0.32, -0.02), '#5a3c22', 0.03);
+        // Landing craft: open well deck with a vehicle and troops, bridge aft.
+        this.block(-0.85, -0.5, -0.36, 0.36, this.deckZ(-0.7), 0.34, '#76807c', 0.1, true);
+        this.mast(-0.65, 0.75);
+        this.block(-0.1, 0.45, -0.17, 0.17, this.deckZ(0.2), 0.14, shade(this.team, 0.75), 0.1);
+        for (const [u, v] of [[0.6, 0.2], [0.6, -0.2], [-0.25, 0.25], [-0.25, -0.25]]) this.crew(u, v, '#5d6344', true);
         break;
       }
       case 'galley': {
-        const top = this.mast(0.1, this.p.elite ? 1.45 : 1.3);
-        this.squareSail(0.12, this.deckZ(0) + 0.4, top - 0.12, 0.36);
-        this.oars(this.p.elite ? 6 : 5, -0.65, 0.55, 0.42);
-        for (const [u, v] of [
-          [0.55, 0.12],
-          [-0.35, -0.1],
-          [-0.6, 0.1],
-        ])
-          this.crew(u, v, this.team, true);
-        // A bronze ram at the waterline.
-        this.line(this.w(L / 2 - 0.05, 0, 0.04), this.w(L / 2 + 0.22, 0, 0.03), '#a07a3a', 0.05, 0.05);
+        // Patrol boat (missile boat when upgraded): bridge, mast, deck gun forward.
+        this.block(-0.25, 0.3, -0.22, 0.22, this.deckZ(0), 0.3, '#9aa5ad', 0.1, true);
+        this.block(-0.2, 0.15, -0.16, 0.16, this.deckZ(0) + 0.3, 0.12, '#8f9aa2', 0.15);
+        this.mast(0.0, 0.85);
+        this.turret(0.65, 0.09, 0.3, '#8f9aa2', fire);
+        if (this.p.elite) {
+          // Angled anti-ship missile canisters aft.
+          for (const v of [-0.14, 0.14]) {
+            const z = this.deckZ(-0.6);
+            this.line(this.w(-0.75, v, z + 0.05), this.w(-0.45, v, z + 0.15), '#c9cfd2', 0.06, 0.2);
+          }
+        } else this.turret(-0.65, 0.06, 0.18, '#8f9aa2', false, Math.PI);
+        this.crew(-0.45, 0.12, '#2a3a4a', true);
         break;
       }
       case 'fire_ship': {
-        const top = this.mast(-0.1, 1.05);
-        this.squareSail(-0.08, this.deckZ(0) + 0.35, top - 0.1, 0.3);
-        this.oars(3, -0.5, 0.3, 0.38);
-        // Pitch pots on the foredeck, and a siphon nozzle over the bow.
-        for (const [u, v] of [
-          [0.42, 0.12],
-          [0.42, -0.12],
-          [0.6, 0],
-        ]) {
-          const q = this.w(u, v, this.deckZ(u) + 0.06);
-          this.dot(q, 0.06, '#3a2a20', 0.05);
-          if (this.p.attack || (this.p.frame + u * 10) % 2 < 1) this.flame([q[0], q[1], q[2] + 0.05], this.p.attack ? 0.09 : 0.05);
-        }
-        this.line(this.w(0.55, 0, this.deckZ(0.55) + 0.12), this.w(L / 2 + 0.15, 0, this.deckZ(0.7) + 0.14), '#8a7a6a', 0.035, 0.3);
-        this.crew(-0.45, 0, '#4a3a2a');
+        // Gunboat: low hull, armoured cabin and a rapid-fire autocannon up front.
+        this.block(-0.35, 0.1, -0.18, 0.18, this.deckZ(-0.1), 0.24, '#7d8990', 0.1, true);
+        this.mast(-0.2, 0.6);
+        this.turret(0.45, 0.08, 0.32, '#5c666d', fire);
+        if (fire) this.flash(this.w(0.45 + 0.38, 0.03, this.deckZ(0.45) + 0.06), 0.1);
+        this.crew(-0.55, -0.08, '#2a3a4a', true);
         break;
       }
       case 'demolition_raft': {
-        // Lashed logs, a stack of powder kegs and a sputtering fuse.
-        for (const [u, v] of [
-          [0.05, 0.12],
-          [0.05, -0.12],
-          [-0.18, 0],
-          [0.22, 0],
-        ]) {
-          const q = this.w(u, v, this.deckZ(u) + 0.07);
-          this.dot(q, 0.085, '#5a3a20', 0.05);
-          this.dot([q[0], q[1], q[2] + 0.07], 0.05, '#2a2420', 0.08);
-        }
-        const tip = this.w(0.05, 0, this.deckZ(0) + 0.32);
-        this.line(this.w(0.05, 0, this.deckZ(0) + 0.14), tip, '#3a3020', 0.015, 0.3);
-        this.flame(tip, 0.035, 0.4);
-        this.crew(-0.38, 0.05, '#4f5a4a');
+        // Drone boat: a low dark hull, a sensor mast and a warhead in the bow.
+        const z = this.deckZ(0);
+        this.block(-0.3, 0.05, -0.1, 0.1, z, 0.08, '#3a4148', 0.1);
+        this.line(this.w(-0.2, 0, z + 0.08), this.w(-0.2, 0, z + 0.32), '#1e2226', 0.015, 0.3);
+        this.dot(this.w(-0.2, 0, z + 0.33), 0.03, Math.floor(this.t) % 2 ? '#ff3a2a' : '#8a1a12', 0.35);
+        this.block(0.15, 0.35, -0.08, 0.08, z, 0.05, '#e8c22a', 0.12);
+        this.dot(this.w(-0.32, 0, z + 0.12), 0.035, this.team, 0.2);
         break;
       }
       case 'siege_barge': {
-        this.oars(4, -0.6, 0.45, 0.4);
-        // A catapult on deck: frame, arm (thrown when firing) and a stone.
-        const u0 = 0.05, z0 = this.deckZ(u0);
-        const frame = (dv: number) => this.line(this.w(u0 - 0.25, dv, z0), this.w(u0 + 0.05, dv, z0 + 0.42), '#5a3c22', 0.05, 0.1);
-        frame(-0.18);
-        frame(0.18);
-        this.line(this.w(u0 - 0.3, -0.2, z0), this.w(u0 + 0.25, -0.2, z0), '#4e331b', 0.05, 0.05);
-        this.line(this.w(u0 - 0.3, 0.2, z0), this.w(u0 + 0.25, 0.2, z0), '#4e331b', 0.05, 0.05);
-        this.line(this.w(u0 + 0.05, -0.2, z0 + 0.4), this.w(u0 + 0.05, 0.2, z0 + 0.4), '#4e331b', 0.045, 0.12);
-        const thrown = this.p.attack;
-        const armTip = thrown ? this.w(u0 + 0.25, 0, z0 + 0.75) : this.w(u0 - 0.55, 0, z0 + 0.12);
-        this.line(this.w(u0, 0, z0 + 0.08), armTip, '#6e4a2a', 0.05, 0.2);
-        if (!thrown) this.dot([armTip[0], armTip[1], armTip[2] + 0.05], 0.07, '#8a8680', 0.25);
-        this.crew(-0.65, 0.18, '#575866');
-        this.crew(-0.7, -0.15, '#575866');
-        this.mast(-0.8, 0.6);
+        // Destroyer: forward gun, vertical launch cells, stepped superstructure and a lattice mast.
+        this.turret(0.85, 0.1, 0.32, '#9aa5ad', fire && this.p.frame % 2 === 0);
+        const zc = this.deckZ(0.5);
+        this.block(0.4, 0.62, -0.2, 0.2, zc, 0.05, '#5f686e', 0.1);
+        for (let k = 0; k < 4; k++) for (const v of [-0.1, 0.1]) this.dot(this.w(0.44 + k * 0.05, v, zc + 0.06), 0.012, '#2a2f34', 0.15);
+        if (fire) this.flash(this.w(0.5, 0, zc + 0.25), 0.3);
+        this.block(-0.45, 0.32, -0.32, 0.32, this.deckZ(0), 0.3, '#9aa5ad', 0.1, true);
+        this.block(-0.2, 0.25, -0.24, 0.24, this.deckZ(0) + 0.3, 0.2, '#929da5', 0.15, true);
+        this.mast(0.0, 1.05);
+        this.block(-0.75, -0.55, -0.12, 0.12, this.deckZ(-0.6), 0.22, '#5f686e', 0.1);
+        this.block(-1.15, -0.85, -0.3, 0.3, this.deckZ(-1), 0.04, '#5f676d', 0.05);
         break;
       }
     }

@@ -1,9 +1,12 @@
-// Isometric buildings, modelled with the iso3d toolkit and rendered once per zoom
-// level, player colour and variant. Age I style: timber, plaster, thatch and canvas.
+// Isometric buildings for the 21st century, modelled with the iso3d toolkit
+// and rendered once per zoom level, player colour and variant. The base is
+// restyled as it advances: corrugated prefabs and containers, then precast
+// concrete, then concrete and glass, then glass towers with solar roofs and
+// lit trims.
 import type { BuildingType } from '../sim/entities';
 import { Rng } from '../sim/rng';
-import { type G, P, ZK, box, boxShadow, boxTop, crenels, doorAt, gableRoof, hipRoof, line3, log, mat, onGround, poly3, post, prism, setScale, shadeColor, softShadow, windowAt } from './iso3d';
-import { grade } from './materials';
+import { type G, type WallStyle, P, ZK, box, boxShadow, boxTop, gableRoof, line3, mat, onGround, poly3, post, prism, setScale, shadeColor, softShadow } from './iso3d';
+import { type Material, grade } from './materials';
 import { PLAYER_COLORS } from './palette';
 import { type Sprite, SpriteCache, cropSprite } from './sprites';
 
@@ -14,262 +17,348 @@ type Painter = (g: G, n: number, team: string, rng: Rng, variant: number) => voi
 const RISE = 240;
 const PAD = 26;
 
-// Materials by age: the town is restyled as it advances, thatch and wattle giving
-// way to timber and shingle, then a stone ground storey under clay tile, then
-// dressed stone under slate. Set by style() before each sprite is painted.
-type Wall = { base: string; frame?: string | null; plinth?: number; mat?: 'plaster' | 'stone' | 'planks' };
-type Roof = { color: string; kind: 'thatch' | 'shingle' | 'canvas'; trim?: string };
-let PLASTER: Wall = { base: '#d3c39f', frame: '#4a3019', plinth: 3 };
-let STONE: Wall = { base: '#9a958b', mat: 'stone' };
-let THATCH: Roof = { color: '#bf9f55', kind: 'thatch' };
-let SHINGLE: Roof = { color: '#8a6a48', kind: 'shingle' };
-/** Gilded finials and trims in the last age. */
-let ORNATE = false;
-/** Banner and flag cut for the player being painted (their faction's). */
+// Finishes by age, set by style() before each sprite is painted.
+let CLAD: WallStyle = { base: '#a8a48f', mat: 'metal' };
+let PANEL: WallStyle = { base: '#b4b1a8', mat: 'concrete' };
+let GLASS: WallStyle = { base: '#4f7590', mat: 'glass' };
+const METAL: WallStyle = { base: '#8d949a', mat: 'metal' };
+const DARK_METAL: WallStyle = { base: '#59606a', mat: 'metal' };
+let ROOF = '#6d7175';
+/** Concrete and glass from the Network Age; solar roofs and lit trims in the last. */
+let GLAZED = false;
+let HIGHTECH = false;
+/** Flag cut for the player being painted (their faction's). */
 type BannerCut = 'swallowtail' | 'pennant' | 'square' | 'tongued';
-let BANNER: BannerCut = 'swallowtail';
+let BANNER: BannerCut = 'square';
 const BANNERS: BannerCut[] = [];
 
-/** Each player's banner cut, from their faction (set at the start of a match). */
+/** Each player's flag cut, from their faction (set at the start of a match). */
 export function setBanners(cuts: Array<string | undefined>): void {
   BANNERS.length = 0;
-  for (const c of cuts) BANNERS.push((c as BannerCut) ?? 'swallowtail');
+  for (const c of cuts) BANNERS.push((c as BannerCut) ?? 'square');
 }
 
 function style(age: number): void {
-  ORNATE = age >= 3;
-  STONE = { base: age >= 3 ? '#b8b1a2' : '#9a958b', mat: 'stone' };
+  GLAZED = age >= 2;
+  HIGHTECH = age >= 3;
   if (age === 0) {
-    PLASTER = { base: '#d3c39f', frame: '#4a3019', plinth: 3 };
-    THATCH = { color: '#bf9f55', kind: 'thatch' };
-    SHINGLE = { color: '#8a6a48', kind: 'shingle' };
+    CLAD = { base: '#a8a48f', mat: 'metal' };
+    PANEL = { base: '#aeaaa0', mat: 'concrete' };
+    ROOF = '#6d7175';
   } else if (age === 1) {
-    PLASTER = { base: '#dccfae', frame: '#3a2412', plinth: 6 };
-    THATCH = { color: '#7e5d3e', kind: 'shingle' };
-    SHINGLE = { color: '#6f5236', kind: 'shingle' };
+    CLAD = { base: '#b9b5aa', mat: 'concrete' };
+    PANEL = { base: '#b9b5aa', mat: 'concrete' };
+    ROOF = '#5d6268';
   } else if (age === 2) {
-    PLASTER = { base: '#d6cbb0', frame: '#3a2412', plinth: 14 };
-    THATCH = { color: '#a5523a', kind: 'shingle' };
-    SHINGLE = { color: '#93482f', kind: 'shingle' };
+    CLAD = { base: '#c9c7c0', mat: 'concrete' };
+    PANEL = { base: '#c9c7c0', mat: 'concrete' };
+    ROOF = '#4f555c';
   } else {
-    PLASTER = { base: '#c4bcab', mat: 'stone', frame: null, plinth: 4 };
-    THATCH = { color: '#56606e', kind: 'shingle' };
-    SHINGLE = { color: '#4c5562', kind: 'shingle' };
+    CLAD = { base: '#e3e4e2', mat: 'concrete' };
+    PANEL = { base: '#dcdedd', mat: 'concrete' };
+    ROOF = '#3f454c';
   }
+  GLASS = { base: age >= 3 ? '#4a86b0' : '#4f7590', mat: 'glass' };
 }
 
-function flag(g: G, x: number, y: number, z: number, team: string, s = 1): void {
-  const [bx, by] = P(x, y, z);
-  // Turned pole with a gilt finial.
-  const pole = g.createLinearGradient(bx - 0.8, 0, bx + 0.8, 0);
-  pole.addColorStop(0, '#8a6a44');
-  pole.addColorStop(1, '#2e1d0e');
-  g.fillStyle = pole;
-  g.fillRect(bx - 0.7, by - 24 * s, 1.4, 24 * s);
-  g.fillStyle = '#e0b54a';
-  g.beginPath();
-  g.arc(bx, by - 24.5 * s, ORNATE ? 2 : 1.2, 0, Math.PI * 2);
-  g.fill();
-  if (ORNATE) {
-    // A gilded crown finial in the Dominion Age.
-    g.beginPath();
-    g.moveTo(bx - 2.2, by - 26 * s);
-    g.lineTo(bx - 2.2, by - 29 * s);
-    g.lineTo(bx - 1, by - 27.5 * s);
-    g.lineTo(bx, by - 30 * s);
-    g.lineTo(bx + 1, by - 27.5 * s);
-    g.lineTo(bx + 2.2, by - 29 * s);
-    g.lineTo(bx + 2.2, by - 26 * s);
-    g.closePath();
-    g.fill();
-  }
-  // Pennant rippling in the wind, lit on the bellies of its folds.
-  const top = by - 22.5 * s, bot = by - 14.5 * s, len = 15 * s;
-  g.beginPath();
-  g.moveTo(bx + 0.6, top);
-  const mid = (top + bot) / 2 + 1.2 * s;
-  if (BANNER === 'pennant') {
-    g.bezierCurveTo(bx + len * 0.35, top - 2.2 * s, bx + len * 0.65, top + 1.8 * s, bx + len * 1.25, mid);
-  } else {
-    g.bezierCurveTo(bx + len * 0.35, top - 2.2 * s, bx + len * 0.65, top + 1.8 * s, bx + len, top + 1.5 * s);
-    if (BANNER === 'swallowtail') g.lineTo(bx + len * 0.72, mid);
-    else if (BANNER === 'tongued') {
-      const h = bot + 1.5 * s - (top + 1.5 * s);
-      for (const f of [1 / 3, 2 / 3]) {
-        g.lineTo(bx + len * 0.8, top + 1.5 * s + h * f - h / 6);
-        g.lineTo(bx + len, top + 1.5 * s + h * f);
-      }
-    }
-  }
-  if (BANNER !== 'pennant') g.lineTo(bx + len * 0.97, bot + 1.5 * s);
-  g.bezierCurveTo(bx + len * 0.6, bot + 2 * s, bx + len * 0.35, bot - 2 * s, bx + 0.6, bot);
-  g.closePath();
-  const cloth = g.createLinearGradient(bx, 0, bx + len, 0);
-  cloth.addColorStop(0, shadeColor(team, 0.75));
-  cloth.addColorStop(0.3, shadeColor(team, 1.2));
-  cloth.addColorStop(0.55, shadeColor(team, 0.7));
-  cloth.addColorStop(0.8, shadeColor(team, 1.1));
-  cloth.addColorStop(1, shadeColor(team, 0.8));
-  g.fillStyle = cloth;
-  g.fill();
-  g.strokeStyle = 'rgba(0,0,0,0.35)';
-  g.lineWidth = 0.4;
-  g.stroke();
-}
+// ---------- small parts ----------
 
-/** A heraldic banner hung on a wall (u along the wall, v up) with a gold charge and fringe. */
-function banner(g: G, u: number, v: number, team: string): void {
-  g.fillStyle = '#3a2614';
-  g.fillRect(u - 3.8, v - 0.6, 7.6, 0.9);
-  const cloth = g.createLinearGradient(u - 3, 0, u + 3, 0);
-  cloth.addColorStop(0, shadeColor(team, 1.15));
-  cloth.addColorStop(0.5, shadeColor(team, 0.85));
-  cloth.addColorStop(0.75, shadeColor(team, 1.05));
-  cloth.addColorStop(1, shadeColor(team, 0.7));
-  g.fillStyle = cloth;
-  g.beginPath();
-  g.moveTo(u - 3, v);
-  g.lineTo(u + 3, v);
-  if (BANNER === 'pennant') g.lineTo(u, v - 13);
-  else if (BANNER === 'square') (g.lineTo(u + 3, v - 10), g.lineTo(u - 3, v - 10));
-  else if (BANNER === 'tongued') {
-    g.lineTo(u + 3, v - 11);
-    for (const x of [1.5, 0, -1.5]) (g.lineTo(u + x, v - 9), g.lineTo(u + x - 1.5, v - 11));
-  } else {
-    g.lineTo(u + 3, v - 11);
-    g.lineTo(u, v - 8);
-    g.lineTo(u - 3, v - 11);
-  }
-  g.closePath();
-  g.fill();
-  g.strokeStyle = 'rgba(20,10,0,0.45)';
-  g.lineWidth = 0.4;
-  g.stroke();
-  // Gold chevron and border.
-  g.strokeStyle = '#e2bc4c';
-  g.lineWidth = 0.7;
-  g.beginPath();
-  g.moveTo(u - 2, v - 3);
-  g.lineTo(u, v - 5.5);
-  g.lineTo(u + 2, v - 3);
-  g.stroke();
-  g.fillStyle = '#e2bc4c';
-  g.fillRect(u - 3, v - 1.4, 6, 0.8);
-}
-
-/**
- * Trodden earth around a building, with a soft, irregular edge. Painted first,
- * onto the empty sprite, so its alpha can be feathered with destination-in.
- */
-function groundPatch(g: G, n: number, color: string, spread = 0.2): void {
-  const c = /rgba?\((\d+),(\d+),(\d+)/.exec(color.replace(/\s/g, ''));
-  const hex = c ? '#' + [c[1], c[2], c[3]].map((v) => (+v).toString(16).padStart(2, '0')).join('') : color;
-  onGround(g, 0, 0, () => {
-    const m = n * 32, pad = spread * 32;
-    g.fillStyle = mat(g, 'earth', hex, 2);
-    g.fillRect(-pad, -pad, m + pad * 2, m + pad * 2);
-    g.globalCompositeOperation = 'destination-in';
-    const r = m / 2 + pad;
-    const fade = g.createRadialGradient(m / 2, m / 2, r * 0.55, m / 2, m / 2, r * 1.05);
-    fade.addColorStop(0, 'rgba(0,0,0,0.95)');
-    fade.addColorStop(0.6, 'rgba(0,0,0,0.6)');
-    fade.addColorStop(1, 'rgba(0,0,0,0)');
-    g.fillStyle = fade;
-    g.fillRect(-m, -m, m * 3, m * 3);
-    g.globalCompositeOperation = 'source-over';
-  });
-}
-
-function crate(g: G, x: number, y: number, s = 0.35): void {
-  softShadow(g, [[x, y, 0], [x + s + 0.12, y - 0.08, 0], [x + s + 0.12, y + s, 0], [x, y + s, 0]], 2, 0.45);
-  box(g, x, y, x + s, y + s, s * 30, { base: '#9a7040', mat: 'planks' }, {}, 17);
-  boxTop(g, x, y, x + s, y + s, s * 30, 'planks', '#a57a48');
-}
-
-/** An oak barrel with iron hoops. */
-function barrel(g: G, x: number, y: number, r = 3.4, h = 9): void {
-  const [bx, by] = P(x, y, 0);
+/** Lifts what `draw` paints by z units. */
+function at(g: G, z: number, draw: () => void): void {
   g.save();
-  g.fillStyle = 'rgba(8,12,4,0.4)';
-  g.beginPath();
-  g.ellipse(bx + 2.5, by, r * 1.3, r * 0.55, 0, 0, Math.PI * 2);
-  g.fill();
-  g.beginPath();
-  g.moveTo(bx - r, by);
-  g.bezierCurveTo(bx - r * 1.2, by - h * 0.35, bx - r * 1.2, by - h * 0.65, bx - r, by - h);
-  g.lineTo(bx + r, by - h);
-  g.bezierCurveTo(bx + r * 1.2, by - h * 0.65, bx + r * 1.2, by - h * 0.35, bx + r, by);
-  g.ellipse(bx, by, r, r * 0.45, 0, 0, Math.PI);
-  g.closePath();
-  g.fillStyle = mat(g, 'woodV', '#7a5230', 19);
-  g.fill();
-  const shade = g.createLinearGradient(bx - r, 0, bx + r, 0);
-  shade.addColorStop(0, 'rgba(255,230,190,0.25)');
-  shade.addColorStop(0.4, 'rgba(0,0,0,0)');
-  shade.addColorStop(1, 'rgba(10,6,2,0.6)');
-  g.fillStyle = shade;
-  g.fill();
-  g.strokeStyle = '#2d2925';
-  g.lineWidth = 0.8;
-  for (const f of [0.18, 0.82]) {
-    g.beginPath();
-    g.ellipse(bx, by - h * f, r * 1.12, r * 0.45, 0, 0, Math.PI);
-    g.stroke();
-  }
-  g.fillStyle = mat(g, 'woodH', '#8a6038', 20);
-  g.beginPath();
-  g.ellipse(bx, by - h, r, r * 0.45, 0, 0, Math.PI * 2);
-  g.fill();
-  g.strokeStyle = 'rgba(20,10,0,0.55)';
-  g.lineWidth = 0.5;
-  g.stroke();
+  g.translate(0, -z * ZK);
+  draw();
   g.restore();
 }
 
-/** A tied grain sack slumped on the ground. */
-function sack(g: G, x: number, y: number, s = 1): void {
-  const [bx, by] = P(x, y, 0);
-  g.fillStyle = 'rgba(8,12,4,0.35)';
+/** A block with a flat top: the workhorse of modern architecture. */
+function slab(g: G, x0: number, y0: number, x1: number, y1: number, h: number, wall: WallStyle, detail: Parameters<typeof box>[7] = {}, top: Material = 'membrane', topColor = ROOF, seed = 1): void {
+  box(g, x0, y0, x1, y1, h, wall, detail, seed);
+  boxTop(g, x0, y0, x1, y1, h, top, topColor);
+  // A parapet line around the roof.
+  line3(g, [x0, y1, h], [x1, y1, h], 'rgba(255,255,255,0.35)', 0.6);
+  line3(g, [x1, y0, h], [x1, y1, h], 'rgba(255,255,255,0.25)', 0.6);
+}
+
+/** A strip of dark glazing in wall space from u0 to u1, v (bottom) to v + h, with mullions. */
+function band(g: G, u0: number, u1: number, v: number, h: number, warm = false): void {
+  const grad = g.createLinearGradient(0, v, 0, v + h);
+  grad.addColorStop(0, '#2c4a62');
+  grad.addColorStop(1, '#16222e');
+  g.fillStyle = grad;
+  g.fillRect(u0, v, u1 - u0, h);
+  if (warm) {
+    g.fillStyle = 'rgba(255,214,140,0.35)';
+    for (let u = u0 + 2; u < u1 - 3; u += 11) g.fillRect(u, v + 0.6, 4, h - 1.2);
+  }
+  g.fillStyle = 'rgba(200,230,255,0.22)';
+  g.fillRect(u0, v + h * 0.55, u1 - u0, h * 0.18);
+  g.fillStyle = '#a3abb1';
+  for (let u = u0; u <= u1 + 0.01; u += 5.5) g.fillRect(Math.min(u, u1 - 0.5), v, 0.5, h);
+  g.fillRect(u0 - 0.4, v - 0.6, u1 - u0 + 0.8, 0.6);
+}
+
+/** Single windows along a wall. */
+function windows(g: G, len: number, v: number, h = 5, step = 9): void {
+  for (let u = step * 0.7; u < len - step * 0.4; u += step) band(g, u - 2, u + 2, v, h);
+}
+
+/** A sectional roll-up door with slats and a dark sill. */
+function rollDoor(g: G, u: number, w: number, h: number, open = false): void {
+  g.fillStyle = '#4a4f55';
+  g.fillRect(u - w / 2 - 1, 0, w + 2, h + 1.2);
+  if (open) {
+    g.fillStyle = '#121519';
+    g.fillRect(u - w / 2, 0, w, h);
+    return;
+  }
+  g.fillStyle = mat(g, 'metal', '#aab0b5', 61);
+  g.fillRect(u - w / 2, 0, w, h);
+  g.fillStyle = 'rgba(30,34,38,0.45)';
+  for (let v = 1.6; v < h; v += 2.2) g.fillRect(u - w / 2, v, w, 0.35);
+  g.fillStyle = '#e8b51c';
+  g.fillRect(u - w / 2, 0, w, 0.8);
+}
+
+/** A glazed entrance door with a canopy. */
+function glassDoor(g: G, u: number, w = 6, h = 10): void {
+  g.fillStyle = '#5c646b';
+  g.fillRect(u - w / 2 - 0.8, 0, w + 1.6, h + 0.8);
+  band(g, u - w / 2, u + w / 2, 0, h);
+  g.fillStyle = '#3b4248';
+  g.fillRect(u - w / 2 - 2, h + 0.8, w + 4, 1.2);
+}
+
+/** A team-coloured sign panel with a white chevron emblem. */
+function sign(g: G, u: number, v: number, w: number, h: number, team: string): void {
+  g.fillStyle = shadeColor(team, 0.85);
+  g.fillRect(u - w / 2, v, w, h);
+  g.fillStyle = 'rgba(255,255,255,0.9)';
   g.beginPath();
-  g.ellipse(bx + 2, by, 4.5 * s, 1.8 * s, 0, 0, Math.PI * 2);
-  g.fill();
-  g.beginPath();
-  g.moveTo(bx - 3.8 * s, by);
-  g.bezierCurveTo(bx - 5 * s, by - 5 * s, bx - 2 * s, by - 8 * s, bx - 0.8 * s, by - 8.5 * s);
-  g.lineTo(bx + 0.8 * s, by - 8.5 * s);
-  g.bezierCurveTo(bx + 2 * s, by - 8 * s, bx + 5 * s, by - 5 * s, bx + 3.8 * s, by);
+  g.moveTo(u - w * 0.28, v + h * 0.72);
+  g.lineTo(u, v + h * 0.3);
+  g.lineTo(u + w * 0.28, v + h * 0.72);
+  g.lineTo(u + w * 0.28, v + h * 0.5);
+  g.lineTo(u, v + h * 0.12);
+  g.lineTo(u - w * 0.28, v + h * 0.5);
   g.closePath();
-  g.fillStyle = mat(g, 'canvas', '#bba57a', 21);
   g.fill();
-  const sh = g.createRadialGradient(bx - 1.5 * s, by - 5 * s, 0.5, bx, by - 3 * s, 6 * s);
-  sh.addColorStop(0, 'rgba(255,245,220,0.3)');
-  sh.addColorStop(1, 'rgba(20,12,4,0.5)');
-  g.fillStyle = sh;
-  g.fill();
-  g.strokeStyle = '#6b5232';
-  g.lineWidth = 0.6;
+  g.fillStyle = 'rgba(255,255,255,0.25)';
+  g.fillRect(u - w / 2, v + h - 0.6, w, 0.6);
+}
+
+/** Yellow-and-black hazard stripes along a wall. */
+function hazard(g: G, u0: number, u1: number, v: number, h: number): void {
+  g.save();
   g.beginPath();
-  g.moveTo(bx - 1.2 * s, by - 7.6 * s);
-  g.lineTo(bx + 1.2 * s, by - 7.6 * s);
+  g.rect(u0, v, u1 - u0, h);
+  g.clip();
+  g.fillStyle = '#e8b51c';
+  g.fillRect(u0, v, u1 - u0, h);
+  g.fillStyle = '#1d1f22';
+  for (let u = u0 - h; u < u1 + h; u += h * 1.6) {
+    g.beginPath();
+    g.moveTo(u, v);
+    g.lineTo(u + h * 0.8, v);
+    g.lineTo(u + h * 1.6, v + h);
+    g.lineTo(u + h * 0.8, v + h);
+    g.closePath();
+    g.fill();
+  }
+  g.restore();
+}
+
+/** A team-lit LED trim around a roof edge (last age). */
+function trim(g: G, x0: number, y0: number, x1: number, y1: number, z: number, team: string): void {
+  if (!HIGHTECH) return;
+  for (const [a, b] of [[[x0, y1], [x1, y1]], [[x1, y0], [x1, y1]]] as const) {
+    line3(g, [a[0], a[1], z - 1.2], [b[0], b[1], z - 1.2], shadeColor(team, 1.35), 1.2);
+    line3(g, [a[0], a[1], z - 1.2], [b[0], b[1], z - 1.2], 'rgba(255,255,255,0.45)', 0.4);
+  }
+}
+
+/** A rooftop air-conditioning unit with a fan grille. */
+function hvac(g: G, x: number, y: number, z: number, s = 0.3): void {
+  at(g, z, () => {
+    slab(g, x, y, x + s, y + s * 0.7, 6, METAL, {}, 'metal', '#9aa1a6', 5);
+    const [cx, cy] = P(x + s / 2, y + s * 0.35, 6);
+    g.fillStyle = '#2b3036';
+    g.beginPath();
+    g.ellipse(cx, cy, s * 12, s * 6, 0, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = '#8d949a';
+    g.lineWidth = 0.4;
+    g.stroke();
+  });
+}
+
+/** Rows of tilted solar panels on a roof from (x0, y0) to (x1, y1) at height z. */
+function solar(g: G, x0: number, y0: number, x1: number, y1: number, z: number): void {
+  for (let y = y0; y < y1 - 0.15; y += 0.32)
+    for (let x = x0; x < x1 - 0.2; x += 0.42) {
+      const pts: [number, number, number][] = [[x, y, z + 1], [x + 0.36, y, z + 1], [x + 0.36, y + 0.22, z + 5], [x, y + 0.22, z + 5]];
+      poly3(g, pts, '#22385a', 'rgba(170,190,210,0.7)', 0.35);
+      line3(g, [x + 0.18, y, z + 1], [x + 0.18, y + 0.22, z + 5], 'rgba(170,190,210,0.5)', 0.3);
+    }
+}
+
+/** A steel lattice mast with a beacon, at (x, y) from height z. */
+function mast(g: G, x: number, y: number, z: number, h: number, team: string, dishes = true): void {
+  const [bx, by] = P(x, y, z), [tx, ty] = P(x, y, z + h);
+  g.strokeStyle = '#4b5258';
+  g.lineWidth = 0.9;
+  g.beginPath();
+  g.moveTo(bx - 3, by);
+  g.lineTo(tx - 0.6, ty);
+  g.moveTo(bx + 3, by);
+  g.lineTo(tx + 0.6, ty);
+  g.stroke();
+  g.lineWidth = 0.4;
+  const steps = Math.max(3, Math.round(h / 8));
+  for (let k = 0; k < steps; k++) {
+    const f0 = k / steps, f1 = (k + 1) / steps;
+    const w0 = 3 - 2.4 * f0, w1 = 3 - 2.4 * f1;
+    const y0 = by + (ty - by) * f0, y1 = by + (ty - by) * f1;
+    g.beginPath();
+    g.moveTo(bx - w0, y0);
+    g.lineTo(bx + w1, y1);
+    g.moveTo(bx + w0, y0);
+    g.lineTo(bx - w1, y1);
+    g.stroke();
+  }
+  if (dishes) {
+    dish(g, tx - 2, ty + h * 0.35 * ZK, 3.2, -1);
+    dish(g, tx + 2, ty + h * 0.55 * ZK, 2.6, 1);
+  }
+  flagAt(g, tx, ty, team, 0.8);
+  g.fillStyle = '#ff3a2a';
+  g.beginPath();
+  g.arc(tx, ty - 1, 1, 0, Math.PI * 2);
+  g.fill();
+}
+
+/** A small microwave or satellite dish in screen space, facing left (-1) or right (+1). */
+function dish(g: G, x: number, y: number, r: number, side: number): void {
+  g.fillStyle = '#e8eaea';
+  g.beginPath();
+  g.ellipse(x + side * r * 0.5, y, r * 0.45, r, 0, 0, Math.PI * 2);
+  g.fill();
+  g.strokeStyle = 'rgba(40,40,40,0.45)';
+  g.lineWidth = 0.4;
   g.stroke();
 }
 
-/** A neat stack of split firewood, end grain facing the viewer. */
-function woodpile(g: G, x: number, y: number, rows = 3, cols = 4): void {
-  for (let r = 0; r < rows; r++) for (let k = 0; k < cols - (r % 2); k++) log(g, [x + k * 0.11 + (r % 2) * 0.055, y - 0.45], [x + k * 0.11 + (r % 2) * 0.055, y], 1.5 + r * 2.6, 1.3);
+/** A white radar dome on a short drum. */
+function radome(g: G, x: number, y: number, z: number, r: number): void {
+  const [cx, cy] = P(x, y, z);
+  const R = r * 45;
+  g.fillStyle = '#c9cccd';
+  g.fillRect(cx - R * 0.7, cy - 6, R * 1.4, 6);
+  const grad = g.createRadialGradient(cx - R * 0.35, cy - R * 0.9, R * 0.1, cx, cy - R * 0.5, R * 1.1);
+  grad.addColorStop(0, '#ffffff');
+  grad.addColorStop(0.6, '#e2e5e6');
+  grad.addColorStop(1, '#9aa1a4');
+  g.fillStyle = grad;
+  g.beginPath();
+  g.arc(cx, cy - 6, R, Math.PI, 0);
+  g.ellipse(cx, cy - 6, R, R * 0.35, 0, 0, Math.PI);
+  g.closePath();
+  g.fill();
+  g.strokeStyle = 'rgba(80,90,95,0.35)';
+  g.lineWidth = 0.4;
+  for (const k of [-0.5, 0, 0.5]) {
+    g.beginPath();
+    g.ellipse(cx, cy - 6, R * Math.abs(Math.cos(k)) * 0.98, R, 0, Math.PI, 0);
+    g.stroke();
+  }
 }
 
-function oreHeap(g: G, x: number, y: number, color: string, rng: Rng): void {
+/** A vertical cylinder (silo or tank) with a domed top, at (x, y) with radius r tiles and height h. */
+function silo(g: G, x: number, y: number, r: number, h: number, color: string, dome = true): void {
+  const [cx, cy] = P(x, y, 0), [, ty] = P(x, y, h);
+  const rx = r * 45, ry = r * 22.5;
+  g.fillStyle = 'rgba(8,12,4,0.35)';
+  g.beginPath();
+  g.ellipse(cx + rx * 0.4, cy + ry * 0.3, rx * 1.15, ry * 1.1, 0, 0, Math.PI * 2);
+  g.fill();
+  const grad = g.createLinearGradient(cx - rx, 0, cx + rx, 0);
+  grad.addColorStop(0, shadeColor(color, 1.2));
+  grad.addColorStop(0.35, shadeColor(color, 1.05));
+  grad.addColorStop(1, shadeColor(color, 0.55));
+  g.fillStyle = grad;
+  g.beginPath();
+  g.moveTo(cx - rx, ty);
+  g.lineTo(cx - rx, cy);
+  g.ellipse(cx, cy, rx, ry, 0, Math.PI, 0, true);
+  g.lineTo(cx + rx, ty);
+  g.closePath();
+  g.fill();
+  // Ribs.
+  g.strokeStyle = 'rgba(0,0,0,0.18)';
+  g.lineWidth = 0.4;
+  for (let v = cy - 6; v > ty; v -= 6) {
+    g.beginPath();
+    g.ellipse(cx, v, rx, ry, 0, 0, Math.PI);
+    g.stroke();
+  }
+  g.fillStyle = shadeColor(color, 1.15);
+  g.beginPath();
+  g.ellipse(cx, ty, rx, ry, 0, 0, Math.PI * 2);
+  g.fill();
+  if (dome) {
+    const dg = g.createRadialGradient(cx - rx * 0.4, ty - ry * 1.4, 1, cx, ty, rx * 1.1);
+    dg.addColorStop(0, shadeColor(color, 1.3));
+    dg.addColorStop(1, shadeColor(color, 0.75));
+    g.fillStyle = dg;
+    g.beginPath();
+    g.ellipse(cx, ty, rx, ry, 0, Math.PI, 0);
+    g.quadraticCurveTo(cx, ty - ry * 3.2, cx - rx, ty);
+    g.fill();
+  }
+}
+
+/** A shipping container lying along x (or y), w tiles long. */
+function container(g: G, x: number, y: number, color: string, alongX = true, len = 0.95, z = 0): void {
+  const [x1, y1] = alongX ? [x + len, y + 0.4] : [x + 0.4, y + len];
+  at(g, z, () => {
+    softShadow(g, [[x, y, 0], [x1 + 0.1, y, 0], [x1 + 0.1, y1 + 0.05, 0], [x, y1 + 0.05, 0]], 2, 0.4);
+    box(g, x, y, x1, y1, 13, { base: color, mat: 'metal' }, {}, 63);
+    boxTop(g, x, y, x1, y1, 13, 'metal', shadeColor(color, 1.05));
+  });
+}
+
+/** A neat stack of logs with end grain facing the viewer. */
+function logs(g: G, x: number, y: number, rows = 3, cols = 4): void {
+  for (let r = 0; r < rows; r++)
+    for (let k = 0; k < cols - (r % 2); k++) {
+      const cx = x + k * 0.12 + (r % 2) * 0.06;
+      const [ax, ay] = P(cx, y - 0.55, 1.6 + r * 2.8), [bx, by] = P(cx, y, 1.6 + r * 2.8);
+      g.strokeStyle = '#6b4626';
+      g.lineWidth = 2.6;
+      g.lineCap = 'round';
+      g.beginPath();
+      g.moveTo(ax, ay);
+      g.lineTo(bx, by);
+      g.stroke();
+      g.fillStyle = '#d9b27a';
+      g.beginPath();
+      g.ellipse(bx, by, 1.3, 1.3, 0, 0, Math.PI * 2);
+      g.fill();
+    }
+}
+
+/** A heap of rock or ore. */
+function heap(g: G, x: number, y: number, color: string, rng: Rng, size = 1): void {
   const [cx, cy] = P(x, y, 0);
   g.fillStyle = 'rgba(8,12,4,0.38)';
   g.beginPath();
-  g.ellipse(cx + 2, cy, 9, 3.5, 0, 0, Math.PI * 2);
+  g.ellipse(cx + 2, cy, 10 * size, 4 * size, 0, 0, Math.PI * 2);
   g.fill();
-  for (let k = 0; k < 14; k++) {
-    const a = rng.next() * Math.PI * 2, d = rng.next() * 0.22 * (1 - k / 18);
+  for (let k = 0; k < 16; k++) {
+    const a = rng.next() * Math.PI * 2, d = rng.next() * 0.24 * size * (1 - k / 20);
     const [px, py] = P(x + Math.cos(a) * d, y + Math.sin(a) * d, 0);
-    const r = 1.4 + rng.next() * 1.4;
-    const yy = py - 1 - k * 0.35;
+    const r = (1.4 + rng.next() * 1.4) * size;
+    const yy = py - 1 - k * 0.38 * size;
     const grad = g.createRadialGradient(px - r * 0.4, yy - r * 0.5, 0.2, px, yy, r * 1.2);
     grad.addColorStop(0, shadeColor(color, 1.35));
     grad.addColorStop(0.5, shadeColor(color, 0.85 + rng.next() * 0.2));
@@ -287,26 +376,142 @@ function oreHeap(g: G, x: number, y: number, color: string, rng: Rng): void {
   }
 }
 
-/** A hay bale, banded with twine. */
-function hayBale(g: G, x: number, y: number): void {
-  box(g, x, y, x + 0.42, y + 0.26, 7, { base: '#c9ad62', mat: 'plaster' }, {}, 23);
-  boxTop(g, x, y, x + 0.42, y + 0.26, 7, 'thatch', '#d6bd70');
-  line3(g, [x + 0.14, y + 0.26, 0], [x + 0.14, y + 0.26, 7], 'rgba(90,60,25,0.8)', 0.5);
-  line3(g, [x + 0.3, y + 0.26, 0], [x + 0.3, y + 0.26, 7], 'rgba(90,60,25,0.8)', 0.5);
+/** A row of stacked sandbags from a to b at the given courses. */
+function sandbagRun(g: G, a: [number, number], b: [number, number], courses = 3, color = '#b7a37a'): void {
+  const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const n = Math.max(1, Math.round(len / 0.13));
+  for (let c = 0; c < courses; c++)
+    for (let k = 0; k <= n; k++) {
+      const f = (k + (c % 2) * 0.5) / n;
+      if (f > 1) continue;
+      const [x, y] = P(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, 2.2 + c * 4.2);
+      const grad = g.createRadialGradient(x - 1.5, y - 1.5, 0.3, x, y, 4.5);
+      grad.addColorStop(0, shadeColor(color, 1.25));
+      grad.addColorStop(1, shadeColor(color, 0.6));
+      g.fillStyle = grad;
+      g.beginPath();
+      g.ellipse(x, y, 4, 2.5, 0, 0, Math.PI * 2);
+      g.fill();
+      g.strokeStyle = 'rgba(60,45,20,0.45)';
+      g.lineWidth = 0.35;
+      g.stroke();
+    }
 }
 
-/** Open canvas shelter on log posts with a team-coloured valance (camps). */
-function shelter(g: G, x0: number, y0: number, x1: number, y1: number, h: number, team: string): void {
-  boxShadow(g, x0, y0, x1, y1, h + 14);
-  // Shaded interior floor so the open sides read as shade.
-  softShadow(g, [[x0, y0, 0], [x1, y0, 0], [x1, y1, 0], [x0, y1, 0]], 4, 0.45);
-  for (const [x, y] of [[x0, y0], [x1, y0], [x0, y1], [x1, y1]] as const) post(g, x, y, h, 2.6);
-  post(g, (x0 + x1) / 2, y1, h, 2.2);
-  // Ropes guying the corners.
-  for (const [x, y, dx, dy] of [[x0, y1, -0.25, 0.25], [x1, y1, 0.3, 0.25]] as const) line3(g, [x, y, h], [x + dx, y + dy, 0], 'rgba(200,180,140,0.7)', 0.4);
-  hipRoof(g, x0, y0, x1, y1, h, 14, { color: '#d8c79e', kind: 'canvas', trim: team }, 0.1);
+/** A floodlight on a pole. */
+function floodlight(g: G, x: number, y: number, h: number): void {
+  post(g, x, y, h, 1.2, '#59606a');
+  const [lx, ly] = P(x, y, h);
+  g.fillStyle = '#2b3036';
+  g.fillRect(lx - 2.6, ly - 2, 5.2, 2.4);
+  g.fillStyle = '#fff6c8';
+  g.fillRect(lx - 2, ly - 0.6, 4, 0.9);
 }
 
+/** A helipad: a dark circle with a yellow ring and an H. */
+function helipad(g: G, cx: number, cy: number, r: number): void {
+  onGround(g, 0, 0, () => {
+    const X = cx * 32, Y = cy * 32, R = r * 32;
+    g.fillStyle = '#3a3f44';
+    g.beginPath();
+    g.arc(X, Y, R, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = '#e8c22a';
+    g.lineWidth = 1.4;
+    g.beginPath();
+    g.arc(X, Y, R * 0.82, 0, Math.PI * 2);
+    g.stroke();
+    g.fillStyle = '#f2f2f2';
+    g.fillRect(X - R * 0.32, Y - R * 0.4, R * 0.14, R * 0.8);
+    g.fillRect(X + R * 0.18, Y - R * 0.4, R * 0.14, R * 0.8);
+    g.fillRect(X - R * 0.2, Y - R * 0.07, R * 0.4, R * 0.14);
+  });
+}
+
+/** A rectangular team flag at a screen point (the top of a pole). */
+function flagAt(g: G, x: number, y: number, team: string, s = 1): void {
+  const top = y + 1 * s, bot = y + 8 * s, len = 12 * s;
+  g.beginPath();
+  g.moveTo(x + 0.4, top);
+  g.bezierCurveTo(x + len * 0.35, top - 1.6 * s, x + len * 0.65, top + 1.6 * s, x + len, top + 1 * s);
+  if (BANNER === 'pennant') g.lineTo(x + len * 1.15, (top + bot) / 2);
+  else if (BANNER === 'swallowtail') g.lineTo(x + len * 0.75, (top + bot) / 2 + 1);
+  else if (BANNER === 'tongued') g.lineTo(x + len * 0.82, (top + bot) / 2 + 1);
+  g.lineTo(x + len, bot + 1 * s);
+  g.bezierCurveTo(x + len * 0.6, bot + 1.6 * s, x + len * 0.35, bot - 1.6 * s, x + 0.4, bot);
+  g.closePath();
+  const cloth = g.createLinearGradient(x, 0, x + len, 0);
+  cloth.addColorStop(0, shadeColor(team, 0.8));
+  cloth.addColorStop(0.3, shadeColor(team, 1.2));
+  cloth.addColorStop(0.6, shadeColor(team, 0.75));
+  cloth.addColorStop(1, shadeColor(team, 1.05));
+  g.fillStyle = cloth;
+  g.fill();
+  // A white stripe across the flag.
+  g.fillStyle = 'rgba(255,255,255,0.75)';
+  g.fillRect(x + 1, (top + bot) / 2 - 0.4 * s, len * 0.8, 1 * s);
+}
+
+/** A steel flagpole with the owner's flag. */
+function flag(g: G, x: number, y: number, z: number, team: string, s = 1): void {
+  const [bx, by] = P(x, y, z);
+  const pole = g.createLinearGradient(bx - 0.8, 0, bx + 0.8, 0);
+  pole.addColorStop(0, '#e2e6e8');
+  pole.addColorStop(1, '#6b7378');
+  g.fillStyle = pole;
+  g.fillRect(bx - 0.6, by - 26 * s, 1.2, 26 * s);
+  g.fillStyle = '#d8dcde';
+  g.beginPath();
+  g.arc(bx, by - 26.5 * s, 1.1, 0, Math.PI * 2);
+  g.fill();
+  flagAt(g, bx, by - 25 * s, team, s * 1.15);
+}
+
+/**
+ * Paving around a building, with a soft, irregular edge. Painted first, onto
+ * the empty sprite, so its alpha can be feathered with destination-in.
+ */
+function apron(g: G, n: number, color: string, spread = 0.2, m: Material = 'membrane'): void {
+  onGround(g, 0, 0, () => {
+    const w = n * 32, pad = spread * 32;
+    g.fillStyle = mat(g, m, color, 2);
+    g.fillRect(-pad, -pad, w + pad * 2, w + pad * 2);
+    g.globalCompositeOperation = 'destination-in';
+    const r = w / 2 + pad;
+    const fade = g.createRadialGradient(w / 2, w / 2, r * 0.6, w / 2, w / 2, r * 1.05);
+    fade.addColorStop(0, 'rgba(0,0,0,0.95)');
+    fade.addColorStop(0.65, 'rgba(0,0,0,0.6)');
+    fade.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = fade;
+    g.fillRect(-w, -w, w * 3, w * 3);
+    g.globalCompositeOperation = 'source-over';
+  });
+}
+
+/** Painted lines on paving: parking bays or a lane, in ground space (tiles). */
+function lines(g: G, pts: Array<[number, number, number, number]>, color = 'rgba(240,240,230,0.7)'): void {
+  onGround(g, 0, 0, () => {
+    g.strokeStyle = color;
+    g.lineWidth = 0.8;
+    for (const [x0, y0, x1, y1] of pts) {
+      g.beginPath();
+      g.moveTo(x0 * 32, y0 * 32);
+      g.lineTo(x1 * 32, y1 * 32);
+      g.stroke();
+    }
+  });
+}
+
+/** A chain-link fence along a ground line, on steel posts. */
+function fence(g: G, a: [number, number], b: [number, number], h = 9): void {
+  const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const n = Math.max(1, Math.round(len / 0.45));
+  const pts: Array<[number, number]> = [];
+  for (let k = 0; k <= n; k++) pts.push([a[0] + ((b[0] - a[0]) * k) / n, a[1] + ((b[1] - a[1]) * k) / n]);
+  poly3(g, [[a[0], a[1], 0], [b[0], b[1], 0], [b[0], b[1], h], [a[0], a[1], h]], 'rgba(170,180,186,0.22)', null);
+  for (const [x, y] of pts) post(g, x, y, h, 0.8, '#7b838a');
+  line3(g, [a[0], a[1], h], [b[0], b[1], h], '#8d959b', 0.5);
+}
 
 // ---------- fortifications ----------
 
@@ -329,7 +534,7 @@ function halfRun(d: [number, number], t: number): Array<[number, number]> {
   return [[0.5 + px, 0.5 + py], [ex + px, ey + py], [ex - px, ey - py], [0.5 - px, 0.5 - py]];
 }
 
-/** Hairline cracks and knocked-out chips over a damaged wall (screen space around the tile centre). */
+/** Hairline cracks and spalled chips over a damaged wall (screen space around the tile centre). */
 function cracks(g: G, level: number, height: number, rng: Rng): void {
   if (!level) return;
   const [cx, cy] = P(0.5, 0.5, 0);
@@ -356,67 +561,49 @@ function cracks(g: G, level: number, height: number, rng: Rng): void {
     }
 }
 
-function stoneWall(g: G, variant: number, rng: Rng, height = 24): void {
-  const st = { base: ORNATE ? '#b8b1a2' : '#a19b8f', mat: 'stone' as const };
+/** Coils of razor wire along the top of a wall run. */
+function razorWire(g: G, a: [number, number], b: [number, number], z: number): void {
+  const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const n = Math.max(2, Math.round(len / 0.09));
+  g.strokeStyle = 'rgba(210,216,220,0.85)';
+  g.lineWidth = 0.4;
+  for (let k = 0; k < n; k++) {
+    const f = k / n;
+    const [x, y] = P(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, z + 2.4);
+    g.beginPath();
+    g.ellipse(x, y, 2.2, 2.4, 0.3, 0, Math.PI * 2);
+    g.stroke();
+  }
+}
+
+/** Precast concrete T-walls: tall slabs on a footing, with razor wire once fortified. */
+function concreteWall(g: G, variant: number, rng: Rng, height = 28): void {
+  const st: WallStyle = { base: HIGHTECH ? '#c3c1ba' : '#aaa79e', mat: 'concrete' };
   softShadow(g, [[0.15, 0.15, 0], [0.85, 0.15, 0], [0.85, 0.85, 0], [0.15, 0.85, 0]], 3, 0.35);
   const runs = joins(variant & 255);
   const back = runs.filter((d) => d[0] + d[1] < 0), side = runs.filter((d) => d[0] + d[1] === 0), front = runs.filter((d) => d[0] + d[1] > 0);
   const run = (d: [number, number]) => {
-    prism(g, halfRun(d, 0.36), 0, height, st, 'stone', '#8e897e', 7);
-    // Merlons along the run's walk.
-    const len = Math.hypot(d[0], d[1]);
-    for (let k = 0.15; k < 0.5 * len; k += 0.22) {
-      const f = k / len;
-      const x = 0.5 + d[0] * f, y = 0.5 + d[1] * f;
-      prism(g, [[x - 0.07, y - 0.07], [x + 0.07, y - 0.07], [x + 0.07, y + 0.07], [x - 0.07, y + 0.07]], height, 5, st, 'stone', '#8e897e', 9);
-    }
+    prism(g, halfRun(d, 0.42), 0, 4, st, 'concrete', '#9a978e', 5);
+    prism(g, halfRun(d, 0.2), 4, height - 4, st, 'concrete', '#9a978e', 7);
+    if (HIGHTECH) razorWire(g, [0.5, 0.5], [0.5 + d[0] * 0.5, 0.5 + d[1] * 0.5], height);
   };
   for (const d of back) run(d);
   for (const d of side) run(d);
-  // Pillar where runs meet.
-  prism(g, [[0.28, 0.28], [0.72, 0.28], [0.72, 0.72], [0.28, 0.72]], 0, height + 4, st, 'stone', '#8e897e', 11);
-  crenels(g, 0.28, 0.28, 0.72, 0.72, height + 4, st, 0.11, 13);
+  // A post where runs meet, with a team reflector.
+  prism(g, [[0.36, 0.36], [0.64, 0.36], [0.64, 0.64], [0.36, 0.64]], 0, height + 2, st, 'concrete', '#9a978e', 11);
   for (const d of front) run(d);
   cracks(g, (variant >> 8) & 3, height, rng);
 }
 
-/** A sharpened stake (log) standing at (x, y). */
-function stake(g: G, x: number, y: number, h: number, w = 2.6): void {
-  const [bx, by] = P(x, y, 0);
-  h *= ZK;
-  g.fillStyle = mat(g, 'woodV', '#6b4626', 21);
-  g.fillRect(bx - w / 2, by - h, w, h);
-  const sh = g.createLinearGradient(bx - w / 2, 0, bx + w / 2, 0);
-  sh.addColorStop(0, 'rgba(255,225,180,0.3)');
-  sh.addColorStop(0.4, 'rgba(0,0,0,0)');
-  sh.addColorStop(1, 'rgba(10,6,2,0.55)');
-  g.fillStyle = sh;
-  g.fillRect(bx - w / 2, by - h, w, h);
-  g.fillStyle = '#c99a5e';
-  g.beginPath();
-  g.moveTo(bx - w / 2, by - h);
-  g.lineTo(bx, by - h - w * 1.3);
-  g.lineTo(bx + w / 2, by - h);
-  g.closePath();
-  g.fill();
-  g.strokeStyle = 'rgba(20,12,4,0.55)';
-  g.lineWidth = 0.4;
-  g.stroke();
-}
-
-function palisade(g: G, variant: number, rng: Rng): void {
+/** Sandbag wall: three courses of bags along every joined direction. */
+function sandbags(g: G, variant: number, rng: Rng): void {
   softShadow(g, [[0.2, 0.2, 0], [0.8, 0.2, 0], [0.8, 0.8, 0], [0.2, 0.8, 0]], 2.5, 0.3);
-  // Stakes along every joined direction, drawn back to front.
-  const pts: Array<[number, number, number]> = [[0.5, 0.5, 20]];
-  for (const d of joins(variant & 255)) {
-    const len = Math.hypot(d[0], d[1]);
-    for (let k = 0.12; k <= 0.5 * len + 0.01; k += 0.12) pts.push([0.5 + (d[0] * k) / len, 0.5 + (d[1] * k) / len, 17 + rng.next() * 5]);
-  }
-  pts.sort((a, b) => a[0] + a[1] - (b[0] + b[1]));
-  for (const [x, y, h] of pts) stake(g, x, y, h);
-  // Lashing rail.
-  for (const d of joins(variant & 255)) line3(g, [0.5, 0.5, 9], [0.5 + d[0] * 0.5, 0.5 + d[1] * 0.5, 9], 'rgba(60,40,20,0.9)', 0.8);
-  cracks(g, (variant >> 8) & 3, 18, rng);
+  const runs = joins(variant & 255);
+  const c: [number, number] = [0.5, 0.5];
+  for (const d of runs.filter((d) => d[0] + d[1] <= 0)) sandbagRun(g, c, [0.5 + d[0] * 0.5, 0.5 + d[1] * 0.5], 3);
+  sandbagRun(g, [0.44, 0.5], [0.56, 0.5], 4);
+  for (const d of runs.filter((d) => d[0] + d[1] > 0)) sandbagRun(g, c, [0.5 + d[0] * 0.5, 0.5 + d[1] * 0.5], 3);
+  cracks(g, (variant >> 8) & 3, 12, rng);
 }
 
 /** Which way a gate's passage runs: across its wall line. */
@@ -425,616 +612,493 @@ function passageAlongY(variant: number): boolean {
   return !!(m & 1 || m & 16) || !(m & 4 || m & 64);
 }
 
-function stoneGate(g: G, variant: number, team: string, rng: Rng): void {
-  const st = { base: ORNATE ? '#b8b1a2' : '#a19b8f', mat: 'stone' as const };
+/** Blast gate: a steel slider between concrete pylons under a gantry with a camera and a sign. */
+function blastGate(g: G, variant: number, team: string, rng: Rng): void {
+  const st: WallStyle = { base: HIGHTECH ? '#c3c1ba' : '#aaa79e', mat: 'concrete' };
   const open = !!(variant & (1 << 10)), locked = !!(variant & (1 << 11));
-  boxShadow(g, 0.05, 0.05, 0.95, 0.95, 40);
-  // Flanking runs to the neighbouring walls.
-  for (const d of joins(variant & 255)) prism(g, halfRun(d, 0.36), 0, 24, st, 'stone', '#8e897e', 7);
+  boxShadow(g, 0.05, 0.05, 0.95, 0.95, 36);
+  for (const d of joins(variant & 255)) prism(g, halfRun(d, 0.2), 0, 28, st, 'concrete', '#9a978e', 7);
   const alongY = passageAlongY(variant);
-  const arch = (len: number) => {
-    // The archway: dark when open, oak doors with iron studs when shut.
-    const w = len * 0.5, h2 = 18;
-    g.beginPath();
-    g.moveTo(len / 2 - w / 2, 0);
-    g.lineTo(len / 2 - w / 2, h2 - w / 2);
-    g.arc(len / 2, h2 - w / 2, w / 2, Math.PI, 0, true);
-    g.lineTo(len / 2 + w / 2, 0);
-    g.closePath();
-    g.fillStyle = open ? '#0f0904' : mat(g, 'woodV', '#5a381c', 23);
-    g.fill();
-    if (!open) {
-      g.fillStyle = '#2b2622';
-      for (const v of [4, 10, 15]) g.fillRect(len / 2 - w / 2, v, w, 0.7);
-      if (locked) {
-        g.fillStyle = '#c9a24a';
-        g.fillRect(len / 2 - 1.2, 7, 2.4, 3);
-      }
-    } else {
-      // Portcullis drawn up into the arch.
-      g.strokeStyle = 'rgba(60,60,60,0.9)';
-      g.lineWidth = 0.6;
-      for (let k = -2; k <= 2; k++) {
-        g.beginPath();
-        g.moveTo(len / 2 + k * (w / 6), h2 - 1);
-        g.lineTo(len / 2 + k * (w / 6), h2 - 4);
-        g.stroke();
-      }
+  const [a, b]: Array<[number, number]> = alongY ? [[0.1, 0.5], [0.9, 0.5]] : [[0.5, 0.1], [0.5, 0.9]];
+  const pylon = ([x, y]: [number, number]) => slab(g, x - 0.1, y - 0.1, x + 0.1, y + 0.1, 34, st, {}, 'concrete', '#9a978e', 31);
+  pylon(a);
+  if (!open) {
+    const pts: [number, number, number][] = [[a[0], a[1], 0.5], [b[0], b[1], 0.5], [b[0], b[1], 26], [a[0], a[1], 26]];
+    poly3(g, pts, mat(g, 'metal', '#6b737b', 23));
+    // Hazard band and a lock light.
+    const q = (f: number, z: number): [number, number, number] => [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, z];
+    poly3(g, [q(0, 3), q(1, 3), q(1, 6), q(0, 6)], '#e8b51c', null);
+    for (let k = 0; k < 6; k++) poly3(g, [q(k / 6, 3), q(k / 6 + 0.06, 3), q(k / 6 + 0.1, 6), q(k / 6 + 0.04, 6)], '#1d1f22', null);
+    if (locked) {
+      const [lx, ly] = P(...q(0.5, 16));
+      g.fillStyle = '#ff3a2a';
+      g.beginPath();
+      g.arc(lx, ly, 1.6, 0, Math.PI * 2);
+      g.fill();
     }
-  };
-  box(g, 0.05, 0.05, 0.95, 0.95, 34, st, alongY ? { left: arch } : { right: arch }, 31);
-  boxTop(g, 0.05, 0.05, 0.95, 0.95, 34, 'stone', '#8e897e');
-  crenels(g, 0.05, 0.05, 0.95, 0.95, 34, st, 0.14, 33);
-  flagPole(g, 0.5, 0.5, 34, team, 0.7);
+  }
+  pylon(b);
+  // Gantry beam with the owner's sign and a camera.
+  line3(g, [a[0], a[1], 34], [b[0], b[1], 34], '#4b5258', 3);
+  const [sx, sy] = P((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 34);
+  g.fillStyle = shadeColor(team, 0.9);
+  g.fillRect(sx - 6, sy - 3, 12, 5);
+  g.fillStyle = 'rgba(255,255,255,0.85)';
+  g.fillRect(sx - 4, sy - 1, 8, 1);
+  const [cx, cy] = P(a[0], a[1], 36);
+  g.fillStyle = '#2b3036';
+  g.fillRect(cx - 1, cy - 2, 4, 2);
   cracks(g, (variant >> 8) & 3, 30, rng);
 }
 
-function palisadeGate(g: G, variant: number, rng: Rng): void {
-  const open = !!(variant & (1 << 10));
-  palisade(g, variant & 255, rng);
+/** Checkpoint: jersey barriers, a guard booth and a red-and-white boom (raised when open). */
+function checkpoint(g: G, variant: number, team: string, rng: Rng): void {
+  const open = !!(variant & (1 << 10)), locked = !!(variant & (1 << 11));
+  sandbags(g, variant & 255, rng);
   const alongY = passageAlongY(variant);
-  // Two tall gateposts with a lintel, and plank doors (swung back when open).
-  const [a, b]: Array<[number, number]> = alongY ? [[0.15, 0.5], [0.85, 0.5]] : [[0.5, 0.15], [0.5, 0.85]];
-  for (const [x, y] of [a, b]) stake(g, x, y, 28, 3.4);
-  line3(g, [a[0], a[1], 26], [b[0], b[1], 26], '#5a3a1c', 2.4);
-  if (!open) {
-    const pts: [number, number, number][] = [[a[0], a[1], 1], [b[0], b[1], 1], [b[0], b[1], 22], [a[0], a[1], 22]];
-    poly3(g, pts, mat(g, 'woodV', '#6b4a28', 25));
-    line3(g, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 1], [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 22], 'rgba(20,10,4,0.7)', 0.8);
-    if (variant & (1 << 11)) line3(g, [a[0], a[1], 12], [b[0], b[1], 12], '#3a3a3a', 1.6);
+  const [a, b]: Array<[number, number]> = alongY ? [[0.12, 0.5], [0.88, 0.5]] : [[0.5, 0.12], [0.5, 0.88]];
+  // Guard booth at the near end.
+  slab(g, a[0] - 0.12, a[1] - 0.12, a[0] + 0.12, a[1] + 0.12, 22, { base: '#e2e2dc', mat: 'metal' }, {
+    left: (len) => band(g, 1, len - 1, 10, 7),
+    right: (len) => band(g, 1, len - 1, 10, 7),
+  }, 'metal', shadeColor(team, 0.9), 33);
+  // Boom from the booth, striped red and white.
+  const tip: [number, number, number] = open ? [a[0] + (b[0] - a[0]) * 0.15, a[1] + (b[1] - a[1]) * 0.15, 40] : [b[0], b[1], 10];
+  const n = 6;
+  for (let k = 0; k < n; k++) {
+    const f0 = k / n, f1 = (k + 1) / n;
+    const p0: [number, number, number] = [a[0] + (tip[0] - a[0]) * f0, a[1] + (tip[1] - a[1]) * f0, 10 + (tip[2] - 10) * f0];
+    const p1: [number, number, number] = [a[0] + (tip[0] - a[0]) * f1, a[1] + (tip[1] - a[1]) * f1, 10 + (tip[2] - 10) * f1];
+    line3(g, p0, p1, k % 2 ? '#f2f2f2' : '#d63a2a', 1.6);
+  }
+  if (!open) post(g, b[0], b[1], 10, 1.4, '#9aa1a6');
+  if (locked) {
+    const [lx, ly] = P(a[0], a[1], 24);
+    g.fillStyle = '#ff3a2a';
+    g.beginPath();
+    g.arc(lx, ly, 1.4, 0, Math.PI * 2);
+    g.fill();
   }
 }
 
-/** Pole and pennant (without the age finial logic of flag()). */
-function flagPole(g: G, x: number, y: number, z: number, team: string, s: number): void {
-  flag(g, x, y, z, team, s);
-}
-
+/** Sentry tower, upgraded to a gun tower and then a missile turret. */
 function tower(g: G, variant: number, team: string, rng: Rng): void {
   const level = (variant >> 12) & 3;
-  const st = { base: ORNATE ? '#b8b1a2' : '#a19b8f', mat: 'stone' as const };
-  const h = [46, 60, 76][level];
-  boxShadow(g, 0.08, 0.08, 0.92, 0.92, h + 20);
-  const win = (len: number, hh: number) => {
-    for (const v of level ? [hh * 0.45, hh * 0.75] : [hh * 0.55]) {
-      g.fillStyle = '#140c06';
-      g.fillRect(len / 2 - 1, v, 2, 6);
-    }
-  };
-  box(g, 0.1, 0.1, 0.9, 0.9, h, st, { left: (len, hh) => { doorAt(g, len / 2, 6, 10); win(len, hh); }, right: win }, 41 + level);
+  const st: WallStyle = { base: HIGHTECH ? '#c3c1ba' : '#a7a49b', mat: 'concrete' };
+  const h = [44, 56, 68][level];
+  boxShadow(g, 0.12, 0.12, 0.88, 0.88, h + 18);
   if (level === 0) {
-    // Watch tower: a timber hoarding and a pointed shingle roof.
-    box(g, 0.02, 0.02, 0.98, 0.98, 10, { base: '#6b4a2a', mat: 'planks' }, {}, 43);
-    g.save();
-    g.translate(0, -h * ZK);
-    box(g, 0.02, 0.02, 0.98, 0.98, 10, { base: '#6b4a2a', mat: 'planks' }, {}, 44);
-    g.restore();
-    hipRoof(g, -0.02, -0.02, 1.02, 1.02, h + 10, 22, SHINGLE, 0.08, 45);
-    flag(g, 0.5, 0.5, h + 32, team, 0.7);
+    // Steel legs, cross-braced, carrying a clad cabin with a machine gun.
+    for (const [x, y] of [[0.22, 0.22], [0.78, 0.22], [0.22, 0.78], [0.78, 0.78]] as const) post(g, x, y, h - 12, 2, '#5b636b');
+    line3(g, [0.22, 0.78, 4], [0.78, 0.78, h - 14], '#5b636b', 0.8);
+    line3(g, [0.78, 0.22, 4], [0.78, 0.78, h - 14], '#5b636b', 0.8);
+    sandbagRun(g, [0.15, 0.85], [0.85, 0.85], 2);
+    at(g, h - 12, () => {
+      slab(g, 0.1, 0.1, 0.9, 0.9, 14, CLAD, {
+        left: (len) => band(g, 2, len - 2, 6, 5),
+        right: (len) => band(g, 2, len - 2, 6, 5),
+      }, 'metal', ROOF, 41);
+    });
+    line3(g, [0.9, 0.6, h - 4], [1.2, 0.75, h - 3], '#1d1f22', 1.4);
+    flag(g, 0.2, 0.2, h + 2, team, 0.6);
+    floodlight(g, 0.85, 0.15, h + 6);
   } else {
-    boxTop(g, 0.1, 0.1, 0.9, 0.9, h, 'stone', '#8e897e');
-    crenels(g, 0.06, 0.06, 0.94, 0.94, h, st, 0.15, 47);
-    if (level === 2) {
-      // Keep: a turret on top.
-      box(g, 0.3, 0.3, 0.7, 0.7, 0, st, {}, 49);
-      g.save();
-      g.translate(0, -h * ZK);
-      box(g, 0.3, 0.3, 0.7, 0.7, 14, st, {}, 49);
-      g.restore();
-      hipRoof(g, 0.28, 0.28, 0.72, 0.72, h + 14, 16, SHINGLE, 0.05, 51);
-      flag(g, 0.5, 0.5, h + 30, team, 0.8);
-    } else flag(g, 0.5, 0.5, h + 6, team, 0.8);
+    // Concrete shaft with firing slits and a turret on top.
+    slab(g, 0.14, 0.14, 0.86, 0.86, h, st, {
+      left: (len, hh) => {
+        rollDoor(g, len / 2, 7, 10);
+        g.fillStyle = '#121519';
+        for (const v of [hh * 0.5, hh * 0.75]) g.fillRect(len / 2 - 4, v, 8, 1.6);
+      },
+      right: (len, hh) => {
+        g.fillStyle = '#121519';
+        for (const v of [hh * 0.5, hh * 0.75]) g.fillRect(len / 2 - 4, v, 8, 1.6);
+      },
+    }, 'concrete', '#8e8b83', 41 + level);
+    trim(g, 0.14, 0.14, 0.86, 0.86, h, team);
+    at(g, h, () => {
+      if (level === 1) {
+        // Twin autocannon turret.
+        slab(g, 0.28, 0.28, 0.72, 0.72, 9, DARK_METAL, {}, 'metal', '#6b737b', 45);
+        line3(g, [0.72, 0.42, 5], [1.15, 0.5, 6], '#1d1f22', 1.6);
+        line3(g, [0.72, 0.56, 5], [1.15, 0.64, 6], '#1d1f22', 1.6);
+      } else {
+        // Missile pod launcher with a radar panel.
+        slab(g, 0.24, 0.24, 0.76, 0.76, 7, DARK_METAL, {}, 'metal', '#6b737b', 47);
+        at(g, 7, () => {
+          slab(g, 0.3, 0.32, 0.7, 0.68, 12, { base: shadeColor(team, 0.7), mat: 'metal' }, {
+            left: (len) => {
+              g.fillStyle = '#1d1f22';
+              for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
+                g.beginPath();
+                g.arc(len * (0.25 + c * 0.25), 3.5 + r * 5, 1.5, 0, Math.PI * 2);
+                g.fill();
+              }
+            },
+          }, 'metal', '#6b737b', 49);
+        });
+        const [rx, ry] = P(0.3, 0.3, 26);
+        g.fillStyle = '#d8dcde';
+        g.fillRect(rx - 4, ry - 6, 8, 6);
+      }
+      flag(g, 0.2, 0.8, 4, team, 0.6);
+    });
   }
   cracks(g, (variant >> 8) & 3, h, rng);
 }
 
 // ---------- naval ----------
 
-/** Planked walkway on piles from (x0, y0) to (x1, y1), deck at height h. */
-function jetty(g: G, x0: number, y0: number, x1: number, y1: number, h: number): void {
-  // Piles first (the far ones are hidden by the deck).
-  for (const [x, y] of [[x0, y0], [x1, y0], [x0, y1], [x1, y1], [(x0 + x1) / 2, y1], [x1, (y0 + y1) / 2]] as const) post(g, x, y, h + 3, 2.4, '#5a3c22');
-  box(g, x0, y0, x1, y1, h, { base: '#6e4c2c', mat: 'planks' }, {}, 71);
-  boxTop(g, x0, y0, x1, y1, h, 'planks', '#a8814f');
-}
-
-/** Nets drying on a frame of poles. */
-function netRack(g: G, x: number, y0: number, y1: number): void {
-  post(g, x, y0, 14, 1.6);
-  post(g, x, y1, 14, 1.6);
-  line3(g, [x, y0, 14], [x, y1, 14], '#4a3020', 0.9);
-  g.strokeStyle = 'rgba(214,204,170,0.75)';
-  g.lineWidth = 0.4;
-  for (let k = 0; k <= 8; k++) {
-    const y = y0 + ((y1 - y0) * k) / 8;
-    const [ax, ay] = P(x, y, 14), [bx, by] = P(x + 0.05, y, 4 + (k % 2) * 2);
-    g.beginPath();
-    g.moveTo(ax, ay);
-    g.lineTo(bx, by);
-    g.stroke();
-  }
-  for (const z of [7, 10]) {
-    const [ax, ay] = P(x + 0.03, y0, z), [bx, by] = P(x + 0.03, y1, z);
-    g.beginPath();
-    g.moveTo(ax, ay);
-    g.quadraticCurveTo((ax + bx) / 2, (ay + by) / 2 + 3, bx, by);
-    g.stroke();
-  }
-}
-
 /**
- * Dock: a wharf on the shore with a boathouse, a crane and a jetty out over the
- * water. `side` (0 +x, 1 +y, 2 -x, 3 -y) is where the water is.
+ * Naval dock: a concrete quay with bollards, a warehouse, a container stack
+ * and a crane over the water. `side` (0 +x, 1 +y, 2 -x, 3 -y) is the water.
  */
 function dock(g: G, n: number, team: string, side: number): void {
-  groundPatch(g, n, '#9c8a62', 0.2);
+  apron(g, n, '#8d8f8c', 0.15);
   const m = n / 2;
-  // The jetty runs out over the water from the middle of the water side.
+  const quay = PANEL;
+  // A concrete pier out over the water.
   const pier = (): void => {
-    if (side === 0) jetty(g, n - 0.2, m - 0.45, n + 1.25, m + 0.45, 6);
-    else if (side === 1) jetty(g, m - 0.45, n - 0.2, m + 0.45, n + 1.25, 6);
-    else if (side === 2) jetty(g, -1.25, m - 0.45, 0.2, m + 0.45, 6);
-    else jetty(g, m - 0.45, -1.25, m + 0.45, 0.2, 6);
+    const [x0, y0, x1, y1] = side === 0 ? [n - 0.2, m - 0.4, n + 1.3, m + 0.4] : side === 1 ? [m - 0.4, n - 0.2, m + 0.4, n + 1.3] : side === 2 ? [-1.3, m - 0.4, 0.2, m + 0.4] : [m - 0.4, -1.3, m + 0.4, 0.2];
+    for (const [x, y] of [[x0, y1], [x1, y1], [x1, y0]] as const) post(g, x, y, 7, 3, '#7d7a72');
+    slab(g, x0, y0, x1, y1, 6, quay, {}, 'concrete', '#9b9890', 71);
+    for (const f of [0.25, 0.75]) {
+      const [bx, by] = side % 2 === 0 ? [x0 + (x1 - x0) * f, y1 - 0.08] : [x1 - 0.08, y0 + (y1 - y0) * f];
+      const [px, py] = P(bx, by, 6);
+      g.fillStyle = '#2b3036';
+      g.fillRect(px - 1.2, py - 3, 2.4, 3);
+    }
   };
   if (side >= 2) pier();
-  // Wharf deck over the whole yard.
   boxShadow(g, 0.1, 0.1, n - 0.1, n - 0.1, 10);
-  box(g, 0.1, 0.1, n - 0.1, n - 0.1, 5, { base: '#6a4a2c', mat: 'planks' }, {}, 73);
-  boxTop(g, 0.1, 0.1, n - 0.1, n - 0.1, 5, 'planks', '#b08a58');
-  g.save();
-  g.translate(0, -5 * ZK);
-  // Boathouse on the landward half, its open end toward the water.
-  const land = (side + 2) % 4;
-  const bx0 = land === 2 ? 0.2 : land === 0 ? n - 1.7 : 0.35, by0 = land === 3 ? 0.2 : land === 1 ? n - 1.7 : 0.35;
-  const bx1 = land === 2 ? 1.7 : land === 0 ? n - 0.2 : n - 0.35, by1 = land === 3 ? 1.7 : land === 1 ? n - 0.2 : n - 0.35;
-  box(g, bx0, by0, bx1, by1, 26, PLASTER, {
-    left: (len) => {
-      doorAt(g, len / 2, 8, 12);
-      banner(g, len * 0.2, 22, team);
-    },
-    right: (len) => windowAt(g, len / 2, 16, 4, 5),
-  }, 75);
-  gableRoof(g, bx0, by0, bx1, by1, 26, 20, THATCH, side % 2 === 0 ? 'x' : 'y', 0.15, 77);
-  // Crates, barrels and a coil of rope on the wharf; nets drying.
-  const fx = side === 0 ? n - 0.9 : side === 2 ? 0.3 : 0.3, fy = side === 1 ? n - 0.9 : side === 3 ? 0.3 : n - 0.75;
-  crate(g, fx, fy, 0.3);
-  barrel(g, fx + 0.6, fy + 0.1, 3, 8);
-  barrel(g, fx + 0.35, fy + 0.45, 3, 8);
-  if (side % 2 === 0) netRack(g, side === 0 ? 0.35 : n - 0.35, 0.4, 1.4);
-  else netRack(g, n - 0.4, side === 1 ? 0.4 : n - 1.4, side === 1 ? 1.4 : n - 0.4);
-  // A timber crane at the head of the jetty.
-  const cx = side === 0 ? n - 0.4 : side === 2 ? 0.4 : m + 0.55, cy = side === 1 ? n - 0.4 : side === 3 ? 0.4 : m + 0.55;
-  post(g, cx, cy, 34, 2.4, '#5e3f22');
-  const ox = side === 0 ? 0.9 : side === 2 ? -0.9 : 0, oy = side === 1 ? 0.9 : side === 3 ? -0.9 : 0;
-  line3(g, [cx, cy, 33], [cx + ox, cy + oy, 36], '#4e331b', 1.8);
-  line3(g, [cx, cy, 22], [cx + ox * 0.45, cy + oy * 0.45, 34], '#4e331b', 1.1);
-  line3(g, [cx + ox, cy + oy, 36], [cx + ox, cy + oy, 16], 'rgba(200,180,140,0.85)', 0.5);
-  const [hx, hy] = P(cx + ox, cy + oy, 15);
-  g.fillStyle = '#8a6a42';
-  g.fillRect(hx - 2, hy - 2, 4, 3.2);
-  g.restore();
+  slab(g, 0.1, 0.1, n - 0.1, n - 0.1, 5, quay, {}, 'concrete', '#a3a098', 73);
+  at(g, 5, () => {
+    // Warehouse on the landward half, its door toward the water.
+    const land = (side + 2) % 4;
+    const bx0 = land === 2 ? 0.2 : land === 0 ? n - 1.6 : 0.3, by0 = land === 3 ? 0.2 : land === 1 ? n - 1.6 : 0.3;
+    const bx1 = land === 2 ? 1.6 : land === 0 ? n - 0.2 : n - 0.3, by1 = land === 3 ? 1.6 : land === 1 ? n - 0.2 : n - 0.3;
+    box(g, bx0, by0, bx1, by1, 26, GLAZED ? PANEL : CLAD, {
+      left: (len) => {
+        rollDoor(g, len * 0.4, 12, 14);
+        sign(g, len * 0.8, 17, 7, 6, team);
+      },
+      right: (len) => band(g, 3, len - 3, 18, 4),
+    }, 75);
+    gableRoof(g, bx0, by0, bx1, by1, 26, 10, { color: ROOF, kind: 'metal' }, side % 2 === 0 ? 'x' : 'y', 0.08, 77);
+    // Containers and a dockside crane.
+    const fx = side === 0 ? n - 1.1 : side === 2 ? 0.2 : 0.25, fy = side === 1 ? n - 0.65 : side === 3 ? 0.2 : n - 0.6;
+    container(g, fx, fy, shadeColor(team, 0.75), true);
+    container(g, fx, fy, '#b8562c', true, 0.95, 13);
+    const cx = side === 0 ? n - 0.4 : side === 2 ? 0.4 : m + 0.6, cy = side === 1 ? n - 0.4 : side === 3 ? 0.4 : m + 0.6;
+    post(g, cx, cy, 44, 3, '#d0661c');
+    const ox = side === 0 ? 1.2 : side === 2 ? -1.2 : 0, oy = side === 1 ? 1.2 : side === 3 ? -1.2 : 0;
+    line3(g, [cx - ox * 0.3, cy - oy * 0.3, 44], [cx + ox, cy + oy, 46], '#d0661c', 2.2);
+    line3(g, [cx, cy, 30], [cx + ox * 0.55, cy + oy * 0.55, 44], '#b8561a', 1);
+    line3(g, [cx + ox, cy + oy, 46], [cx + ox, cy + oy, 22], 'rgba(40,40,40,0.8)', 0.5);
+    const [hx, hy] = P(cx + ox, cy + oy, 21);
+    g.fillStyle = '#e8c22a';
+    g.fillRect(hx - 2, hy - 2, 4, 3);
+  });
   if (side < 2) pier();
-  // The owner's flag at the end of the jetty.
-  const [jx, jy] = side === 0 ? [n + 1.1, m - 0.35] : side === 1 ? [m - 0.35, n + 1.1] : side === 2 ? [-1.1, m - 0.35] : [m - 0.35, -1.1];
+  const [jx, jy] = side === 0 ? [n + 1.15, m - 0.3] : side === 1 ? [m - 0.3, n + 1.15] : side === 2 ? [-1.15, m - 0.3] : [m - 0.3, -1.15];
   flag(g, jx, jy, 6, team, 0.7);
 }
 
-/** Fish trap: a ring of stakes and nets in the water, fish showing while it is stocked. */
-function fishTrap(g: G, n: number, rng: Rng, stage: number): void {
-  // Disturbed, darker water inside the ring.
+/** Fish farm: a ring of floating walkways around a net pen, fish showing while it is stocked. */
+function fishFarm(g: G, n: number, rng: Rng, stage: number): void {
+  const R = n * 0.4, c = n / 2;
   onGround(g, 0, 0, () => {
     const W = n * 32;
-    const grad = g.createRadialGradient(W / 2, W / 2, 4, W / 2, W / 2, W * 0.55);
-    grad.addColorStop(0, 'rgba(20,50,70,0.35)');
-    grad.addColorStop(1, 'rgba(20,50,70,0)');
+    const grad = g.createRadialGradient(W / 2, W / 2, 4, W / 2, W / 2, W * 0.45);
+    grad.addColorStop(0, 'rgba(10,40,60,0.45)');
+    grad.addColorStop(1, 'rgba(10,40,60,0.1)');
     g.fillStyle = grad;
-    g.fillRect(0, 0, W, W);
+    g.beginPath();
+    g.arc(W / 2, W / 2, R * 32, 0, Math.PI * 2);
+    g.fill();
   });
-  const ring: Array<[number, number]> = [];
-  const R = n * 0.42, c = n / 2;
-  for (let k = 0; k < 14; k++) {
-    const a = (k / 14) * Math.PI * 2;
-    ring.push([c + Math.cos(a) * R, c + Math.sin(a) * R]);
-  }
-  // Fish flashing in the trap.
-  const fish = [0, 3, 6, 10][stage] ?? 0;
+  const fish = [0, 3, 7, 12][stage] ?? 0;
   for (let k = 0; k < fish; k++) {
-    const a = rng.next() * Math.PI * 2, r = rng.next() * R * 0.7;
+    const a = rng.next() * Math.PI * 2, r = rng.next() * R * 0.75;
     const [x, y] = P(c + Math.cos(a) * r, c + Math.sin(a) * r, 0);
-    g.fillStyle = 'rgba(200,215,220,0.8)';
+    g.fillStyle = 'rgba(210,225,230,0.85)';
     g.beginPath();
     g.ellipse(x, y, 2.2, 0.8, rng.next() * Math.PI, 0, Math.PI * 2);
     g.fill();
   }
-  // Net between the stakes (back half first), then the stakes, then the front net.
-  const net = (front: boolean) => {
-    g.strokeStyle = 'rgba(220,210,180,0.7)';
-    g.lineWidth = 0.5;
-    for (let k = 0; k < ring.length; k++) {
-      const a = ring[k], b = ring[(k + 1) % ring.length];
-      if (a[0] + a[1] + b[0] + b[1] > 2 * n !== front) continue;
-      for (const z of [2, 5, 8]) {
-        const [ax, ay] = P(a[0], a[1], z), [bx, by] = P(b[0], b[1], z);
-        g.beginPath();
-        g.moveTo(ax, ay);
-        g.quadraticCurveTo((ax + bx) / 2, (ay + by) / 2 + 1.2, bx, by);
-        g.stroke();
-      }
+  // The float ring: back half, then front half over the net.
+  const ring = (front: boolean) => {
+    for (let k = 0; k < 40; k++) {
+      const a = (k / 40) * Math.PI * 2;
+      const x = c + Math.cos(a) * R, y = c + Math.sin(a) * R;
+      if ((x + y > n) !== front) continue;
+      const [px, py] = P(x, y, 1.5);
+      g.fillStyle = '#2a2f34';
+      g.beginPath();
+      g.ellipse(px, py, 3, 1.6, 0, 0, Math.PI * 2);
+      g.fill();
+      g.fillStyle = 'rgba(255,255,255,0.2)';
+      g.fillRect(px - 2, py - 1.2, 3, 0.5);
     }
   };
-  net(false);
-  for (const [x, y] of [...ring].sort((p, q) => p[0] + p[1] - q[0] - q[1])) {
-    post(g, x, y, 10 + rng.next() * 3, 1.8, '#6a4a2a');
-    // Ripple ring where the stake meets the water.
-    const [px, py] = P(x, y, 0);
-    g.strokeStyle = 'rgba(230,240,245,0.45)';
-    g.lineWidth = 0.5;
+  ring(false);
+  // Hand-rail posts and the net hanging inside.
+  g.strokeStyle = 'rgba(220,220,210,0.45)';
+  g.lineWidth = 0.4;
+  for (let k = 0; k < 12; k++) {
+    const a = (k / 12) * Math.PI * 2;
+    const [x0, y0] = P(c + Math.cos(a) * R * 0.95, c + Math.sin(a) * R * 0.95, 8);
+    const [x1, y1] = P(c + Math.cos(a) * R * 0.95, c + Math.sin(a) * R * 0.95, 1);
     g.beginPath();
-    g.ellipse(px, py, 2.6, 1.1, 0, 0, Math.PI * 2);
+    g.moveTo(x0, y0);
+    g.lineTo(x1, y1);
     g.stroke();
   }
-  net(true);
-  // Cork floats.
-  for (let k = 0; k < ring.length; k += 2) {
-    const [x, y] = P(ring[k][0], ring[k][1], 0.5);
-    g.fillStyle = '#d0a040';
-    g.beginPath();
-    g.ellipse(x + 2, y + 1, 1.4, 0.8, 0, 0, Math.PI * 2);
-    g.fill();
-  }
+  ring(true);
+  // A yellow feed buoy in the middle.
+  const [bx, by] = P(c, c, 2);
+  g.fillStyle = '#e8c22a';
+  g.beginPath();
+  g.ellipse(bx, by, 4, 2.4, 0, 0, Math.PI * 2);
+  g.fill();
+  g.fillRect(bx - 0.6, by - 8, 1.2, 8);
+  g.fillStyle = '#ff3a2a';
+  g.beginPath();
+  g.arc(bx, by - 8.5, 1.2, 0, Math.PI * 2);
+  g.fill();
 }
 
-/** A stepped marble monument: three terraces, colonnaded hall, a gilded spire over all. */
-function wonder(g: G, n: number, team: string): void {
-  const marble = { base: '#e3dccb', mat: 'stone' as const };
-  const gold = '#d9b041';
-  groundPatch(g, n, '#8a7a60', 0.4);
-  boxShadow(g, 0.1, 0.1, n - 0.1, n - 0.1, 130);
-  let z = 0;
-  const tier = (i: number, h: number) => {
-    g.save();
-    g.translate(0, -z * ZK);
-    box(g, i, i, n - i, n - i, h, marble, {}, 90 + i * 10);
-    boxTop(g, i, i, n - i, n - i, h, 'stone', '#d6cfbe');
-    g.restore();
-    z += h;
-  };
-  tier(0.15, 8);
-  tier(0.45, 8);
-  tier(0.75, 8);
-  // Steps up the front of the terraces.
-  for (let k = 0; k < 6; k++) {
-    const y = n - 0.15 - k * 0.1;
-    box(g, n / 2 - 0.5, y - 0.1, n / 2 + 0.5, y, 4 * (k + 1), marble, {}, 120 + k);
+/** Launch complex: a pad, a red service tower, the rocket in the owner's colours, and fuel spheres. */
+function launchComplex(g: G, n: number, team: string): void {
+  apron(g, n, '#9a9a94', 0.3, 'concrete');
+  boxShadow(g, 0.3, 0.3, n - 0.3, n - 0.3, 120);
+  // The pad: a stepped concrete mound with the flame trench.
+  slab(g, 0.4, 0.4, n - 0.4, n - 0.4, 8, PANEL, {}, 'concrete', '#a4a29b', 90);
+  at(g, 8, () => {
+    slab(g, 1.2, 1.2, n - 1.2, n - 1.2, 8, PANEL, {
+      left: (len) => {
+        g.fillStyle = '#16191c';
+        g.fillRect(len / 2 - 10, 0, 20, 6);
+      },
+    }, 'concrete', '#a4a29b', 91);
+  });
+  // Fuel spheres and tanks in the corner.
+  silo(g, 0.8, n - 0.9, 0.32, 18, '#e8e9e6');
+  silo(g, n - 0.9, 0.8, 0.32, 18, '#e8e9e6');
+  // Service tower: a red lattice with access arms.
+  const tx = 1.55, ty = 1.55, z0 = 16, th = 150;
+  for (const [x, y] of [[tx - 0.25, ty - 0.25], [tx + 0.25, ty - 0.25], [tx - 0.25, ty + 0.25], [tx + 0.25, ty + 0.25]] as const) line3(g, [x, y, z0], [x, y, z0 + th], '#b8341f', 1.6);
+  for (let z = z0; z < z0 + th; z += 12) {
+    line3(g, [tx - 0.25, ty + 0.25, z], [tx + 0.25, ty + 0.25, z + 12], '#c84a2a', 0.6);
+    line3(g, [tx + 0.25, ty - 0.25, z], [tx + 0.25, ty + 0.25, z + 12], '#c84a2a', 0.6);
+    line3(g, [tx - 0.25, ty + 0.25, z], [tx + 0.25, ty + 0.25, z], '#c84a2a', 0.6);
   }
-  // The colonnaded hall.
-  g.save();
-  g.translate(0, -z * ZK);
-  box(g, 1.05, 1.05, n - 1.05, n - 1.05, 46, marble, {
-    left: (len) => {
-      for (let u = 6; u < len - 3; u += 8) {
-        g.fillStyle = 'rgba(60,45,30,0.55)';
-        g.fillRect(u + 1.4, 4, 3.4, 34);
-        g.fillStyle = '#f2ecdf';
-        g.fillRect(u - 0.8, 2, 2.4, 38);
-      }
-      doorAt(g, len / 2, 10, 22);
-      banner(g, len * 0.22, 44, team);
-      banner(g, len * 0.78, 44, team);
-    },
-    right: (len) => {
-      for (let u = 6; u < len - 3; u += 8) {
-        g.fillStyle = 'rgba(40,30,20,0.55)';
-        g.fillRect(u + 1.4, 4, 3.4, 34);
-        g.fillStyle = '#d7d0c0';
-        g.fillRect(u - 0.8, 2, 2.4, 38);
-      }
-    },
-  }, 131);
-  boxTop(g, 1.05, 1.05, n - 1.05, n - 1.05, 46, 'stone', '#cfc8b6');
-  // Gilt frieze.
-  line3(g, [1.05, n - 1.05, 44], [n - 1.05, n - 1.05, 44], gold, 1.6);
-  line3(g, [n - 1.05, 1.05, 44], [n - 1.05, n - 1.05, 44], gold, 1.6);
-  g.restore();
-  z += 46;
-  // Upper drum and a tall pointed roof.
-  g.save();
-  g.translate(0, -z * ZK);
-  box(g, 1.7, 1.7, n - 1.7, n - 1.7, 26, marble, { left: (len) => windowAt(g, len / 2, 12, 5, 8), right: (len) => windowAt(g, len / 2, 12, 5, 8) }, 141);
-  hipRoof(g, 1.6, 1.6, n - 1.6, n - 1.6, 26, 52, { color: '#3d6f8f', kind: 'shingle', trim: gold }, 0.1, 9);
-  g.restore();
-  z += 26 + 52;
-  line3(g, [n / 2, n / 2, z - 2], [n / 2, n / 2, z + 18], gold, 2);
-  const [sx, sy] = P(n / 2, n / 2, z + 20);
-  g.fillStyle = gold;
+  for (const z of [70, 120]) line3(g, [tx + 0.25, ty + 0.25, z0 + z], [n / 2 - 0.15, n / 2 - 0.15, z0 + z], '#9a9a94', 1.6);
+  // The rocket: white body, team bands, a black interstage and a nose cone.
+  const [cx, cy] = P(n / 2, n / 2, z0);
+  const R = 9, H = 140;
+  const body = g.createLinearGradient(cx - R, 0, cx + R, 0);
+  body.addColorStop(0, '#ffffff');
+  body.addColorStop(0.45, '#eef0f0');
+  body.addColorStop(1, '#a7adb0');
+  // Boosters either side.
+  for (const sx of [-1, 1]) {
+    const bx = cx + sx * (R + 3.5);
+    const bg = g.createLinearGradient(bx - 3.5, 0, bx + 3.5, 0);
+    bg.addColorStop(0, '#f4f4f2');
+    bg.addColorStop(1, '#9aa1a4');
+    g.fillStyle = bg;
+    g.fillRect(bx - 3.5, cy - 70 * ZK, 7, 70 * ZK);
+    g.beginPath();
+    g.moveTo(bx - 3.5, cy - 70 * ZK);
+    g.quadraticCurveTo(bx, cy - 82 * ZK, bx + 3.5, cy - 70 * ZK);
+    g.fill();
+  }
+  g.fillStyle = body;
+  g.fillRect(cx - R, cy - H * ZK, R * 2, H * ZK);
+  g.fillStyle = shadeColor(team, 1.0);
+  g.fillRect(cx - R, cy - 30 * ZK, R * 2, 7 * ZK);
+  g.fillRect(cx - R, cy - 100 * ZK, R * 2, 4 * ZK);
+  g.fillStyle = '#1d1f22';
+  g.fillRect(cx - R, cy - 108 * ZK, R * 2, 5 * ZK);
+  g.fillStyle = body;
   g.beginPath();
-  g.arc(sx, sy, 3, 0, Math.PI * 2);
+  g.moveTo(cx - R, cy - H * ZK);
+  g.bezierCurveTo(cx - R, cy - (H + 18) * ZK, cx - 2, cy - (H + 26) * ZK, cx, cy - (H + 28) * ZK);
+  g.bezierCurveTo(cx + 2, cy - (H + 26) * ZK, cx + R, cy - (H + 18) * ZK, cx + R, cy - H * ZK);
   g.fill();
-  // Obelisks at the corners of the lowest terrace.
-  for (const [x, y] of [[0.4, 0.4], [n - 0.4, 0.4], [0.4, n - 0.4], [n - 0.4, n - 0.4]] as const) {
-    prism(g, [[x - 0.12, y - 0.12], [x + 0.12, y - 0.12], [x + 0.12, y + 0.12], [x - 0.12, y + 0.12]], 8, 34, marble, 'stone', '#d6cfbe', 151);
-    line3(g, [x, y, 42], [x, y, 50], gold, 1.4);
-  }
-  flag(g, n - 0.4, n - 0.4, 50, team, 1.1);
+  g.fillStyle = 'rgba(255,255,255,0.9)';
+  g.fillRect(cx - R + 2, cy - 64 * ZK, 1.2, 30 * ZK);
+  // Engine bells under the pad lip.
+  g.fillStyle = '#3a3f44';
+  for (const dx of [-5, 0, 5]) g.fillRect(cx + dx - 1.8, cy - 2, 3.6, 4);
+  flag(g, n - 0.55, n - 0.55, 8, team, 1.1);
+  floodlight(g, 0.5, n / 2, 40);
+  floodlight(g, n / 2, 0.5, 40);
 }
+
+// ---------- the buildings ----------
 
 const PAINTERS: Record<BuildingType, Painter> = {
-  wonder: (g, n, team) => wonder(g, n, team),
+  wonder: (g, n, team) => launchComplex(g, n, team),
   dock: (g, n, team, _rng, variant) => dock(g, n, team, variant & 3),
-  fish_trap: (g, n, _team, rng, variant) => fishTrap(g, n, rng, variant),
+  fish_trap: (g, n, _team, rng, variant) => fishFarm(g, n, rng, variant),
   town_center: (g, n, team) => {
-    groundPatch(g, n, '#7d6444', 0.35);
-    boxShadow(g, 0.3, 0.3, n - 0.3, n - 0.3, 84);
-    // Dressed-stone plinth with a flagged terrace, then the timber hall.
-    box(g, 0.3, 0.3, n - 0.3, n - 0.3, 6, STONE, {}, 31);
-    boxTop(g, 0.3, 0.3, n - 0.3, n - 0.3, 6, 'stone', '#9d978b');
-    // Steps up to the door.
-    for (let k = 0; k < 3; k++) {
-      const y = n - 0.3 + 0.12 * (2 - k);
-      box(g, n / 2 - 0.45, y - 0.12, n / 2 + 0.45, y, 2 * (k + 1), STONE, {}, 40 + k);
-    }
-    g.save();
-    g.translate(0, -6 * ZK);
-    box(g, 0.5, 0.6, n - 0.6, n - 0.5, 34, PLASTER, {
+    apron(g, n, '#7d7f7c', 0.35);
+    lines(g, [[0.4, n - 0.15, 1.4, n - 0.15], [n - 0.15, 0.6, n - 0.15, 1.6]]);
+    helipad(g, n - 0.85, n - 0.85, 0.6);
+    boxShadow(g, 0.3, 0.3, n - 1.4, n - 0.4, 90);
+    // Two-storey command block.
+    slab(g, 0.3, 0.3, n - 1.4, n - 0.4, 30, CLAD, {
       left: (len) => {
-        doorAt(g, len / 2, 9, 14);
-        for (const u of [len * 0.18, len * 0.34, len * 0.66, len * 0.82]) windowAt(g, u, 17, 4.5, 6);
-        banner(g, len * 0.26, 29, team);
-        banner(g, len * 0.74, 29, team);
+        glassDoor(g, len * 0.5, 9, 11);
+        band(g, 3, len * 0.5 - 7, 6, 6, true);
+        band(g, len * 0.5 + 7, len - 3, 6, 6, true);
+        band(g, 3, len - 3, 19, 6, true);
+        sign(g, len * 0.5, 13.5, 10, 4, team);
       },
       right: (len) => {
-        for (const u of [len * 0.2, len * 0.4, len * 0.6, len * 0.8]) windowAt(g, u, 17, 4.5, 6);
+        band(g, 3, len - 3, 6, 6);
+        band(g, 3, len - 3, 19, 6, true);
       },
-    }, 33);
-    gableRoof(g, 0.5, 0.6, n - 0.6, n - 0.5, 34, 30, THATCH, 'x', 0.2, 11);
-    // Central bell tower rising through the roof, with an open belfry.
-    const t0 = n / 2 - 0.55, t1 = n / 2 + 0.55;
-    box(g, t0, t0, t1, t1, 84, PLASTER, {
-      left: (len) => {
-        windowAt(g, len / 2, 50, 4, 6);
-        g.fillStyle = '#1a0f07';
-        g.fillRect(len * 0.25, 68, len * 0.5, 10);
-        g.fillStyle = '#c9a24a';
-        g.beginPath();
-        g.arc(len / 2, 74, 2.6, Math.PI, 0);
-        g.fill();
-      },
-      right: (len) => {
-        windowAt(g, len / 2, 50, 4, 6);
-        g.fillStyle = '#1a0f07';
-        g.fillRect(len * 0.25, 68, len * 0.5, 10);
-      },
-    }, 35);
-    hipRoof(g, t0, t0, t1, t1, 84, 26, THATCH.kind === 'thatch' ? { color: '#b9a46a', kind: 'shingle' } : SHINGLE, 0.15, 5);
-    flag(g, n / 2, n / 2, 110, team, 1.2);
-    // Chimney with a wisp of smoke.
-    box(g, n - 1.3, 1.0, n - 1.0, 1.3, 64, STONE, {}, 37);
-    boxTop(g, n - 1.3, 1.0, n - 1.0, 1.3, 64, 'stone', '#5a544c');
-    const [sx, sy] = P(n - 1.15, 1.15, 66);
-    for (let k = 0; k < 5; k++) {
-      const grad = g.createRadialGradient(sx + k * 2, sy - k * 5, 0, sx + k * 2, sy - k * 5, 3 + k * 1.4);
-      grad.addColorStop(0, `rgba(220,220,215,${0.3 - k * 0.05})`);
-      grad.addColorStop(1, 'rgba(220,220,215,0)');
-      g.fillStyle = grad;
-      g.beginPath();
-      g.arc(sx + k * 2, sy - k * 5, 3 + k * 1.4, 0, Math.PI * 2);
-      g.fill();
-    }
-    g.restore();
-    // Stores by the door.
-    barrel(g, n / 2 - 1.05, n - 0.12);
-    barrel(g, n / 2 - 0.75, n - 0.02, 3, 8);
-    sack(g, n / 2 + 0.8, n - 0.05);
-    sack(g, n / 2 + 1.05, n - 0.15, 0.85);
-    crate(g, 0.05, n - 0.55, 0.32);
+    }, 'membrane', ROOF, 31);
+    trim(g, 0.3, 0.3, n - 1.4, n - 0.4, 30, team);
+    // East wing, lower.
+    slab(g, n - 1.4, 0.5, n - 0.3, 2.0, 18, GLAZED ? GLASS : CLAD, {
+      left: (len) => rollDoor(g, len / 2, len - 6, 12),
+      right: (len) => band(g, 2, len - 2, 8, 5),
+    }, 'membrane', ROOF, 33);
+    // Control tower rising through the roof, glass cab on top.
+    const t0 = 0.8, t1 = 1.6;
+    at(g, 30, () => {
+      slab(g, t0, t0, t1, t1, 34, PANEL, { left: (len, hh) => band(g, len / 2 - 2, len / 2 + 2, 4, hh - 8), right: (len, hh) => band(g, len / 2 - 2, len / 2 + 2, 4, hh - 8) }, 'concrete', '#9a978e', 35);
+      at(g, 34, () => {
+        slab(g, t0 - 0.12, t0 - 0.12, t1 + 0.12, t1 + 0.12, 12, GLASS, {}, 'metal', '#3f454c', 37);
+        trim(g, t0 - 0.12, t0 - 0.12, t1 + 0.12, t1 + 0.12, 12, team);
+        mast(g, (t0 + t1) / 2, (t0 + t1) / 2, 12, 34, team);
+      });
+      hvac(g, 2.0, 0.6, 0);
+      hvac(g, 2.0, 1.3, 0);
+      if (HIGHTECH) solar(g, 0.5, 2.0, n - 1.6, n - 0.5, 0);
+      else dish(g, ...P(1.2, 2.8, 6), 5, 1);
+    });
+    flag(g, 0.4, n - 0.25, 0, team, 1.1);
+    flag(g, 1.0, n - 0.25, 0, team, 1.1);
   },
   house: (g, n, team) => {
-    groundPatch(g, n, '#806a4a', 0.15);
-    boxShadow(g, 0.25, 0.25, n - 0.2, n - 0.2, 44);
-    box(g, 0.25, 0.3, n - 0.25, n - 0.2, 22, { ...PLASTER, plinth: Math.max(PLASTER.plinth ?? 0, 4) }, {
+    apron(g, n, '#8a8b86', 0.15, 'concrete');
+    if (!GLAZED) {
+      // A container home: corrugated box, door, window, AC unit and a water tank.
+      boxShadow(g, 0.25, 0.4, n - 0.25, n - 0.5, 30);
+      slab(g, 0.25, 0.4, n - 0.25, n - 0.5, 20, { base: CLAD.mat === 'metal' ? '#a6a08a' : '#b3afa4', mat: CLAD.mat === 'metal' ? 'metal' : 'concrete' }, {
+        left: (len) => {
+          glassDoor(g, len * 0.3, 5, 10);
+          band(g, len * 0.55, len * 0.85, 7, 5, true);
+          sign(g, len * 0.3, 13, 5, 2.5, team);
+        },
+        right: (len) => band(g, len * 0.3, len * 0.7, 7, 5),
+      }, 'metal', ROOF, 61);
+      hvac(g, n - 0.75, 0.6, 20, 0.28);
+      silo(g, 0.55, 0.7, 0.14, 0, '#2b3036', false);
+      at(g, 20, () => silo(g, 0.55, 0.75, 0.13, 8, '#3a4048'));
+      return;
+    }
+    // A modern townhouse: two stacked, offset volumes with a glass corner and a solar roof.
+    boxShadow(g, 0.2, 0.2, n - 0.2, n - 0.2, 46);
+    slab(g, 0.2, 0.3, n - 0.2, n - 0.2, 18, CLAD, {
       left: (len) => {
-        doorAt(g, len * 0.33, 6.5, 11);
-        windowAt(g, len * 0.72, 9, 4, 5);
+        glassDoor(g, len * 0.25, 5, 10);
+        band(g, len * 0.45, len - 2, 3, 12, true);
       },
-      right: (len) => windowAt(g, len / 2, 9, 4, 5),
-    }, 41);
-    gableRoof(g, 0.25, 0.3, n - 0.25, n - 0.2, 22, 20, THATCH, 'y', 0.16, 3);
-    box(g, 0.45, 0.55, 0.72, 0.82, 50, STONE, {}, 43);
-    boxTop(g, 0.45, 0.55, 0.72, 0.82, 50, 'stone', '#4e4943');
-    flag(g, n - 0.3, 0.3, 30, team, 0.7);
-    woodpile(g, n - 0.05, n * 0.62, 2, 3);
-    barrel(g, 0.15, n - 0.05, 2.8, 7.5);
-  },
-  lumber_camp: (g, n, team) => {
-    groundPatch(g, n, '#7a6243', 0.25);
-    // Sawdust and wood chips.
-    onGround(g, 0, 0, () => {
-      for (let k = 0; k < 70; k++) {
-        const u = ((k * 37) % 61) / 61 * n * 32, v = ((k * 53) % 59) / 59 * n * 32;
-        g.fillStyle = k % 3 ? 'rgba(222,190,130,0.7)' : 'rgba(160,120,70,0.7)';
-        g.fillRect(u, v, 1.2, 0.6);
-      }
+      right: (len) => band(g, 3, len - 6, 6, 8),
+    }, 'membrane', ROOF, 63);
+    at(g, 18, () => {
+      slab(g, 0.2, 0.2, n - 0.6, n - 0.35, 16, { base: shadeColor(team, 0.55), mat: 'metal' }, {
+        left: (len) => band(g, 3, len - 3, 4, 8, true),
+        right: (len) => band(g, 3, len - 3, 4, 8),
+      }, 'membrane', ROOF, 65);
+      if (HIGHTECH) solar(g, 0.3, 0.3, n - 0.7, n - 0.45, 16);
+      else hvac(g, 0.5, 0.5, 16, 0.28);
     });
-    shelter(g, 0.2, 0.2, n * 0.62, n - 0.25, 22, team);
-    // Stacked logs, a sawhorse with a log on it and an axe in the chopping block.
-    for (let r = 0; r < 3; r++) for (let k = 0; k < 3 - r; k++) log(g, [n * 0.66 + k * 0.17 + r * 0.085, 0.3], [n * 0.66 + k * 0.17 + r * 0.085, 1.3], 1.8 + r * 3.3, 1.7);
-    crate(g, n * 0.74, n * 0.72);
-    line3(g, [n * 0.24, n * 0.88, 0], [n * 0.27, n * 0.85, 8], '#4a301a', 1.1);
-    line3(g, [n * 0.3, n * 0.82, 0], [n * 0.27, n * 0.85, 8], '#4a301a', 1.1);
-    line3(g, [n * 0.44, n * 0.88, 0], [n * 0.47, n * 0.85, 8], '#4a301a', 1.1);
-    line3(g, [n * 0.5, n * 0.82, 0], [n * 0.47, n * 0.85, 8], '#4a301a', 1.1);
-    log(g, [n * 0.18, n * 0.85], [n * 0.55, n * 0.85], 8.5, 1.5);
-    const [bx, by] = P(n * 0.12, n * 0.62, 0);
-    g.fillStyle = mat(g, 'woodV', '#6b4626', 13);
-    g.fillRect(bx - 3, by - 5, 6, 5);
-    g.fillStyle = '#d9b27a';
-    g.beginPath();
-    g.ellipse(bx, by - 5, 3, 1.3, 0, 0, Math.PI * 2);
-    g.fill();
-    line3(g, [n * 0.12, n * 0.62, 5], [n * 0.08, n * 0.6, 13], '#7a5430', 0.9);
-    poly3(g, [[n * 0.12, n * 0.62, 5.5], [n * 0.15, n * 0.64, 6.5], [n * 0.14, n * 0.64, 8.5], [n * 0.11, n * 0.61, 7]], '#9aa3a8');
+  },
+  lumber_camp: (g, n, team, rng) => {
+    apron(g, n, '#7a6e5a', 0.2, 'earth');
+    // An open-sided saw shed with a metal roof, log stacks and sawn timber.
+    boxShadow(g, 0.2, 0.2, n - 0.2, n * 0.55, 36);
+    for (const [x, y] of [[0.2, 0.2], [n - 0.2, 0.2], [0.2, n * 0.55], [n - 0.2, n * 0.55]] as const) post(g, x, y, 24, 2.2, '#5b636b');
+    slab(g, 0.25, 0.25, n - 0.25, 0.55, 22, CLAD, {}, 'metal', ROOF, 51);
+    // The band saw table under the shed.
+    slab(g, 0.6, 0.65, n - 0.6, 0.9, 7, METAL, {}, 'metal', '#a9b0b5', 53);
+    const [sx, sy] = P(n / 2, 0.78, 12);
+    g.fillStyle = '#d0661c';
+    g.fillRect(sx - 3, sy - 8, 6, 8);
+    gableRoof(g, 0.1, 0.1, n - 0.1, n * 0.6, 24, 6, { color: ROOF, kind: 'metal', trim: team }, 'x', 0.06, 55);
+    logs(g, 0.25, n - 0.25, 3, 5);
+    // Sawn planks on a pallet.
+    slab(g, n - 0.85, n - 0.75, n - 0.2, n - 0.3, 6, { base: '#c79c62', mat: 'planks' }, {}, 'planks', '#d9b27a', 57);
+    heap(g, n - 0.5, n * 0.68, '#a07040', rng, 0.5);
   },
   mining_camp: (g, n, team, rng) => {
-    groundPatch(g, n, '#7b7266', 0.25);
-    shelter(g, 0.2, 0.2, n * 0.62, n - 0.25, 22, team);
-    // Ore cart on spoked wheels, heaped with gold; a pile of quarried stone.
-    boxShadow(g, n * 0.68, n * 0.2, n * 0.95, n * 0.5, 14);
-    box(g, n * 0.68, n * 0.2, n * 0.95, n * 0.5, 9, { base: '#7a5634', mat: 'planks' }, {}, 51);
-    poly3(g, [[n * 0.68, n * 0.2, 9], [n * 0.95, n * 0.2, 9], [n * 0.95, n * 0.5, 9], [n * 0.68, n * 0.5, 9]], '#3a2a1a');
-    oreHeap(g, n * 0.8, n * 0.33, '#f2c230', rng);
-    for (const x of [n * 0.72, n * 0.9]) {
-      const [wx, wy] = P(x, n * 0.5, 3.2);
-      g.strokeStyle = '#3a2614';
-      g.lineWidth = 1.1;
-      g.beginPath();
-      g.ellipse(wx, wy, 1.6, 3.2, -0.45, 0, Math.PI * 2);
-      g.stroke();
-      g.lineWidth = 0.4;
-      for (let a = 0; a < 3; a++) {
-        g.beginPath();
-        g.moveTo(wx + Math.cos(a) * 1.5, wy + Math.sin(a) * 3);
-        g.lineTo(wx - Math.cos(a) * 1.5, wy - Math.sin(a) * 3);
-        g.stroke();
-      }
-    }
-    oreHeap(g, n * 0.78, n * 0.8, '#a9a9a2', rng);
-    // Cut blocks and pickaxes leaning on the crate.
-    for (const [x, y] of [[n * 0.95, n * 0.68], [n * 1.0, n * 0.82]] as const) {
-      box(g, x - 0.15, y - 0.12, x, y, 4.5, STONE, {}, 53);
-      boxTop(g, x - 0.15, y - 0.12, x, y, 4.5, 'stone', '#b0aaa0');
-    }
-    crate(g, n * 0.3, n * 0.82, 0.3);
-    line3(g, [n * 0.46, n * 0.92, 0], [n * 0.4, n * 0.88, 13], '#7a5430', 0.9);
-    line3(g, [n * 0.36, n * 0.86, 13], [n * 0.45, n * 0.9, 12.5], '#6d777d', 1.2);
+    apron(g, n, '#7d766a', 0.2, 'earth');
+    // A clad shed, a hopper on legs with a conveyor, ore heaps and drums.
+    boxShadow(g, 0.2, 0.2, 1.1, n - 0.3, 30);
+    slab(g, 0.2, 0.2, 1.1, n - 0.3, 22, CLAD, {
+      left: (len) => rollDoor(g, len / 2, len - 6, 13),
+      right: (len) => {
+        rollDoor(g, len * 0.35, 9, 13);
+        sign(g, len * 0.8, 15, 5, 4, team);
+      },
+    }, 'metal', ROOF, 51);
+    for (const [x, y] of [[1.35, 0.3], [1.75, 0.3], [1.35, 0.7], [1.75, 0.7]] as const) post(g, x, y, 22, 1.4, '#5b636b');
+    at(g, 22, () => slab(g, 1.3, 0.25, 1.8, 0.75, 10, { base: '#d0a21c', mat: 'metal' }, {}, 'metal', '#bf931a', 53));
+    line3(g, [1.55, 0.75, 26], [1.55, n - 0.35, 3], '#2b3036', 2.2);
+    heap(g, 1.5, n - 0.45, '#8e8a84', rng, 0.8);
+    heap(g, 0.6, n - 0.1, '#c9a43a', rng, 0.45);
   },
   mill: (g, n, team) => {
-    groundPatch(g, n, '#7f6a4a', 0.2);
-    boxShadow(g, 0.3, 0.3, n - 0.3, n - 0.3, 64);
-    box(g, 0.3, 0.35, n - 0.3, n - 0.3, 18, STONE, {
-      left: (len) => doorAt(g, len * 0.4, 6, 10),
-    }, 61);
-    box(g, 0.45, 0.5, n - 0.45, n - 0.45, 40, { ...PLASTER, plinth: Math.max(PLASTER.plinth ?? 0, 0) }, {
-      left: (len) => windowAt(g, len * 0.5, 26, 4, 5),
-      right: (len) => windowAt(g, len / 2, 26, 4, 5),
-    }, 63);
-    hipRoof(g, 0.45, 0.5, n - 0.45, n - 0.45, 40, 22, THATCH, 0.14, 9);
-    // Four lattice sails clothed in canvas on the south-west face.
-    const [hx, hy] = P(n / 2 - 0.1, n - 0.45, 46);
-    g.save();
-    g.translate(hx, hy);
-    g.rotate(0.3);
-    for (let k = 0; k < 4; k++) {
-      g.rotate(Math.PI / 2);
-      g.fillStyle = mat(g, 'woodV', '#4a3218', 65);
-      g.fillRect(-0.9, 0, 1.8, 35);
-      g.fillStyle = 'rgba(0,0,0,0.3)';
-      g.fillRect(0.4, 0, 0.5, 35);
-      g.fillStyle = mat(g, 'canvas', '#e6dcc4', 66);
-      g.fillRect(1.3, 8, 7.5, 26);
-      const sail = g.createLinearGradient(1.3, 0, 8.8, 0);
-      sail.addColorStop(0, 'rgba(255,250,235,0.25)');
-      sail.addColorStop(1, 'rgba(40,30,15,0.3)');
-      g.fillStyle = sail;
-      g.fillRect(1.3, 8, 7.5, 26);
-      g.strokeStyle = 'rgba(70,50,25,0.75)';
-      g.lineWidth = 0.45;
-      for (let v = 11; v < 34; v += 3.6) {
-        g.beginPath();
-        g.moveTo(1.3, v);
-        g.lineTo(8.8, v);
-        g.stroke();
-      }
-      g.strokeRect(1.3, 8, 7.5, 26);
-    }
-    g.restore();
-    const hub = g.createRadialGradient(hx - 0.8, hy - 0.8, 0.2, hx, hy, 3);
-    hub.addColorStop(0, '#8a6a44');
-    hub.addColorStop(1, '#2a1a0c');
-    g.fillStyle = hub;
-    g.beginPath();
-    g.arc(hx, hy, 2.8, 0, Math.PI * 2);
-    g.fill();
-    sack(g, n - 0.25, n - 0.1);
-    sack(g, n - 0.05, n - 0.35, 0.9);
-    sack(g, n - 0.12, n + 0.05, 0.8);
-    hayBale(g, 0.0, n - 0.4);
-    flag(g, 0.4, 0.4, 40, team, 0.7);
+    apron(g, n, '#8a8b86', 0.2, 'concrete');
+    // Food depot: two grain silos and a refrigerated store.
+    boxShadow(g, 0.15, 1.05, n - 0.15, n - 0.15, 26);
+    slab(g, 0.15, 1.05, n - 0.15, n - 0.15, 18, GLAZED ? PANEL : CLAD, {
+      left: (len) => {
+        rollDoor(g, len * 0.35, 10, 12);
+        sign(g, len * 0.8, 10, 6, 5, team);
+      },
+      right: (len) => band(g, 2, len - 2, 11, 3),
+    }, 'membrane', ROOF, 41);
+    hvac(g, 0.5, 1.3, 18, 0.28);
+    silo(g, 0.55, 0.55, 0.36, 46, '#d6d8d6');
+    silo(g, 1.45, 0.55, 0.36, 46, '#d6d8d6');
+    const [lx, ly] = P(1.0, 0.25, 50);
+    g.fillStyle = shadeColor(team, 0.9);
+    g.fillRect(lx - 14, ly - 1, 28, 2);
   },
   barracks: (g, n, team) => {
-    groundPatch(g, n, '#836748', 0.2);
-    boxShadow(g, 0.2, 0.2, n - 0.2, n * 0.55, 50);
-    box(g, 0.2, 0.2, n - 0.2, n * 0.55, 28, { ...PLASTER, plinth: Math.max(PLASTER.plinth ?? 0, 5) }, {
+    apron(g, n, '#7b7d79', 0.25);
+    lines(g, [[0.3, n - 0.3, n - 0.3, n - 0.3]], 'rgba(240,220,90,0.7)');
+    boxShadow(g, 0.2, 0.2, n - 0.2, n - 1.0, 54);
+    slab(g, 0.2, 0.2, n - 0.2, n - 1.0, 36, CLAD, {
       left: (len) => {
-        doorAt(g, len / 2, 9, 14);
-        for (const u of [len * 0.18, len * 0.82]) windowAt(g, u, 14, 4.5, 6);
-        banner(g, len * 0.33, 24, team);
-        banner(g, len * 0.67, 24, team);
+        glassDoor(g, len * 0.5, 8, 11);
+        windows(g, len, 5, 6, 12);
+        band(g, 3, len - 3, 22, 6, true);
+        sign(g, len * 0.5, 15, 10, 4, team);
       },
-      right: (len) => windowAt(g, len / 2, 14, 4.5, 6),
-    }, 71);
-    gableRoof(g, 0.2, 0.2, n - 0.2, n * 0.55, 28, 22, SHINGLE, 'x', 0.16, 21);
-    // Training yard: sanded ground, a post-and-rail fence along the front.
-    for (let x = 0.1; x <= n - 0.1; x += 0.45) post(g, x, n - 0.1, 9, 1.6);
-    for (const z of [7, 3.5]) {
-      line3(g, [0.1, n - 0.1, z], [n - 0.1, n - 0.1, z], '#4e331b', 1.5);
-      line3(g, [0.1, n - 0.1, z + 0.4], [n - 0.1, n - 0.1, z + 0.4], 'rgba(255,220,170,0.25)', 0.4);
-    }
-    // Straw practice dummy on a post.
-    const [dx, dy] = P(0.8, n * 0.8, 0);
-    g.fillStyle = 'rgba(8,12,4,0.35)';
-    g.beginPath();
-    g.ellipse(dx + 3, dy, 5, 1.6, 0, 0, Math.PI * 2);
-    g.fill();
-    g.fillStyle = mat(g, 'woodV', '#5a3d22', 72);
-    g.fillRect(dx - 1, dy - 19, 2, 19);
-    g.fillRect(dx - 6.5, dy - 14.5, 13, 1.6);
-    const straw = g.createRadialGradient(dx - 1.5, dy - 12, 0.5, dx, dy - 10, 6);
-    straw.addColorStop(0, '#ead28c');
-    straw.addColorStop(1, '#8e7638');
-    g.fillStyle = straw;
-    g.beginPath();
-    g.ellipse(dx, dy - 10, 3.8, 5.4, 0, 0, Math.PI * 2);
-    g.fill();
-    g.beginPath();
-    g.arc(dx, dy - 18.5, 2.9, 0, Math.PI * 2);
-    g.fill();
-    g.strokeStyle = '#6b5232';
-    g.lineWidth = 0.5;
-    g.beginPath();
-    g.moveTo(dx - 3.5, dy - 8);
-    g.lineTo(dx + 3.5, dy - 8);
-    g.stroke();
-    // Weapon rack: spears with steel heads and team shields.
-    line3(g, [n * 0.58, n * 0.78, 14], [n * 1.0, n * 0.78, 14], '#4e331b', 1.2);
-    for (let k = 0; k < 4; k++) {
-      line3(g, [n * 0.62 + k * 0.12, n * 0.78, 0], [n * 0.6 + k * 0.12, n * 0.78, 22], '#7a5430', 1.1);
-      poly3(g, [[n * 0.595 + k * 0.12, n * 0.78, 22], [n * 0.605 + k * 0.12, n * 0.78, 22], [n * 0.6 + k * 0.12, n * 0.78, 26]], '#c9d0d4', null);
-    }
-    for (const x of [n * 0.66, n * 0.86]) {
-      const [sx, sy] = P(x, n * 0.8, 8);
-      const sh = g.createRadialGradient(sx - 1.5, sy - 1.5, 0.3, sx, sy, 4.8);
-      sh.addColorStop(0, shadeColor(team, 1.35));
-      sh.addColorStop(1, shadeColor(team, 0.55));
-      g.fillStyle = sh;
-      g.beginPath();
-      g.ellipse(sx, sy, 4, 4.4, 0, 0, Math.PI * 2);
-      g.fill();
-      g.strokeStyle = '#8a6a30';
-      g.lineWidth = 0.7;
-      g.stroke();
-      const boss = g.createRadialGradient(sx - 0.4, sy - 0.4, 0.1, sx, sy, 1.4);
-      boss.addColorStop(0, '#fff2c0');
-      boss.addColorStop(1, '#8a6a20');
-      g.fillStyle = boss;
-      g.beginPath();
-      g.arc(sx, sy, 1.3, 0, Math.PI * 2);
-      g.fill();
-    }
-    barrel(g, n - 0.15, n * 0.6, 2.8, 7.5);
-    flag(g, n - 0.25, 0.25, 40, team, 1);
+      right: (len) => {
+        windows(g, len, 5, 6, 9);
+        band(g, 3, len - 3, 22, 6);
+      },
+    }, 'membrane', ROOF, 41);
+    trim(g, 0.2, 0.2, n - 0.2, n - 1.0, 36, team);
+    hvac(g, 0.5, 0.5, 36);
+    hvac(g, 1.6, 0.5, 36);
+    if (HIGHTECH) solar(g, 0.4, 1.0, n - 0.4, n - 1.2, 36);
+    sandbagRun(g, [0.3, n - 0.55], [1.2, n - 0.55], 2);
+    flag(g, n - 0.35, n - 0.4, 0, team, 1);
+    floodlight(g, 0.25, n - 0.25, 34);
   },
   farm: (g, n, _team, rng, stage) => {
-    // Ploughed field: ridged furrows run along x; wheat thins as it is harvested.
+    // Irrigated field: ridged rows and a pivot boom; the crop thins as it is harvested.
     onGround(g, 0, 0, () => {
       const W = n * 32;
       g.fillStyle = mat(g, 'earth', '#6e5232', 81);
@@ -1047,7 +1111,6 @@ const PAINTERS: Record<BuildingType, Painter> = {
         g.fillStyle = ridge;
         g.fillRect(1, v, W - 2, 3.2);
       }
-      // Grassy margin.
       g.strokeStyle = 'rgba(90,110,40,0.55)';
       g.lineWidth = 1.6;
       g.strokeRect(0.8, 0.8, W - 1.6, W - 1.6);
@@ -1069,445 +1132,269 @@ const PAINTERS: Record<BuildingType, Painter> = {
         g.quadraticCurveTo(sx + lean * 0.3, sy - h * 0.6, sx + lean, sy - h);
         g.stroke();
         if (stage > 0) {
-          // Ear of grain, lit on its left.
           g.fillStyle = shadeColor(tip, 0.85 + rng.next() * 0.3);
           g.beginPath();
           g.ellipse(sx + lean, sy - h - 1, 0.65, 1.5, lean * 0.15, 0, Math.PI * 2);
           g.fill();
-          g.fillStyle = 'rgba(255,250,220,0.35)';
-          g.fillRect(sx + lean - 0.55, sy - h - 2, 0.4, 1.4);
         }
       }
-    for (const [x, y] of [[0, 0], [n, 0], [0, n], [n, n], [n / 2, n], [n, n / 2]]) post(g, x, y, 7, 1.5);
-    for (const z of [5, 2.5]) {
-      line3(g, [0, n, z], [n, n, z], '#4e331b', 0.9);
-      line3(g, [n, 0, z], [n, n, z], '#4e331b', 0.9);
+    // Pivot irrigation: a pipe truss on wheeled towers across the field.
+    const z = 16;
+    for (const f of [0.15, 0.5, 0.85]) {
+      const x = n * f, y = n / 2;
+      line3(g, [x - 0.12, y, 0], [x, y, z], '#9aa1a6', 0.9);
+      line3(g, [x + 0.12, y, 0], [x, y, z], '#9aa1a6', 0.9);
+      const [wx, wy] = P(x, y, 1.5);
+      g.fillStyle = '#1d1f22';
+      g.beginPath();
+      g.ellipse(wx, wy, 2.4, 2.4, 0, 0, Math.PI * 2);
+      g.fill();
     }
+    line3(g, [0.1, n / 2, z], [n - 0.1, n / 2, z], '#c0c6ca', 1.4);
+    for (let f = 0.1; f < 0.95; f += 0.1) line3(g, [n * f, n / 2, z], [n * f, n / 2, z - 5], 'rgba(170,200,220,0.6)', 0.4);
   },
   archery_range: (g, n, team) => {
-    groundPatch(g, n, '#84694a', 0.2);
-    // Open-fronted range house at the back, shooting lane and straw butts in front.
-    boxShadow(g, 0.2, 0.2, n - 0.2, n * 0.45, 40);
-    box(g, 0.2, 0.2, n - 0.2, n * 0.45, 22, { ...PLASTER, plinth: Math.max(PLASTER.plinth ?? 0, 4) }, {
+    apron(g, n, '#7f7a6a', 0.2, 'earth');
+    // Firing range: a covered firing line at the back, lanes and target boards, a berm.
+    lines(g, [[0.8, 1.2, 0.8, n - 0.2], [1.5, 1.2, 1.5, n - 0.2], [2.2, 1.2, 2.2, n - 0.2]], 'rgba(240,240,230,0.5)');
+    boxShadow(g, 0.2, 0.2, n - 0.2, 1.0, 34);
+    for (const [x, y] of [[0.2, 1.0], [n - 0.2, 1.0], [n / 2, 1.0]] as const) post(g, x, y, 20, 1.8, '#5b636b');
+    slab(g, 0.2, 0.2, n - 0.2, 0.55, 22, CLAD, {
       left: (len) => {
-        for (const u of [len * 0.25, len * 0.5, len * 0.75]) {
-          g.fillStyle = '#1e130a';
-          g.fillRect(u - 4.5, 4, 9, 12);
-          g.fillStyle = 'rgba(0,0,0,0.4)';
-          g.fillRect(u - 4.5, 13, 9, 3);
-        }
-        banner(g, len * 0.12, 20, team);
-        banner(g, len * 0.88, 20, team);
+        rollDoor(g, len * 0.2, 7, 11);
+        sign(g, len * 0.6, 13, 8, 5, team);
       },
-      right: (len) => windowAt(g, len / 2, 10, 4, 5),
-    }, 91);
-    gableRoof(g, 0.2, 0.2, n - 0.2, n * 0.45, 22, 18, SHINGLE, 'x', 0.16, 23);
-    // Straw butts with painted targets on easels.
-    for (const x of [n * 0.25, n * 0.55, n * 0.85]) {
-      const [tx, ty] = P(x, n * 0.85, 0);
-      g.fillStyle = 'rgba(8,12,4,0.35)';
-      g.beginPath();
-      g.ellipse(tx + 3, ty, 6, 2, 0, 0, Math.PI * 2);
-      g.fill();
-      line3(g, [x - 0.08, n * 0.88, 0], [x, n * 0.85, 13], '#5a3d22', 1);
-      line3(g, [x + 0.08, n * 0.82, 0], [x, n * 0.85, 13], '#5a3d22', 1);
-      const straw = g.createRadialGradient(tx - 1.5, ty - 11, 0.5, tx, ty - 10, 6);
-      straw.addColorStop(0, '#ecd590');
-      straw.addColorStop(1, '#9a7c3a');
-      g.fillStyle = straw;
-      g.beginPath();
-      g.ellipse(tx, ty - 10, 5, 5.6, 0, 0, Math.PI * 2);
-      g.fill();
-      for (const [r, c] of [[3.8, '#f2ece0'], [2.6, team], [1.4, '#f2ece0'], [0.6, '#b8352a']] as const) {
-        g.fillStyle = c;
+    }, 'metal', ROOF, 51);
+    gableRoof(g, 0.15, 0.15, n - 0.15, 1.05, 22, 4, { color: ROOF, kind: 'metal', trim: team }, 'x', 0.05, 53);
+    // Target boards with rings on posts, and a sandbag berm behind them.
+    sandbagRun(g, [0.3, n - 0.12], [n - 0.3, n - 0.12], 2, '#a99a72');
+    for (const x of [0.8, 1.5, 2.2]) {
+      post(g, x, n - 0.4, 12, 1, '#7b838a');
+      const [tx, ty] = P(x, n - 0.4, 12);
+      g.fillStyle = '#f2f0ea';
+      g.fillRect(tx - 4, ty - 2, 8, 8);
+      g.strokeStyle = '#1d1f22';
+      g.lineWidth = 0.6;
+      for (const r of [3, 1.8, 0.7]) {
         g.beginPath();
-        g.ellipse(tx, ty - 10, r, r * 1.1, 0, 0, Math.PI * 2);
-        g.fill();
+        g.arc(tx, ty + 2, r, 0, Math.PI * 2);
+        g.stroke();
       }
-      // A couple of arrows stuck in.
-      g.strokeStyle = '#3a2614';
-      g.lineWidth = 0.5;
-      g.beginPath();
-      g.moveTo(tx - 1, ty - 11);
-      g.lineTo(tx - 6, ty - 12.5);
-      g.moveTo(tx + 1.2, ty - 9);
-      g.lineTo(tx - 4, ty - 9.5);
-      g.stroke();
     }
-    barrel(g, 0.1, n * 0.6, 2.6, 7);
-    flag(g, n - 0.25, 0.25, 34, team, 0.9);
   },
   stable: (g, n, team) => {
-    groundPatch(g, n, '#806446', 0.25);
-    // Long timber stable with stall doors, a hay loft and a paddock in front.
-    boxShadow(g, 0.2, 0.2, n - 0.2, n * 0.5, 44);
-    box(g, 0.2, 0.2, n - 0.2, n * 0.5, 24, { base: '#7a5634', mat: 'planks', plinth: 3 }, {
+    apron(g, n, '#72746f', 0.25);
+    lines(g, [[0.4, n - 0.2, n - 0.4, n - 0.2]], 'rgba(240,220,90,0.7)');
+    // Motor pool: a big garage with three bays, a fuel tank and a parked buggy.
+    boxShadow(g, 0.2, 0.2, n - 0.2, n - 0.8, 40);
+    box(g, 0.2, 0.2, n - 0.2, n - 0.8, 28, CLAD, {
       left: (len) => {
-        for (const u of [len * 0.2, len * 0.4, len * 0.6, len * 0.8]) {
-          // Dutch stall doors, top half open with a dark interior.
-          g.fillStyle = mat(g, 'woodV', '#5a3a1c', 93);
-          g.fillRect(u - 3.5, 0.5, 7, 6);
-          g.fillStyle = '#140c06';
-          g.fillRect(u - 3.5, 6.5, 7, 6.5);
-          g.strokeStyle = '#2a1a0c';
-          g.lineWidth = 0.5;
-          g.strokeRect(u - 3.5, 0.5, 7, 12.5);
-          g.beginPath();
-          g.moveTo(u - 3.5, 0.5);
-          g.lineTo(u + 3.5, 6.5);
-          g.stroke();
-        }
-        g.fillStyle = '#140c06';
-        g.fillRect(len / 2 - 3, 16, 6, 5);
-        g.fillStyle = '#d6bd70';
-        g.fillRect(len / 2 - 3, 16, 6, 2.2);
-        banner(g, len * 0.1, 22, team);
+        for (const f of [0.2, 0.5, 0.8]) rollDoor(g, len * f, len * 0.24, 17, f === 0.5);
+        sign(g, len * 0.5, 21, 9, 4.5, team);
       },
-      right: (len) => windowAt(g, len / 2, 12, 4, 5),
-    }, 95);
-    gableRoof(g, 0.2, 0.2, n - 0.2, n * 0.5, 24, 20, THATCH, 'x', 0.18, 25);
-    // Paddock rails and a water trough.
-    for (let x = 0.1; x <= n - 0.1; x += 0.5) post(g, x, n - 0.1, 8, 1.5);
-    for (let y = n * 0.55; y <= n - 0.1; y += 0.5) post(g, n - 0.1, y, 8, 1.5);
-    for (const z of [6.5, 3.2]) {
-      line3(g, [0.1, n - 0.1, z], [n - 0.1, n - 0.1, z], '#4e331b', 1.2);
-      line3(g, [n - 0.1, n * 0.55, z], [n - 0.1, n - 0.1, z], '#4e331b', 1.2);
-    }
-    box(g, n * 0.25, n * 0.72, n * 0.55, n * 0.8, 5, { base: '#6b4626', mat: 'planks' }, {}, 97);
-    poly3(g, [[n * 0.26, n * 0.73, 4.6], [n * 0.54, n * 0.73, 4.6], [n * 0.54, n * 0.79, 4.6], [n * 0.26, n * 0.79, 4.6]], '#3f6a7a', null);
-    hayBale(g, n * 0.68, n * 0.62);
-    hayBale(g, n * 0.72, n * 0.72);
-    flag(g, n - 0.25, 0.25, 40, team, 1);
+      right: (len) => band(g, 3, len - 3, 20, 4),
+    }, 41);
+    gableRoof(g, 0.15, 0.15, n - 0.15, n - 0.75, 28, 9, { color: ROOF, kind: 'metal' }, 'x', 0.06, 43);
+    silo(g, n - 0.4, n - 0.35, 0.18, 10, '#c9c7c0', false);
+    floodlight(g, 0.25, n - 0.4, 30);
   },
   monastery: (g, n, team) => {
-    groundPatch(g, n, '#8a7a5e', 0.2);
-    // Stone chapel with a bell-cote, round-arched windows and a walled garth.
-    boxShadow(g, 0.3, 0.3, n - 0.3, n * 0.6, 80);
-    box(g, 0.3, 0.3, n - 0.3, n * 0.6, 34, STONE, {
+    apron(g, n, '#7f817e', 0.25);
+    // Intel HQ: a dark glass block behind a security fence, a radar dome and an antenna array.
+    boxShadow(g, 0.3, 0.3, n - 0.6, n - 0.6, 56);
+    slab(g, 0.3, 0.3, n - 0.6, n - 0.6, 40, { base: '#36576e', mat: 'glass' }, {
       left: (len) => {
-        doorAt(g, len / 2, 8, 15);
-        for (const u of [len * 0.2, len * 0.8]) {
-          g.fillStyle = '#1c140c';
-          g.beginPath();
-          g.moveTo(u - 2.2, 14);
-          g.lineTo(u - 2.2, 22);
-          g.arc(u, 22, 2.2, Math.PI, 0, true);
-          g.lineTo(u + 2.2, 14);
-          g.closePath();
-          g.fill();
-          g.fillStyle = 'rgba(80,140,220,0.35)';
-          g.fill();
-        }
-        // Rose window.
-        g.fillStyle = '#1c140c';
-        g.beginPath();
-        g.arc(len / 2, 26, 3.4, 0, Math.PI * 2);
-        g.fill();
-        g.strokeStyle = shadeColor(team, 1.2);
-        g.lineWidth = 0.6;
-        for (let k = 0; k < 6; k++) {
-          g.beginPath();
-          g.moveTo(len / 2, 26);
-          g.lineTo(len / 2 + Math.cos(k) * 3, 26 + Math.sin(k) * 3);
-          g.stroke();
-        }
+        glassDoor(g, len * 0.5, 8, 10);
+        sign(g, len * 0.5, 30, 9, 5, team);
       },
-      right: (len) => {
-        for (const u of [len * 0.3, len * 0.7]) windowAt(g, u, 16, 3.5, 7);
-      },
-    }, 101);
-    gableRoof(g, 0.3, 0.3, n - 0.3, n * 0.6, 34, 26, { color: '#8a5a40', kind: 'shingle' }, 'y', 0.14, 27);
-    // Bell-cote on the gable with a cross.
-    const bx = n / 2, by = n * 0.6;
-    box(g, bx - 0.2, by - 0.1, bx + 0.2, by + 0.05, 74, STONE, {
-      left: (len) => {
-        g.fillStyle = '#140c06';
-        g.fillRect(len * 0.2, 62, len * 0.6, 8);
-        g.fillStyle = '#c9a24a';
-        g.beginPath();
-        g.arc(len / 2, 66, 2, Math.PI, 0);
-        g.fill();
-      },
-    }, 103);
-    const [cx, cy] = P(bx, by, 74);
-    g.fillStyle = '#d9b44a';
-    g.fillRect(cx - 0.6, cy - 12, 1.2, 12);
-    g.fillRect(cx - 3, cy - 9, 6, 1.2);
-    // Low cloister wall and a cypress in the garth.
-    for (const [a, b] of [[[0.2, n - 0.1], [n - 0.1, n - 0.1]], [[n - 0.1, n * 0.62], [n - 0.1, n - 0.1]]] as const) {
-      const [ax, ay] = a, [bx2, by2] = b;
-      box(g, Math.min(ax, bx2), Math.min(ay, by2) - 0.08, Math.max(ax, bx2), Math.max(ay, by2), 6, STONE, {}, 105);
-      boxTop(g, Math.min(ax, bx2), Math.min(ay, by2) - 0.08, Math.max(ax, bx2), Math.max(ay, by2), 6, 'stone', '#b0aa9e');
-    }
-    const [tx, ty] = P(n * 0.25, n * 0.8, 0);
-    const tree = g.createLinearGradient(tx - 3, 0, tx + 3, 0);
-    tree.addColorStop(0, '#4c7a3a');
-    tree.addColorStop(1, '#1e3a1a');
-    g.fillStyle = tree;
-    g.beginPath();
-    g.ellipse(tx, ty - 12, 3.4, 12, 0, 0, Math.PI * 2);
-    g.fill();
-    flag(g, 0.4, 0.4, 40, team, 0.8);
+    }, 'membrane', '#3f454c', 41);
+    trim(g, 0.3, 0.3, n - 0.6, n - 0.6, 40, team);
+    at(g, 40, () => {
+      radome(g, 1.0, 1.0, 0, 0.34);
+      mast(g, 1.8, 0.7, 0, 30, team);
+      hvac(g, 1.6, 1.5, 0, 0.28);
+    });
+    fence(g, [0.1, n - 0.15], [n - 0.15, n - 0.15], 8);
+    fence(g, [n - 0.15, 0.1], [n - 0.15, n - 0.15], 8);
   },
   blacksmith: (g, n, team) => {
-    groundPatch(g, n, '#6f6150', 0.2);
-    // Stone forge with a tall chimney; the open front shows the glowing hearth and anvil.
-    boxShadow(g, 0.2, 0.2, n - 0.2, n * 0.6, 50);
-    box(g, 0.2, 0.2, n - 0.2, n * 0.6, 26, STONE, {
+    apron(g, n, '#7b7d79', 0.25);
+    // Armory: an earth-bermed concrete bunker with a blast door and ammo crates.
+    boxShadow(g, 0.25, 0.25, n - 0.25, n - 0.6, 30);
+    slab(g, 0.25, 0.25, n - 0.25, n - 0.6, 24, { base: '#8f9086', mat: 'concrete' }, {
       left: (len) => {
-        // Open forge bay with a fire glow.
-        g.fillStyle = '#140b05';
-        g.fillRect(len * 0.18, 0, len * 0.42, 15);
-        const glow = g.createRadialGradient(len * 0.39, 4, 0.5, len * 0.39, 4, 9);
-        glow.addColorStop(0, 'rgba(255,190,80,0.95)');
-        glow.addColorStop(0.4, 'rgba(255,90,20,0.6)');
-        glow.addColorStop(1, 'rgba(255,60,10,0)');
-        g.fillStyle = glow;
-        g.fillRect(len * 0.18, 0, len * 0.42, 15);
-        g.fillStyle = mat(g, 'woodH', '#4a3019', 111);
-        g.fillRect(len * 0.16, 15, len * 0.46, 2);
-        windowAt(g, len * 0.8, 12, 4, 5);
-        banner(g, len * 0.08, 22, team);
+        g.fillStyle = '#4b5258';
+        g.fillRect(len / 2 - 9, 0, 18, 15);
+        g.fillStyle = mat(g, 'metal', '#6f7880', 62);
+        g.fillRect(len / 2 - 8, 0, 16, 14);
+        hazard(g, len / 2 - 9, len / 2 + 9, 15, 2);
+        sign(g, len * 0.85, 12, 6, 5, team);
       },
-      right: (len) => windowAt(g, len / 2, 12, 4, 5),
-    }, 113);
-    gableRoof(g, 0.2, 0.2, n - 0.2, n * 0.6, 26, 18, SHINGLE, 'x', 0.15, 29);
-    box(g, n - 0.85, 0.35, n - 0.45, 0.75, 62, STONE, {}, 115);
-    boxTop(g, n - 0.85, 0.35, n - 0.45, 0.75, 62, 'stone', '#3c3833');
-    const [cx, cy] = P(n - 0.65, 0.55, 64);
-    for (let k = 0; k < 4; k++) {
-      const sm = g.createRadialGradient(cx + k * 2.5, cy - k * 6, 0, cx + k * 2.5, cy - k * 6, 4 + k * 1.6);
-      sm.addColorStop(0, `rgba(70,68,66,${0.45 - k * 0.09})`);
-      sm.addColorStop(1, 'rgba(70,68,66,0)');
-      g.fillStyle = sm;
-      g.beginPath();
-      g.arc(cx + k * 2.5, cy - k * 6, 4 + k * 1.6, 0, Math.PI * 2);
-      g.fill();
-    }
-    // Anvil on a stump, quench barrel and a rack of blades in the yard.
-    const [ax, ay] = P(n * 0.45, n * 0.8, 0);
-    g.fillStyle = 'rgba(8,12,4,0.35)';
-    g.beginPath();
-    g.ellipse(ax + 2, ay, 5, 1.8, 0, 0, Math.PI * 2);
-    g.fill();
-    g.fillStyle = mat(g, 'woodV', '#5a3a1c', 117);
-    g.fillRect(ax - 2.4, ay - 6, 4.8, 6);
-    const anvil = g.createLinearGradient(ax - 5, 0, ax + 5, 0);
-    anvil.addColorStop(0, '#8a9296');
-    anvil.addColorStop(1, '#2e3336');
-    g.fillStyle = anvil;
-    g.beginPath();
-    g.moveTo(ax - 5.5, ay - 9.5);
-    g.lineTo(ax + 4, ay - 9.5);
-    g.quadraticCurveTo(ax + 7, ay - 9, ax + 7.5, ay - 8);
-    g.lineTo(ax + 2, ay - 7.6);
-    g.lineTo(ax + 1.5, ay - 6);
-    g.lineTo(ax - 2.5, ay - 6);
-    g.lineTo(ax - 3, ay - 7.6);
-    g.lineTo(ax - 5.5, ay - 8);
-    g.closePath();
-    g.fill();
-    barrel(g, n * 0.7, n * 0.85, 3, 7);
-    for (let k = 0; k < 4; k++) line3(g, [n * 0.12 + k * 0.08, n * 0.85, 0], [n * 0.12 + k * 0.08, n * 0.85, 14], k % 2 ? '#c9d1d6' : '#aab3b8', 0.9);
-    line3(g, [n * 0.08, n * 0.85, 11], [n * 0.42, n * 0.85, 11], '#4e331b', 1.1);
-    flag(g, 0.3, 0.3, 32, team, 0.8);
+      right: (len) => hazard(g, 0, len, 20, 1.5),
+    }, 'earth', '#6f7a3e', 41);
+    for (const [x, y] of [[0.5, 0.5], [1.4, 0.6]] as const) hvac(g, x, y, 24, 0.3);
+    for (let k = 0; k < 3; k++) slab(g, 0.3 + k * 0.32, n - 0.45, 0.58 + k * 0.32, n - 0.2, 6, { base: '#5d6344', mat: 'metal' }, {}, 'metal', '#6b7150', 70 + k);
+    at(g, 6, () => slab(g, 0.46, n - 0.45, 0.74, n - 0.2, 6, { base: '#5d6344', mat: 'metal' }, {}, 'metal', '#6b7150', 74));
+    floodlight(g, n - 0.25, n - 0.3, 30);
   },
   market: (g, n, team) => {
-    groundPatch(g, n, '#8a7254', 0.25);
-    // Three striped stalls around a small square, heaped with produce.
-    const stall = (x0: number, y0: number, x1: number, y1: number, goods: string[]) => {
-      boxShadow(g, x0, y0, x1, y1, 26);
-      for (const [x, y] of [[x0, y0], [x1, y0], [x0, y1], [x1, y1]] as const) post(g, x, y, 15, 1.8);
-      // Counter with goods.
-      box(g, x0 + 0.05, y1 - 0.2, x1 - 0.05, y1, 6, { base: '#7a5634', mat: 'planks' }, {}, 121);
-      for (let k = 0; k < goods.length * 4; k++) {
-        const t = (k + 0.5) / (goods.length * 4);
-        const [gx, gy] = P(x0 + 0.1 + (x1 - x0 - 0.2) * t, y1 - 0.1, 6.5);
-        const c = goods[k % goods.length];
-        const ball = g.createRadialGradient(gx - 0.5, gy - 0.8, 0.1, gx, gy - 0.5, 1.6);
-        ball.addColorStop(0, shadeColor(c, 1.35));
-        ball.addColorStop(1, shadeColor(c, 0.65));
-        g.fillStyle = ball;
-        g.beginPath();
-        g.arc(gx, gy - 0.6, 1.3, 0, Math.PI * 2);
-        g.fill();
-      }
-      hipRoof(g, x0, y0, x1, y1, 15, 9, { color: '#efe4c8', kind: 'canvas', trim: team }, 0.08);
-      // Awning stripes in the team colour.
-      for (let k = 1; k < 4; k++) {
-        const f = k / 4;
-        line3(g, [x0 + (x1 - x0) * f, y1 + 0.08, 15], [x0 + (x1 - x0) * f, (y0 + y1) / 2, 24], shadeColor(team, 1.1), 1.4);
-      }
-    };
-    stall(0.15, 0.2, n * 0.48, n * 0.42, ['#c4392b', '#e8a33a']);
-    stall(n * 0.55, 0.2, n - 0.15, n * 0.42, ['#6f9a3a', '#d8c36a']);
-    stall(n * 0.55, n * 0.55, n - 0.15, n * 0.8, ['#8a4a8a', '#c4392b']);
-    // Sacks, a barrel and crates in the square.
-    sack(g, n * 0.25, n * 0.7);
-    sack(g, n * 0.35, n * 0.78, 0.85);
-    barrel(g, n * 0.15, n * 0.85, 3, 7.5);
-    crate(g, n * 0.3, n * 0.52, 0.3);
-    flag(g, n * 0.1, n * 0.1, 30, team, 0.9);
+    apron(g, n, '#9a9a94', 0.25, 'concrete');
+    // Exchange: a glass pavilion under a cantilevered roof, with a live ticker.
+    boxShadow(g, 0.3, 0.3, n - 0.3, n - 0.3, 34);
+    slab(g, 0.4, 0.4, n - 0.5, n - 0.5, 24, GLASS, {
+      left: (len) => {
+        glassDoor(g, len / 2, 8, 11);
+        g.fillStyle = '#0b1218';
+        g.fillRect(4, 15, len - 8, 4);
+        g.fillStyle = '#4ae06a';
+        for (let u = 6; u < len - 8; u += 5) g.fillRect(u, 16.2, 3, 1.6);
+        g.fillStyle = '#ff5a4a';
+        for (let u = 8.5; u < len - 8; u += 15) g.fillRect(u, 16.2, 2, 1.6);
+      },
+    }, 'membrane', ROOF, 41);
+    at(g, 24, () => slab(g, 0.2, 0.2, n - 0.2, n - 0.2, 4, { base: '#e2e3e1', mat: 'concrete' }, {}, 'membrane', '#d5d6d3', 43));
+    trim(g, 0.2, 0.2, n - 0.2, n - 0.2, 28, team);
+    for (const [x, y] of [[0.3, n - 0.3], [n - 0.3, n - 0.3], [n - 0.3, 0.3]] as const) post(g, x, y, 24, 1.4, '#c9cdd0');
+    container(g, 0.25, n - 0.15, shadeColor(team, 0.8), true, 0.8);
+    flag(g, n - 0.25, n - 0.15, 0, team, 1);
   },
   university: (g, n, team) => {
-    groundPatch(g, n, '#8c8068', 0.2);
-    // A dressed-stone hall with tall arched windows and a domed observatory.
-    boxShadow(g, 0.25, 0.25, n - 0.25, n * 0.62, 70);
-    box(g, 0.25, 0.25, n - 0.25, n * 0.62, 32, { base: '#b5ae9f', mat: 'stone', plinth: 5 }, {
+    apron(g, n, '#9a9a94', 0.25, 'concrete');
+    // Research lab: a white block with a glass atrium, a telescope dome and a wind turbine.
+    boxShadow(g, 0.3, 0.3, n - 0.3, n - 0.3, 46);
+    slab(g, 0.3, 0.3, n - 0.3, n - 0.3, 26, { base: '#e6e7e4', mat: 'concrete' }, {
       left: (len) => {
-        doorAt(g, len / 2, 8, 14);
-        for (const u of [len * 0.15, len * 0.3, len * 0.7, len * 0.85]) {
-          g.fillStyle = '#1a120a';
-          g.beginPath();
-          g.moveTo(u - 2.4, 9);
-          g.lineTo(u - 2.4, 21);
-          g.arc(u, 21, 2.4, Math.PI, 0, true);
-          g.lineTo(u + 2.4, 9);
-          g.closePath();
-          g.fill();
-          g.fillStyle = 'rgba(255,215,140,0.25)';
-          g.fill();
-        }
-        banner(g, len * 0.5, 30, team);
+        glassDoor(g, len * 0.3, 8, 10);
+        band(g, len * 0.45, len - 3, 4, 18, true);
+        sign(g, len * 0.3, 16, 8, 4, team);
       },
       right: (len) => {
-        for (const u of [len * 0.3, len * 0.7]) windowAt(g, u, 14, 3.5, 7);
+        band(g, 3, len - 3, 6, 5);
+        band(g, 3, len - 3, 16, 5);
       },
-    }, 131);
-    gableRoof(g, 0.25, 0.25, n - 0.25, n * 0.62, 32, 20, SHINGLE, 'x', 0.15, 33);
-    // Observatory drum and dome at the east end.
-    const dx = n - 0.75, dy = n * 0.45;
-    box(g, dx - 0.35, dy - 0.35, dx + 0.35, dy + 0.35, 58, { base: '#bdb6a7', mat: 'stone' }, { left: (len) => windowAt(g, len / 2, 44, 3, 6), right: (len) => windowAt(g, len / 2, 44, 3, 6) }, 133);
-    const [cx, cy] = P(dx, dy, 58);
-    const dome = g.createRadialGradient(cx - 5, cy - 8, 1, cx, cy - 3, 16);
-    dome.addColorStop(0, ORNATE ? '#f2d27a' : '#a8c4c0');
-    dome.addColorStop(1, ORNATE ? '#8a6a1c' : '#3e5a58');
-    g.fillStyle = dome;
+    }, 'membrane', ROOF, 41);
+    trim(g, 0.3, 0.3, n - 0.3, n - 0.3, 26, team);
+    at(g, 26, () => {
+      radome(g, 0.9, 0.9, 0, 0.3);
+      if (HIGHTECH || GLAZED) solar(g, 1.4, 0.5, n - 0.5, n - 0.5, 0);
+      else hvac(g, 1.6, 1.2, 0);
+    });
+    // Wind turbine at the back corner.
+    const [tx, ty] = P(n - 0.25, 0.25, 0), [hx, hy] = P(n - 0.25, 0.25, 90);
+    g.fillStyle = '#eef0f0';
     g.beginPath();
-    g.ellipse(cx, cy - 2, 22.4 / 2, 15, 0, Math.PI, 0);
-    g.lineTo(cx + 11.2, cy);
-    g.ellipse(cx, cy, 11.2, 5.6, 0, 0, Math.PI);
+    g.moveTo(tx - 1.6, ty);
+    g.lineTo(hx - 0.6, hy);
+    g.lineTo(hx + 0.6, hy);
+    g.lineTo(tx + 1.6, ty);
     g.closePath();
     g.fill();
-    g.strokeStyle = 'rgba(20,30,30,0.5)';
-    g.lineWidth = 0.6;
-    for (const k of [-0.5, 0, 0.5]) {
+    for (let k = 0; k < 3; k++) {
+      const a = (k / 3) * Math.PI * 2 + 0.4;
+      g.strokeStyle = '#f4f6f6';
+      g.lineWidth = 1.6;
       g.beginPath();
-      g.moveTo(cx + k * 11, cy + 2.8 * Math.cos(k));
-      g.quadraticCurveTo(cx + k * 6, cy - 12, cx, cy - 17);
+      g.moveTo(hx, hy);
+      g.lineTo(hx + Math.cos(a) * 26, hy + Math.sin(a) * 26);
       g.stroke();
     }
-    g.fillStyle = '#d9b44a';
-    g.fillRect(cx - 0.6, cy - 22, 1.2, 5);
-    flag(g, 0.4, 0.4, 38, team, 0.8);
+    g.fillStyle = '#d8dcde';
+    g.fillRect(hx - 2, hy - 2, 5, 3.5);
   },
-  palisade_wall: (g, _n, _team, rng, v) => palisade(g, v, rng),
-  palisade_gate: (g, _n, _team, rng, v) => palisadeGate(g, v, rng),
-  stone_wall: (g, _n, _team, rng, v) => stoneWall(g, v, rng),
-  gate: (g, _n, team, rng, v) => stoneGate(g, v, team, rng),
+  palisade_wall: (g, _n, _team, rng, v) => sandbags(g, v, rng),
+  palisade_gate: (g, _n, team, rng, v) => checkpoint(g, v, team, rng),
+  stone_wall: (g, _n, _team, rng, v) => concreteWall(g, v, rng),
+  gate: (g, _n, team, rng, v) => blastGate(g, v, team, rng),
   watch_tower: (g, _n, team, rng, v) => tower(g, v, team, rng),
   castle: (g, n, team) => {
-    const st = { base: ORNATE ? '#bcb5a6' : '#a49e92', mat: 'stone' as const };
-    groundPatch(g, n, '#7d7060', 0.3);
-    boxShadow(g, 0.2, 0.2, n - 0.2, n - 0.2, 100);
-    // Curtain walls with a gatehouse, a great keep in the ward, round-shouldered corner towers.
-    const T = 0.85;
-    const corner = (x: number, y: number) => {
-      box(g, x, y, x + T, y + T, 54, st, { left: (len) => { g.fillStyle = '#140c06'; g.fillRect(len / 2 - 1, 30, 2, 7); } }, 61);
-      boxTop(g, x, y, x + T, y + T, 54, 'stone', '#8e897e');
-      crenels(g, x - 0.04, y - 0.04, x + T + 0.04, y + T + 0.04, 54, st, 0.14, 63);
-    };
-    corner(0.15, 0.15);
-    box(g, 0.4, 0.3, n - 0.4, 0.75, 36, st, {}, 65);
-    boxTop(g, 0.4, 0.3, n - 0.4, 0.75, 36, 'stone', '#8e897e');
-    box(g, 0.3, 0.4, 0.75, n - 0.4, 36, st, {}, 67);
-    boxTop(g, 0.3, 0.4, 0.75, n - 0.4, 36, 'stone', '#8e897e');
-    corner(n - 0.15 - T, 0.15);
-    corner(0.15, n - 0.15 - T);
-    // The keep.
-    box(g, 1.15, 1.15, n - 1.15, n - 1.15, 76, st, {
-      left: (len) => {
-        for (const u of [len * 0.3, len * 0.7]) {
-          g.fillStyle = '#140c06';
-          g.fillRect(u - 1.2, 40, 2.4, 8);
-          g.fillRect(u - 1.2, 58, 2.4, 8);
-        }
-        banner(g, len / 2, 72, team);
-      },
-      right: (len) => {
-        for (const u of [len * 0.3, len * 0.7]) {
-          g.fillStyle = '#140c06';
-          g.fillRect(u - 1.2, 50, 2.4, 8);
-        }
-      },
-    }, 69);
-    boxTop(g, 1.15, 1.15, n - 1.15, n - 1.15, 76, 'stone', '#8e897e');
-    crenels(g, 1.1, 1.1, n - 1.1, n - 1.1, 76, st, 0.16, 71);
-    flag(g, n / 2, n / 2, 76, team, 1.4);
-    // Front curtain walls with the gatehouse, then the front corner tower.
-    box(g, n - 0.75, 0.4, n - 0.3, n - 0.4, 36, st, {}, 73);
-    boxTop(g, n - 0.75, 0.4, n - 0.3, n - 0.4, 36, 'stone', '#8e897e');
-    crenels(g, n - 0.78, 0.4, n - 0.27, n - 0.4, 36, st, 0.14, 75);
-    box(g, 0.4, n - 0.75, n - 0.4, n - 0.3, 36, st, {
-      left: (len) => {
-        doorAt(g, len / 2, 12, 20);
-        banner(g, len * 0.25, 32, team);
-        banner(g, len * 0.75, 32, team);
-      },
-    }, 77);
-    boxTop(g, 0.4, n - 0.75, n - 0.4, n - 0.3, 36, 'stone', '#8e897e');
-    crenels(g, 0.4, n - 0.78, n - 0.4, n - 0.27, 36, st, 0.14, 79);
-    corner(n - 0.15 - T, n - 0.15 - T);
+    // Fortress: sloped concrete bastion walls, corner bunkers, a command bunker and a radar dome.
+    apron(g, n, '#7b7c76', 0.35, 'concrete');
+    boxShadow(g, 0.1, 0.1, n - 0.1, n - 0.1, 70);
+    const wall: WallStyle = { base: HIGHTECH ? '#c0beb6' : '#9f9c93', mat: 'concrete' };
+    slab(g, 0.15, 0.15, n - 0.15, n - 0.15, 10, wall, {}, 'concrete', '#8e8b83', 30);
+    at(g, 10, () => {
+      slab(g, 0.3, 0.3, n - 0.3, n - 0.3, 22, wall, {
+        left: (len) => {
+          g.fillStyle = '#4b5258';
+          g.fillRect(len / 2 - 10, -10, 20, 20);
+          g.fillStyle = mat(g, 'metal', '#6f7880', 62);
+          g.fillRect(len / 2 - 9, -10, 18, 19);
+          hazard(g, len / 2 - 10, len / 2 + 10, 9, 2);
+          g.fillStyle = '#121519';
+          for (const u of [len * 0.15, len * 0.3, len * 0.7, len * 0.85]) g.fillRect(u - 3, 14, 6, 1.6);
+          sign(g, len / 2, 13, 12, 5, team);
+        },
+        right: (len) => {
+          g.fillStyle = '#121519';
+          for (const u of [len * 0.2, len * 0.4, len * 0.6, len * 0.8]) g.fillRect(u - 3, 14, 6, 1.6);
+        },
+      }, 'concrete', '#8a877f', 31);
+      // Corner bunkers with gun slits.
+      for (const [x, y] of [[0.15, 0.15], [n - 0.85, 0.15], [0.15, n - 0.85], [n - 0.85, n - 0.85]] as const)
+        slab(g, x, y, x + 0.7, y + 0.7, 30, wall, {
+          left: (len) => {
+            g.fillStyle = '#121519';
+            g.fillRect(len / 2 - 5, 20, 10, 2);
+          },
+          right: (len) => {
+            g.fillStyle = '#121519';
+            g.fillRect(len / 2 - 5, 20, 10, 2);
+          },
+        }, 'concrete', '#8a877f', 33);
+      at(g, 22, () => {
+        // Command bunker, helipad and radar on the roof.
+        slab(g, 1.2, 1.0, 2.6, 2.2, 18, wall, {
+          left: (len) => band(g, 3, len - 3, 8, 5, true),
+          right: (len) => band(g, 3, len - 3, 8, 5),
+        }, 'membrane', ROOF, 35);
+        trim(g, 1.2, 1.0, 2.6, 2.2, 18, team);
+        at(g, 18, () => {
+          radome(g, 1.6, 1.4, 0, 0.32);
+          mast(g, 2.3, 1.2, 0, 34, team);
+        });
+        helipad(g, 2.95, 2.95, 0.4);
+      });
+      if (HIGHTECH) for (const [a, b] of [[[0.3, n - 0.3], [n - 0.3, n - 0.3]], [[n - 0.3, 0.3], [n - 0.3, n - 0.3]]] as const) razorWire(g, a as [number, number], b as [number, number], 22);
+      flag(g, 0.5, 0.5, 30, team, 1.1);
+      flag(g, n - 0.5, n - 0.5, 30, team, 1.1);
+    });
   },
   siege_workshop: (g, n, team) => {
-    groundPatch(g, n, '#7a6448', 0.25);
-    // A tall open-fronted timber shed with a wheel and beams in the yard and a hoisting crane.
-    boxShadow(g, 0.2, 0.2, n - 0.2, n * 0.62, 60);
-    box(g, 0.2, 0.2, n - 0.2, n * 0.62, 34, { base: '#7a5634', mat: 'planks', plinth: Math.max(PLASTER.plinth ?? 0, 4) }, {
+    apron(g, n, '#72746f', 0.25);
+    // Vehicle factory: a tall hall with a sawtooth roof, a big door, stacks and a gantry crane outside.
+    boxShadow(g, 0.2, 0.2, n - 0.2, n - 0.7, 70);
+    box(g, 0.2, 0.2, n - 0.2, n - 0.7, 36, CLAD, {
       left: (len) => {
-        g.fillStyle = '#140c06';
-        g.fillRect(len * 0.15, 0, len * 0.5, 26);
-        g.fillStyle = mat(g, 'woodH', '#4a3019', 141);
-        g.fillRect(len * 0.13, 26, len * 0.54, 2.4);
-        // A half-built ram frame glimpsed inside.
-        g.strokeStyle = '#8a6038';
-        g.lineWidth = 1.4;
-        g.beginPath();
-        g.moveTo(len * 0.2, 2);
-        g.lineTo(len * 0.35, 16);
-        g.lineTo(len * 0.5, 2);
-        g.moveTo(len * 0.25, 8);
-        g.lineTo(len * 0.45, 8);
-        g.stroke();
-        banner(g, len * 0.82, 30, team);
+        rollDoor(g, len * 0.45, len * 0.5, 24);
+        sign(g, len * 0.85, 26, 7, 6, team);
+        hazard(g, len * 0.2, len * 0.7, 24, 1.5);
       },
-      right: (len) => windowAt(g, len / 2, 16, 4, 5),
-    }, 143);
-    gableRoof(g, 0.2, 0.2, n - 0.2, n * 0.62, 34, 22, SHINGLE, 'x', 0.18, 35);
-    // Spare wheel leaning on the wall and stacked beams.
-    const [wx, wy] = P(n * 0.85, n * 0.68, 7);
-    g.strokeStyle = '#4e331b';
-    g.lineWidth = 1.6;
-    g.beginPath();
-    g.ellipse(wx, wy, 4, 7, -0.4, 0, Math.PI * 2);
-    g.stroke();
-    g.lineWidth = 0.7;
-    for (let a = 0; a < 3; a++) {
-      g.beginPath();
-      g.moveTo(wx + Math.cos(a) * 3.6, wy + Math.sin(a) * 6.4);
-      g.lineTo(wx - Math.cos(a) * 3.6, wy - Math.sin(a) * 6.4);
-      g.stroke();
+      right: (len) => band(g, 3, len - 3, 28, 4),
+    }, 41);
+    // Sawtooth roof: north lights along x.
+    for (let k = 0; k < 4; k++) {
+      const y0 = 0.2 + ((n - 0.9) * k) / 4, y1 = 0.2 + ((n - 0.9) * (k + 1)) / 4;
+      poly3(g, [[0.2, y0, 36], [n - 0.2, y0, 36], [n - 0.2, y0, 44], [0.2, y0, 44]], '#3f5a70');
+      poly3(g, [[0.2, y0, 44], [n - 0.2, y0, 44], [n - 0.2, y1, 36], [0.2, y1, 36]], mat(g, 'metal', ROOF, 45));
     }
-    for (let r = 0; r < 3; r++) for (let k = 0; k < 3 - r; k++) log(g, [n * 0.15 + k * 0.15 + r * 0.075, n * 0.72], [n * 0.15 + k * 0.15 + r * 0.075, n - 0.05], 1.6 + r * 2.9, 1.5);
-    // Crane: a mast, jib and hook.
-    line3(g, [n * 0.62, n * 0.85, 0], [n * 0.62, n * 0.85, 44], '#5a3d22', 1.8);
-    line3(g, [n * 0.62, n * 0.85, 42], [n * 0.95, n * 0.85, 34], '#5a3d22', 1.4);
-    line3(g, [n * 0.93, n * 0.85, 34], [n * 0.93, n * 0.85, 20], 'rgba(200,180,140,0.8)', 0.5);
-    flag(g, n - 0.25, 0.25, 40, team, 0.9);
+    for (const x of [0.5, 0.85]) silo(g, x, 0.4, 0.09, 66, '#8d949a', false);
+    // Gantry crane over the yard.
+    const y = n - 0.35;
+    post(g, 0.25, y, 30, 2, '#e8b51c');
+    post(g, n - 0.25, y, 30, 2, '#e8b51c');
+    line3(g, [0.25, y, 30], [n - 0.25, y, 30], '#e8b51c', 2.6);
+    const [hx, hy] = P(n * 0.6, y, 29);
+    g.strokeStyle = '#2b3036';
+    g.lineWidth = 0.5;
+    g.beginPath();
+    g.moveTo(hx, hy);
+    g.lineTo(hx, hy + 12);
+    g.stroke();
+    g.fillStyle = '#2b3036';
+    g.fillRect(hx - 2, hy + 12, 4, 3);
   },
 };
 
-/** Building sprites for one zoom level, cached per type, player and variant. */
 export class BuildingSprites {
   /** Memory allowed for one zoom level's building sprites. */
   private readonly cache = new SpriteCache(56 * 1024 * 1024);
@@ -1535,9 +1422,9 @@ export class BuildingSprites {
     g.translate(halfW, RISE);
     setScale(k);
     style(age);
-    BANNER = BANNERS[player] ?? 'swallowtail';
+    BANNER = BANNERS[player] ?? 'square';
     PAINTERS[type](g, n, PLAYER_COLORS[player % PLAYER_COLORS.length], new Rng(n * 31 + type.length), variant);
-    grade(c, 0.06, n * 97 + variant);
+    grade(c, 0.04, n * 97 + variant);
     // Anchor = footprint's north corner.
     return { c, ax: halfW * k, ay: RISE * k };
   }

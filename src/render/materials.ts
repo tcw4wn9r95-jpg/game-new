@@ -1,5 +1,6 @@
 // Procedural material textures for buildings: plaster, masonry, wood, thatch,
-// shingles, canvas and packed earth. Each is a seamless tile painted at device
+// shingles, canvas, packed earth, and the modern set: precast concrete,
+// corrugated metal, glass curtain wall and flat-roof membrane. Each is a seamless tile painted at device
 // resolution (k device px per unit) and used as a CanvasPattern scaled back to
 // units, so detail stays crisp at every zoom level. Light comes from the upper left.
 import { Rng } from '../sim/rng';
@@ -7,7 +8,7 @@ import { Rng } from '../sim/rng';
 type G = CanvasRenderingContext2D;
 type RGB = [number, number, number];
 
-export type Material = 'plaster' | 'stone' | 'woodH' | 'woodV' | 'thatch' | 'shingle' | 'canvas' | 'earth' | 'planks';
+export type Material = 'plaster' | 'stone' | 'woodH' | 'woodV' | 'thatch' | 'shingle' | 'canvas' | 'earth' | 'planks' | 'concrete' | 'metal' | 'glass' | 'membrane';
 
 /** Tile size in units for each material. */
 const SIZE: Record<Material, [number, number]> = {
@@ -20,6 +21,10 @@ const SIZE: Record<Material, [number, number]> = {
   canvas: [48, 48],
   earth: [64, 64],
   planks: [64, 24],
+  concrete: [48, 32],
+  metal: [24, 48],
+  glass: [24, 20],
+  membrane: [64, 64],
 };
 
 const cache = new Map<string, CanvasPattern>();
@@ -292,6 +297,76 @@ const PAINT: Record<Material, Painter> = {
         g.fill();
       });
     }
+  },
+  concrete(g, W, H, k, base, rng) {
+    // Precast panels: mottled grey with panel joints and form-tie holes.
+    g.fillStyle = css(base);
+    g.fillRect(0, 0, W, H);
+    const lo = periodicNoise(rng, 5), streak = periodicNoise(rng, 12);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    modulate(g, Math.round(W * k), Math.round(H * k), (u, v) => (lo(u, v) - 0.5) * 0.12 - Math.max(0, streak(u, v * 0.12) - 0.65) * 0.35 + (Math.random() - 0.5) * 0.06);
+    g.setTransform(k, 0, 0, k, 0, 0);
+    g.fillStyle = css(tone(base, 0.62), 0.8);
+    g.fillRect(0, 0, W, 0.5);
+    g.fillRect(0, 0, 0.5, H);
+    g.fillStyle = css(tone(base, 1.2), 0.5);
+    g.fillRect(0, 0.5, W, 0.35);
+    g.fillStyle = css(tone(base, 0.5), 0.7);
+    for (const [x, y] of [[W * 0.25, H * 0.3], [W * 0.75, H * 0.3], [W * 0.25, H * 0.75], [W * 0.75, H * 0.75]]) {
+      g.beginPath();
+      g.arc(x, y, 0.45, 0, Math.PI * 2);
+      g.fill();
+    }
+  },
+  metal(g, W, H, _k, base) {
+    // Corrugated cladding: vertical ribs, each lit on its left flank.
+    g.fillStyle = css(base);
+    g.fillRect(0, 0, W, H);
+    const rib = W / 6;
+    for (let x = 0; x < W; x += rib) {
+      const grad = g.createLinearGradient(x, 0, x + rib, 0);
+      grad.addColorStop(0, css(tone(base, 1.28)));
+      grad.addColorStop(0.35, css(tone(base, 1.05)));
+      grad.addColorStop(0.7, css(tone(base, 0.75)));
+      grad.addColorStop(1, css(tone(base, 0.92)));
+      g.fillStyle = grad;
+      g.fillRect(x, 0, rib, H);
+    }
+    g.fillStyle = 'rgba(0,0,0,0.18)';
+    g.fillRect(0, H - 0.6, W, 0.6);
+  },
+  glass(g, W, H, _k, base) {
+    // Curtain wall: tinted panes reflecting the sky, aluminium mullions and transoms.
+    const sky = g.createLinearGradient(0, 0, W, H);
+    sky.addColorStop(0, css(tone(base, 1.45)));
+    sky.addColorStop(0.45, css(base));
+    sky.addColorStop(1, css(tone(base, 0.7)));
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, H);
+    g.fillStyle = 'rgba(255,255,255,0.18)';
+    g.beginPath();
+    g.moveTo(W * 0.2, 0);
+    g.lineTo(W * 0.45, 0);
+    g.lineTo(W * 0.1, H);
+    g.lineTo(0, H);
+    g.lineTo(0, H * 0.7);
+    g.closePath();
+    g.fill();
+    g.fillStyle = '#b9c2c8';
+    g.fillRect(0, 0, W, 0.9);
+    g.fillRect(0, 0, 0.9, H);
+    g.fillRect(W / 2 - 0.3, 0, 0.6, H);
+  },
+  membrane(g, W, H, k, base, rng) {
+    // Flat roof: gravel-flecked membrane with lapped seams.
+    g.fillStyle = css(base);
+    g.fillRect(0, 0, W, H);
+    const lo = periodicNoise(rng, 6);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    modulate(g, Math.round(W * k), Math.round(H * k), (u, v) => (lo(u, v) - 0.5) * 0.14 + (Math.random() - 0.5) * 0.16);
+    g.setTransform(k, 0, 0, k, 0, 0);
+    g.fillStyle = css(tone(base, 0.7), 0.6);
+    for (let y = 0; y < H; y += 16) g.fillRect(0, y, W, 0.5);
   },
 };
 
