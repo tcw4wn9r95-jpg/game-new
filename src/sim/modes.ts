@@ -12,16 +12,16 @@ import { scenarioTick } from './scenario';
 
 export type GameMode = 'standard' | 'regicide' | 'domination';
 export const GAME_MODES: GameMode[] = ['standard', 'regicide', 'domination'];
-export const MODE_NAMES: Record<GameMode, string> = { standard: 'Standard', regicide: 'Regicide', domination: 'Domination' };
+export const MODE_NAMES: Record<GameMode, string> = { standard: 'Standard', regicide: 'Commander', domination: 'Control' };
 
 export type VictoryReason = 'conquest' | 'wonder' | 'relics' | 'regicide' | 'domination' | 'sites' | 'objectives';
 export const VICTORY_TEXT: Record<VictoryReason, string> = {
   conquest: 'by conquest',
-  wonder: 'by Wonder',
-  relics: 'by holding every relic',
-  regicide: 'by slaying the King',
+  wonder: 'by Launch Complex',
+  relics: 'by holding all the intel',
+  regicide: 'by taking out the Commander',
   domination: 'on points',
-  sites: 'by holding every site',
+  sites: 'by holding every control point',
   objectives: 'on the objectives',
 };
 
@@ -213,7 +213,7 @@ function wonderCheck(w: World): void {
     standing.add(b.id);
     if (st.wonders[b.id] === undefined) {
       st.wonders[b.id] = w.time;
-      w.events.push({ type: 'mode', owner: b.owner, message: 'Wonder finished', x: b.x + b.size / 2, y: b.y + b.size / 2 });
+      w.events.push({ type: 'mode', owner: b.owner, message: 'Launch Complex finished', x: b.x + b.size / 2, y: b.y + b.size / 2 });
     }
   }
   for (const id of Object.keys(st.wonders)) if (!standing.has(+id)) delete st.wonders[+id];
@@ -324,7 +324,7 @@ export function relicThink(w: World, u: Unit, o: { id: number }, walk: () => voi
   r.holder = b.id;
   r.x = b.x + b.size / 2 + (w.rng.next() - 0.5);
   r.y = b.y + b.size / 2;
-  w.events.push({ type: 'mode', owner: u.owner, message: 'Relic secured', x: r.x, y: r.y });
+  w.events.push({ type: 'mode', owner: u.owner, message: 'Intel secured', x: r.x, y: r.y });
   stop();
 }
 

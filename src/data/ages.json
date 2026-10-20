@@ -1,12 +1,12 @@
 [
   {
-    "name": "Settlement",
+    "name": "Foundation",
     "numeral": "I",
     "cost": {},
     "researchSeconds": 0
   },
   {
-    "name": "Township",
+    "name": "Expansion",
     "numeral": "II",
     "cost": {
       "food": 500
@@ -18,7 +18,7 @@
     }
   },
   {
-    "name": "Stronghold",
+    "name": "Network",
     "numeral": "III",
     "cost": {
       "food": 800,
@@ -31,7 +31,7 @@
     }
   },
   {
-    "name": "Dominion",
+    "name": "Autonomy",
     "numeral": "IV",
     "cost": {
       "food": 1000,

@@ -104,10 +104,10 @@ describe('ages and technologies', () => {
     const barracks = w.placeBuilding('barracks', 0, 30, 10, true);
     w.issue(0, { type: 'research', id: barracks.id, tech: 'swordsman' });
     run(w, 46);
-    expect(unitStats(w, 0, 'militia').name).toBe('Swordsman');
+    expect(unitStats(w, 0, 'militia').name).toBe('Assault Breacher');
     expect(m.hp).toBe(60);
     // A second level needs the first.
-    expect(researchBlock(w, 0, 'bodkin_arrow')).toMatch(/Requires Fletching/);
+    expect(researchBlock(w, 0, 'bodkin_arrow')).toMatch(/Requires Rifle Scopes/);
   });
 
   it('the market buys and sells, with prices that move', () => {

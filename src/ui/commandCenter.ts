@@ -60,7 +60,7 @@ function tipHtml(title: string, body: string, cost?: Record<string, number>): st
 /** One-line account of what a unit is doing. */
 function status(w: World, u: Unit): string {
   const o = u.order;
-  if (u.state === 'pack') return u.packed ? 'Unpacking…' : 'Packing up…';
+  if (u.state === 'pack') return u.packed ? 'Unpacking…' : 'Stowing…';
   if (u.cargo.length) return `${u.cargo.length} aboard`;
   if (!o) return UNIT_DEFS[u.type].packs ? (u.packed ? 'Packed' : 'Ready to fire') : 'Idle';
   switch (o.type) {
@@ -88,7 +88,7 @@ function status(w: World, u: Unit): string {
     case 'garrison':
       return w.unit(o.id) ? 'Climbing aboard' : 'Going inside';
     case 'relic':
-      return carried(w, u) ? 'Bringing a relic home' : 'Fetching a relic';
+      return carried(w, u) ? 'Bringing intel home' : 'Fetching intel';
     case 'attackGround':
       return u.state === 'attack' ? 'Bombarding' : 'Moving to bombard';
     case 'repair': {
@@ -109,7 +109,7 @@ const STANCE_TEXT: Record<Stance, [string, string]> = {
   aggressive: ['Aggressive', 'Attack any enemy in sight and chase it.'],
   defensive: ['Defensive', 'Attack enemies nearby, then return to post.'],
   stand: ['Stand Ground', 'Hold position; attack only what comes within reach.'],
-  passive: ['No Attack', 'Never attack, even when struck. Good for scouting.'],
+  passive: ['No Attack', 'Hold fire, even when struck. Good for recon.'],
 };
 
 export class CommandCenter {
@@ -230,9 +230,9 @@ export class CommandCenter {
       const t = TABS.find((x) => x.key === 'water')!;
       slots.push({
         icon: ICON.fish_trap,
-        label: 'Build Fish Trap',
+        label: 'Build Fish Farm',
         run: () => ((this.tab = t.key), (this.page = 0)),
-        tip: () => tipHtml('Build', 'Fish Traps: renewable food in deep water, worked by a fishing ship.'),
+        tip: () => tipHtml('Build', 'Fish Farms: renewable food in deep water, worked by a trawler.'),
       });
     }
     if (landBuilders) {
@@ -285,7 +285,7 @@ export class CommandCenter {
           ctl.command({ type: 'pack', ids: trebs.map((u) => u.id), packed: !trebs[0].packed });
           this.shown = '';
         },
-        tip: () => tipHtml(trebs[0].packed ? 'Unpack' : 'Pack', 'Trebuchets must unpack to fire and pack to move (5 seconds each). They do it themselves when ordered to attack or move.'),
+        tip: () => tipHtml(trebs[0].packed ? 'Unpack' : 'Pack', 'Missile Launchers must deploy to fire and stow to move (5 seconds each). They do it themselves when ordered to attack or move.'),
       });
     const carriers = soldiers.filter((u) => u.cargo.length);
     const ships = carriers.some((u) => UNIT_DEFS[u.type].naval);
@@ -299,7 +299,7 @@ export class CommandCenter {
         tip: () =>
           ships
             ? tipHtml('Unload', 'Land everyone on the nearest shore. Or tap a point on land to sail there and land them by it.')
-            : tipHtml('Unload', 'Let the riders out. A siege tower next to an enemy wall puts them down on the far side.'),
+            : tipHtml('Unload', 'Let the riders out. An assault bridge next to an enemy wall puts them down on the far side.'),
       });
     while (slots.length < 4) slots.push(null);
     slots.push(own.length ? this.deleteCmd() : null);
@@ -412,16 +412,16 @@ export class CommandCenter {
       const ringing = () => !!this.world.players[this.player].bell;
       actions.push({
         icon: ICONS.bell,
-        label: 'Town Bell',
+        label: 'Air-Raid Siren',
         active: ringing,
         caption: ringing() ? 'All clear' : 'Ring',
         run: () => this.ctl.command({ type: 'bell', on: !ringing() }),
         tip: () =>
           tipHtml(
-            ringing() ? 'All Clear' : 'Ring the Town Bell',
+            ringing() ? 'All Clear' : 'Sound the Siren',
             ringing()
-              ? 'Ring again to send the villagers back out to what they were doing.'
-              : 'Every villager runs for the nearest Town Center, tower or Castle (each one inside adds an arrow). Ring again and they go back to work.',
+              ? 'Sound it again to send the engineers back out to what they were doing.'
+              : 'Every engineer runs for the nearest Command Center, tower or Fortress (each one inside adds a gun). Sound it again and they go back to work.',
           ),
       });
     }
@@ -441,7 +441,7 @@ export class CommandCenter {
         caption: `${b.garrison.length}/${def.garrison}`,
         run: () => this.ctl.command({ type: 'ungarrison', id: b.id }),
         disabled: () => !this.world.building(b.id)?.garrison.length,
-        tip: () => tipHtml('Ungarrison', 'Send everyone inside back out. Tap the building with villagers or soldiers selected to send them in; each adds an arrow.'),
+        tip: () => tipHtml('Ungarrison', 'Send everyone inside back out. Tap the building with engineers or soldiers selected to send them in; each adds a gun.'),
       });
     if (def.gate)
       extra.push({
@@ -514,7 +514,7 @@ export class CommandCenter {
 
   private renderSingle(e: Entity): void {
     const name = e.kind === 'unit' ? unitStats(this.world, e.owner, e.type).name : e.kind === 'building' ? BUILDING_DEFS[e.type].name : e.type[0].toUpperCase() + e.type.slice(1);
-    const owner = e.kind === 'resource' ? '' : e.owner === this.player ? 'Your realm' : `Player ${e.owner + 1}`;
+    const owner = e.kind === 'resource' ? '' : e.owner === this.player ? 'Your nation' : `Player ${e.owner + 1}`;
     this.info.innerHTML = `
       <div class="pf-frame"><div class="pf">${portrait(e)}</div></div>
       <div class="ci-body">
@@ -553,7 +553,7 @@ export class CommandCenter {
         if (cur.complete && def.trains.length && cur.owner === this.player) {
           const head = cur.queue[0];
           st = cur.housed
-            ? 'Waiting for houses: population limit reached'
+            ? 'Waiting for housing: population limit reached'
             : head?.tech
               ? `Researching ${TECH_DEFS[head.tech].name}`
               : head?.unit
@@ -570,7 +570,7 @@ export class CommandCenter {
         }
       } else {
         text = `${cur.amount} food`;
-        st = 'Select villagers, then tap it to gather.';
+        st = 'Select engineers, then tap it to gather.';
       }
       fill.style.width = `${Math.max(0, Math.min(1, frac)) * 100}%`;
       fill.classList.toggle('low', frac < 0.35);
@@ -663,7 +663,7 @@ export class CommandCenter {
         <div class="ci-body">
           <div class="ci-head"><span class="ci-name">${def.name}</span><span class="ci-owner">${plan.length ? costHtml(total) : costHtml(buildingCost(this.world, this.player, p.type) as Record<string, number>)}</span></div>
           <div class="ci-status"><span class="ci-status-text">${plan.length ? `${plan.length - gates} segments, ${gates} gate${gates === 1 ? '' : 's'}` : 'Drag along the ground to draw a wall.'}</span></div>
-          <div class="ci-status"><span class="ci-status-text dim">Drag again to add lines. Tap a segment to make it a gate. Then confirm.</span></div>
+          <div class="ci-status"><span class="ci-status-text dim">Drag again to add lines. Tap a segment to make it a gate or checkpoint. Then confirm.</span></div>
         </div>`;
       return;
     }

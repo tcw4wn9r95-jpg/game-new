@@ -1,6 +1,6 @@
 {
   "villager": {
-    "name": "Villager",
+    "name": "Engineer",
     "hp": 25,
     "speed": 1.1,
     "los": 5,
@@ -11,7 +11,7 @@
     },
     "trainTime": 25,
     "attack": 3,
-    "reload": 2.0,
+    "reload": 2,
     "attackType": "melee",
     "meleeArmor": 0,
     "pierceArmor": 0,
@@ -24,12 +24,12 @@
     "stance": "passive",
     "gatherer": true,
     "builder": true,
-    "description": "Gathers resources, builds and repairs. The heart of your economy.",
+    "description": "Gathers resources, builds and repairs. The backbone of your economy.",
     "strong": "",
     "weak": "Everything; keep them safe"
   },
   "militia": {
-    "name": "Militia",
+    "name": "Breacher",
     "hp": 45,
     "speed": 0.9,
     "los": 4,
@@ -41,7 +41,7 @@
     },
     "trainTime": 21,
     "attack": 5,
-    "reload": 2.0,
+    "reload": 2,
     "attackType": "melee",
     "meleeArmor": 0,
     "pierceArmor": 1,
@@ -52,17 +52,17 @@
     ],
     "bonus": {
       "infantry": 1.5,
-      "building": 2.0
+      "building": 2
     },
     "stance": "aggressive",
-    "description": "Sword-and-shield foot soldier.",
+    "description": "Close-quarters trooper with a combat shotgun and body armour.",
     "strong": "Infantry, buildings",
-    "weak": "Archers"
+    "weak": "Riflemen"
   },
   "spearman": {
-    "name": "Spearman",
+    "name": "AT Trooper",
     "hp": 45,
-    "speed": 1.0,
+    "speed": 1,
     "los": 4,
     "radius": 0.24,
     "pop": 1,
@@ -86,12 +86,12 @@
       "cavalry": 2.5
     },
     "stance": "aggressive",
-    "description": "Cheap infantry with a long spear that stops horsemen.",
-    "strong": "Cavalry",
-    "weak": "Archers, infantry"
+    "description": "Cheap infantry with a shoulder-fired rocket that stops vehicles cold.",
+    "strong": "Vehicles",
+    "weak": "Riflemen, infantry"
   },
   "archer": {
-    "name": "Archer",
+    "name": "Rifleman",
     "hp": 30,
     "speed": 0.96,
     "los": 6,
@@ -103,7 +103,7 @@
     },
     "trainTime": 35,
     "attack": 4,
-    "reload": 2.0,
+    "reload": 2,
     "attackType": "pierce",
     "meleeArmor": 0,
     "pierceArmor": 0,
@@ -114,15 +114,15 @@
       "archer"
     ],
     "bonus": {
-      "infantry": 2.0
+      "infantry": 2
     },
     "stance": "aggressive",
-    "description": "Shoots from a distance. Keep it behind your front line.",
-    "strong": "Infantry, spearmen",
-    "weak": "Skirmishers, cavalry, siege"
+    "description": "Fires from a distance. Keep them behind your front line.",
+    "strong": "Infantry, AT troopers",
+    "weak": "Shield troopers, vehicles, artillery"
   },
   "skirmisher": {
-    "name": "Skirmisher",
+    "name": "Shield Trooper",
     "hp": 30,
     "speed": 0.96,
     "los": 6,
@@ -146,15 +146,15 @@
       "skirmisher"
     ],
     "bonus": {
-      "archer": 3.0
+      "archer": 3
     },
     "stance": "aggressive",
-    "description": "Javelin thrower with a wicker shield, cheap and hard to hurt with arrows.",
-    "strong": "Archers",
-    "weak": "Infantry, cavalry"
+    "description": "Carbine and a ballistic shield: cheap and hard to hurt with gunfire.",
+    "strong": "Riflemen",
+    "weak": "Infantry, vehicles"
   },
   "scout": {
-    "name": "Scout",
+    "name": "Recon Buggy",
     "hp": 50,
     "speed": 2.1,
     "los": 8,
@@ -165,7 +165,7 @@
     },
     "trainTime": 30,
     "attack": 4,
-    "reload": 2.0,
+    "reload": 2,
     "attackType": "melee",
     "meleeArmor": 0,
     "pierceArmor": 2,
@@ -175,18 +175,18 @@
       "cavalry"
     ],
     "bonus": {
-      "archer": 2.0,
+      "archer": 2,
       "villager": 1.5,
-      "siege": 2.0,
-      "monk": 2.0
+      "siege": 2,
+      "monk": 2
     },
     "stance": "aggressive",
-    "description": "Fast mounted explorer and raider.",
-    "strong": "Archers, villagers, siege, monks",
-    "weak": "Spearmen"
+    "description": "Fast off-road explorer and raider.",
+    "strong": "Riflemen, engineers, artillery, agents",
+    "weak": "AT troopers"
   },
   "knight": {
-    "name": "Knight",
+    "name": "Battle Tank",
     "hp": 100,
     "speed": 1.35,
     "los": 4,
@@ -214,12 +214,12 @@
       "spear": 0.6
     },
     "stance": "aggressive",
-    "description": "Heavily armoured lance on a warhorse.",
-    "strong": "Archers, infantry, siege",
-    "weak": "Spearmen, monks"
+    "description": "Heavily armoured tracked tank with a smoothbore main gun.",
+    "strong": "Riflemen, infantry, artillery",
+    "weak": "AT troopers, agents"
   },
   "monk": {
-    "name": "Monk",
+    "name": "Field Agent",
     "hp": 30,
     "speed": 0.7,
     "los": 11,
@@ -230,7 +230,7 @@
     },
     "trainTime": 51,
     "attack": 0,
-    "reload": 1.0,
+    "reload": 1,
     "attackType": "melee",
     "meleeArmor": 0,
     "pierceArmor": 0,
@@ -243,12 +243,12 @@
     "stance": "defensive",
     "healer": true,
     "converter": true,
-    "description": "Heals nearby wounded and converts enemy units to your side.",
-    "strong": "Converts enemies, heals",
-    "weak": "Light cavalry"
+    "description": "Patches up nearby wounded and turns enemy units to your side.",
+    "strong": "Turns enemies, heals",
+    "weak": "Strike buggies"
   },
   "ram": {
-    "name": "Ram",
+    "name": "Breaching Dozer",
     "hp": 175,
     "speed": 0.55,
     "los": 3,
@@ -276,12 +276,12 @@
     "stance": "aggressive",
     "buildingsOnly": true,
     "cargo": 4,
-    "description": "A roofed battering ram. Smashes gates and walls; shrugs off arrows. Up to 4 infantry inside push it faster.",
+    "description": "An armoured bulldozer. Smashes gates and walls; shrugs off gunfire. Up to 4 infantry inside push it faster.",
     "strong": "Buildings, walls, gates",
-    "weak": "Infantry, cavalry"
+    "weak": "Infantry, vehicles"
   },
   "mangonel": {
-    "name": "Mangonel",
+    "name": "Howitzer",
     "hp": 50,
     "speed": 0.6,
     "los": 8,
@@ -310,12 +310,12 @@
     },
     "stance": "aggressive",
     "groundAttack": true,
-    "description": "Hurls stones that crush whole groups, friend and foe alike. Cannot fire at close range.",
-    "strong": "Massed archers and infantry, walls",
-    "weak": "Cavalry, rams"
+    "description": "Lobs high-explosive shells that shred whole groups, friend and foe alike. Cannot fire at close range.",
+    "strong": "Massed riflemen and infantry, walls",
+    "weak": "Vehicles, dozers"
   },
   "scorpion": {
-    "name": "Scorpion",
+    "name": "Gun Truck",
     "hp": 40,
     "speed": 0.65,
     "los": 9,
@@ -343,12 +343,12 @@
       "building": 0.3
     },
     "stance": "aggressive",
-    "description": "A giant crossbow whose bolts pass through every enemy in a line.",
-    "strong": "Lines of infantry and archers",
-    "weak": "Cavalry, buildings"
+    "description": "A heavy machine gun on a light truck; its bursts rake every enemy in a line.",
+    "strong": "Lines of infantry and riflemen",
+    "weak": "Vehicles, buildings"
   },
   "siege_tower": {
-    "name": "Siege Tower",
+    "name": "Assault Bridge",
     "hp": 220,
     "speed": 0.8,
     "los": 7,
@@ -372,12 +372,12 @@
     "bonus": {},
     "stance": "passive",
     "cargo": 8,
-    "description": "Carries 8 foot soldiers up to a wall and lets them out on the far side.",
+    "description": "An armoured carrier with a scissor bridge: puts 8 foot soldiers over a wall.",
     "strong": "Getting troops over walls",
     "weak": "Everything; escort it"
   },
   "trebuchet": {
-    "name": "Trebuchet",
+    "name": "Missile Launcher",
     "hp": 150,
     "speed": 0.6,
     "los": 17,
@@ -407,14 +407,14 @@
     "stance": "aggressive",
     "packs": true,
     "groundAttack": true,
-    "description": "The greatest siege engine: outranges every tower. Must unpack to fire and pack to move (5 s each).",
-    "strong": "Buildings, walls, castles",
-    "weak": "Cavalry, anything close"
+    "description": "A truck-mounted ballistic missile that outranges every tower. Must deploy to fire and stow to move (5 s each).",
+    "strong": "Buildings, walls, fortresses",
+    "weak": "Vehicles, anything close"
   },
   "petard": {
-    "name": "Petard",
+    "name": "Demo Sapper",
     "hp": 50,
-    "speed": 1.0,
+    "speed": 1,
     "los": 4,
     "radius": 0.24,
     "pop": 1,
@@ -440,13 +440,13 @@
     "stance": "aggressive",
     "selfDestruct": true,
     "buildingsOnly": true,
-    "description": "A sapper with a keg of black powder. Blows open one wall segment or gate.",
+    "description": "A combat engineer with a satchel of plastic explosive. Blows open one wall segment or gate.",
     "strong": "Walls and gates",
     "weak": "Everything, once it goes off"
   },
   "fishing_ship": {
     "pop": 1,
-    "reload": 2.0,
+    "reload": 2,
     "attackType": "pierce",
     "meleeArmor": 0,
     "pierceArmor": 4,
@@ -454,7 +454,7 @@
     "bonus": {},
     "stance": "passive",
     "naval": true,
-    "name": "Fishing Ship",
+    "name": "Trawler",
     "hp": 60,
     "speed": 1.3,
     "los": 5,
@@ -471,13 +471,13 @@
     "gatherer": true,
     "builder": true,
     "carry": 15,
-    "description": "Nets fish in deep water and builds Fish Traps. Brings its catch to a Dock.",
+    "description": "Nets fish in deep water and builds Fish Farms. Brings its catch to a Naval Dock.",
     "strong": "",
     "weak": "Every warship"
   },
   "transport_ship": {
     "pop": 1,
-    "reload": 2.0,
+    "reload": 2,
     "attackType": "pierce",
     "meleeArmor": 4,
     "pierceArmor": 8,
@@ -485,7 +485,7 @@
     "bonus": {},
     "stance": "passive",
     "naval": true,
-    "name": "Transport Ship",
+    "name": "Landing Craft",
     "hp": 110,
     "speed": 1.6,
     "los": 5,
@@ -501,13 +501,13 @@
       "transport"
     ],
     "cargo": 10,
-    "description": "Carries 10 land units. Tap the ship, then a shore point, to land them.",
+    "description": "Carries 10 land units. Tap the craft, then a shore point, to land them.",
     "strong": "",
     "weak": "Every warship"
   },
   "galley": {
     "pop": 1,
-    "reload": 3.0,
+    "reload": 3,
     "attackType": "pierce",
     "meleeArmor": 0,
     "pierceArmor": 6,
@@ -518,7 +518,7 @@
     },
     "stance": "aggressive",
     "naval": true,
-    "name": "Galley",
+    "name": "Patrol Boat",
     "hp": 120,
     "speed": 1.4,
     "los": 7,
@@ -535,9 +535,9 @@
       "ship",
       "galley"
     ],
-    "description": "Oared warship with archers on deck. Holds the sea lanes and harries the shore.",
-    "strong": "Demolition Rafts, Fire Ships at range, units on the shore",
-    "weak": "Siege Barges, Fire Ships up close"
+    "description": "Fast warship with a deck gun. Holds the sea lanes and harries the shore.",
+    "strong": "Drone Boats, Gunboats at range, units on the shore",
+    "weak": "Destroyers, Gunboats up close"
   },
   "fire_ship": {
     "pop": 1,
@@ -553,7 +553,7 @@
     },
     "stance": "aggressive",
     "naval": true,
-    "name": "Fire Ship",
+    "name": "Gunboat",
     "hp": 110,
     "speed": 1.55,
     "los": 6,
@@ -570,13 +570,13 @@
       "ship",
       "fireship"
     ],
-    "description": "Sprays burning pitch at close range. Sets galleys alight.",
-    "strong": "Galleys (2x), transports",
-    "weak": "Siege Barges, Demolition Rafts"
+    "description": "A rapid-fire autocannon boat that shreds hulls at close range.",
+    "strong": "Patrol Boats (2x), landing craft",
+    "weak": "Destroyers, Drone Boats"
   },
   "demolition_raft": {
     "pop": 1,
-    "reload": 1.0,
+    "reload": 1,
     "attackType": "melee",
     "meleeArmor": 0,
     "pierceArmor": 2,
@@ -587,7 +587,7 @@
     },
     "stance": "aggressive",
     "naval": true,
-    "name": "Demolition Raft",
+    "name": "Drone Boat",
     "hp": 45,
     "speed": 1.8,
     "los": 5,
@@ -605,13 +605,13 @@
       "raft"
     ],
     "selfDestruct": true,
-    "description": "A raft packed with powder that rams a ship and blows up, wrecking everything around it.",
+    "description": "An uncrewed boat packed with explosives that rams a ship and detonates, wrecking everything around it.",
     "strong": "Ships in a group, docks",
-    "weak": "Galleys"
+    "weak": "Patrol Boats"
   },
   "siege_barge": {
     "pop": 1,
-    "reload": 6.0,
+    "reload": 6,
     "attackType": "melee",
     "meleeArmor": 0,
     "pierceArmor": 8,
@@ -622,7 +622,7 @@
     },
     "stance": "aggressive",
     "naval": true,
-    "name": "Siege Barge",
+    "name": "Destroyer",
     "hp": 160,
     "speed": 0.9,
     "los": 8,
@@ -642,13 +642,13 @@
       "barge"
     ],
     "groundAttack": true,
-    "description": "A floating catapult. Batters coastal walls and buildings from long range.",
-    "strong": "Coastal buildings and walls (3x), Fire Ships",
-    "weak": "Galleys, anything inside its minimum range"
+    "description": "A guided-missile destroyer. Batters coastal walls and buildings from long range.",
+    "strong": "Coastal buildings and walls (3x), Gunboats",
+    "weak": "Patrol Boats, anything inside its minimum range"
   },
   "claymore": {
     "pop": 1,
-    "reload": 2.0,
+    "reload": 2,
     "attackType": "melee",
     "meleeArmor": 1,
     "pierceArmor": 1,
@@ -658,7 +658,7 @@
       "building": 1.5
     },
     "stance": "aggressive",
-    "name": "Claymore Warrior",
+    "name": "Commando",
     "hp": 75,
     "speed": 0.95,
     "los": 4,
@@ -675,9 +675,9 @@
       "infantry"
     ],
     "faction": "highland",
-    "description": "Highland Clans heavy infantry with a two-handed sword that cleaves through those beside the target.",
+    "description": "Boreal Rangers elite assault trooper whose light machine gun sweeps through those beside the target.",
     "strong": "Infantry, packed formations",
-    "weak": "Archers, cavalry"
+    "weak": "Riflemen, vehicles"
   },
   "horse_archer": {
     "pop": 1,
@@ -690,7 +690,7 @@
       "spear": 1.2
     },
     "stance": "aggressive",
-    "name": "Horse Archer",
+    "name": "Technical",
     "hp": 65,
     "speed": 1.45,
     "los": 6,
@@ -708,9 +708,9 @@
       "archer"
     ],
     "faction": "steppe",
-    "description": "Steppe Riders mounted archer: shoots on the move and outruns what it cannot outfight.",
-    "strong": "Infantry, siege",
-    "weak": "Skirmishers, knights"
+    "description": "Dune Raiders pickup with a mounted gun: fires on the move and outruns what it cannot outfight.",
+    "strong": "Infantry, artillery",
+    "weak": "Shield troopers, tanks"
   },
   "arbalest_guard": {
     "pop": 1,
@@ -723,7 +723,7 @@
       "infantry": 1.6
     },
     "stance": "aggressive",
-    "name": "Arbalest Guard",
+    "name": "Sniper",
     "hp": 45,
     "speed": 0.95,
     "los": 8,
@@ -740,13 +740,13 @@
       "archer"
     ],
     "faction": "coastal",
-    "description": "Coastal League crossbowman with a heavy arbalest: the longest-reaching foot archer.",
-    "strong": "Infantry, archers",
-    "weak": "Cavalry, skirmishers"
+    "description": "Harbor Coalition marksman with a long-barrelled rifle: the longest-reaching foot soldier.",
+    "strong": "Infantry, riflemen",
+    "weak": "Vehicles, shield troopers"
   },
   "iron_bear": {
     "pop": 1,
-    "reload": 2.0,
+    "reload": 2,
     "attackType": "melee",
     "meleeArmor": 3,
     "pierceArmor": 3,
@@ -755,7 +755,7 @@
       "building": 1.4
     },
     "stance": "aggressive",
-    "name": "Iron Bear Rider",
+    "name": "Juggernaut",
     "hp": 220,
     "speed": 0.95,
     "los": 5,
@@ -771,20 +771,20 @@
       "cavalry"
     ],
     "faction": "mountain",
-    "description": "Mountain Throne heavy cavalry: slow, armoured, very hard to kill.",
-    "strong": "Archers, siege, buildings",
-    "weak": "Spearmen, monks"
+    "description": "Iron Ridge super-heavy tank: slow, armoured, very hard to kill.",
+    "strong": "Riflemen, artillery, buildings",
+    "weak": "AT troopers, agents"
   },
   "king": {
     "pop": 1,
-    "reload": 2.0,
+    "reload": 2,
     "attackType": "melee",
     "meleeArmor": 1,
     "pierceArmor": 1,
     "range": 0,
     "bonus": {},
     "stance": "defensive",
-    "name": "King",
+    "name": "Commander",
     "hp": 75,
     "speed": 0.8,
     "los": 10,
@@ -796,7 +796,7 @@
     "classes": [
       "king"
     ],
-    "description": "Your sovereign. Lose the King and you lose the game: keep him behind stone.",
+    "description": "Your commanding general. Lose the Commander and you lose the game: keep them behind concrete.",
     "strong": "",
     "weak": "Everything"
   }

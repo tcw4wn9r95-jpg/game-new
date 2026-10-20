@@ -1,7 +1,7 @@
 // Player preferences kept on the device: game speed, sound and which hand the
 // HUD is laid out for. Changes apply at once and are remembered.
 
-const KEY = 'hc.settings';
+const KEY = 'ss.settings';
 
 export const SPEEDS = [1, 1.5, 2, 3] as const;
 export const VOLUMES = [0, 0.35, 0.65, 1] as const;

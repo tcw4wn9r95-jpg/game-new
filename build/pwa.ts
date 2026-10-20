@@ -7,8 +7,8 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import type { Plugin, ResolvedConfig } from 'vite';
 
-const APP_NAME = 'Hearth & Crown';
-const THEME = '#140c05';
+const APP_NAME = 'Steel & Signal';
+const THEME = '#070b12';
 
 const ICONS: Array<{ file: string; size: number; purpose?: string }> = [
   { file: 'icons/apple-touch-icon.png', size: 180 },
@@ -22,8 +22,8 @@ function manifest(): string {
   return JSON.stringify(
     {
       name: APP_NAME,
-      short_name: 'Hearth&Crown',
-      description: 'A medieval real-time strategy game.',
+      short_name: 'Steel&Signal',
+      description: 'A modern real-time strategy game.',
       start_url: './',
       scope: './',
       display: 'standalone',

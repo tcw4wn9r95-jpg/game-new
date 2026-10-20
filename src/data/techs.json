@@ -1,13 +1,13 @@
 {
   "age2": {
-    "name": "Township Age",
+    "name": "Expansion Age",
     "building": "town_center",
     "age": 0,
     "cost": {
       "food": 500
     },
     "time": 160,
-    "description": "Advance to the Township Age: stables, archery ranges, the blacksmith and market.",
+    "description": "Advance to the Expansion Age: the motor pool, firing range, armory and exchange.",
     "effects": [
       {
         "type": "age",
@@ -17,7 +17,7 @@
     "icon": "age2"
   },
   "age3": {
-    "name": "Stronghold Age",
+    "name": "Network Age",
     "building": "town_center",
     "age": 1,
     "cost": {
@@ -25,7 +25,7 @@
       "gold": 200
     },
     "time": 220,
-    "description": "Advance to the Stronghold Age: knights, monks, the university and unit upgrades.",
+    "description": "Advance to the Network Age: tanks, field agents, the research lab and unit upgrades.",
     "effects": [
       {
         "type": "age",
@@ -35,7 +35,7 @@
     "icon": "age3"
   },
   "age4": {
-    "name": "Dominion Age",
+    "name": "Autonomy Age",
     "building": "town_center",
     "age": 2,
     "cost": {
@@ -43,7 +43,7 @@
       "gold": 800
     },
     "time": 280,
-    "description": "Advance to the Dominion Age: the strongest buildings and upgrades.",
+    "description": "Advance to the Autonomy Age: the strongest buildings and upgrades.",
     "effects": [
       {
         "type": "age",
@@ -53,14 +53,14 @@
     "icon": "age4"
   },
   "loom": {
-    "name": "Loom",
+    "name": "Hi-Vis Kit",
     "building": "town_center",
     "age": 0,
     "cost": {
       "gold": 50
     },
     "time": 25,
-    "description": "Villagers +15 HP, +1 melee and +2 pierce armour.",
+    "description": "Engineers +15 HP, +1 melee and +2 pierce armour.",
     "effects": [
       {
         "type": "unit",
@@ -74,7 +74,7 @@
     ]
   },
   "town_watch": {
-    "name": "Town Watch",
+    "name": "CCTV Network",
     "building": "town_center",
     "age": 0,
     "cost": {
@@ -90,7 +90,7 @@
     ]
   },
   "wheelbarrow": {
-    "name": "Wheelbarrow",
+    "name": "Utility Carts",
     "building": "town_center",
     "age": 1,
     "cost": {
@@ -98,7 +98,7 @@
       "wood": 50
     },
     "time": 75,
-    "description": "Villagers walk 10% faster and carry 3 more.",
+    "description": "Engineers move 10% faster and carry 3 more.",
     "effects": [
       {
         "type": "unit",
@@ -114,7 +114,7 @@
     ]
   },
   "hand_cart": {
-    "name": "Hand Cart",
+    "name": "Pickup Trucks",
     "building": "town_center",
     "age": 2,
     "cost": {
@@ -122,7 +122,7 @@
       "wood": 200
     },
     "time": 55,
-    "description": "Villagers walk 10% faster and carry 7 more.",
+    "description": "Engineers move 10% faster and carry 7 more.",
     "effects": [
       {
         "type": "unit",
@@ -139,7 +139,7 @@
     "requires": "wheelbarrow"
   },
   "double_bit_axe": {
-    "name": "Double-Bit Axe",
+    "name": "Chainsaws",
     "building": "lumber_camp",
     "age": 1,
     "cost": {
@@ -147,7 +147,7 @@
       "wood": 50
     },
     "time": 25,
-    "description": "Villagers chop wood 20% faster.",
+    "description": "Engineers cut wood 20% faster.",
     "effects": [
       {
         "type": "gather",
@@ -159,7 +159,7 @@
     ]
   },
   "bow_saw": {
-    "name": "Bow Saw",
+    "name": "Feller Bunchers",
     "building": "lumber_camp",
     "age": 2,
     "cost": {
@@ -167,7 +167,7 @@
       "wood": 100
     },
     "time": 50,
-    "description": "Villagers chop wood a further 20% faster.",
+    "description": "Engineers cut wood a further 20% faster.",
     "effects": [
       {
         "type": "gather",
@@ -180,7 +180,7 @@
     "requires": "double_bit_axe"
   },
   "gold_mining": {
-    "name": "Gold Mining",
+    "name": "Pneumatic Drills",
     "building": "mining_camp",
     "age": 1,
     "cost": {
@@ -188,7 +188,7 @@
       "wood": 75
     },
     "time": 30,
-    "description": "Villagers mine gold 15% faster.",
+    "description": "Engineers mine gold 15% faster.",
     "effects": [
       {
         "type": "gather",
@@ -200,7 +200,7 @@
     ]
   },
   "stone_mining": {
-    "name": "Stone Mining",
+    "name": "Rock Breakers",
     "building": "mining_camp",
     "age": 1,
     "cost": {
@@ -208,7 +208,7 @@
       "wood": 75
     },
     "time": 30,
-    "description": "Villagers mine stone 15% faster.",
+    "description": "Engineers quarry stone 15% faster.",
     "effects": [
       {
         "type": "gather",
@@ -220,7 +220,7 @@
     ]
   },
   "gold_shaft": {
-    "name": "Gold Shaft Mining",
+    "name": "Deep-Bore Mining",
     "building": "mining_camp",
     "age": 2,
     "cost": {
@@ -228,7 +228,7 @@
       "wood": 150
     },
     "time": 75,
-    "description": "Villagers mine gold a further 15% faster.",
+    "description": "Engineers mine gold a further 15% faster.",
     "effects": [
       {
         "type": "gather",
@@ -241,7 +241,7 @@
     "requires": "gold_mining"
   },
   "horse_collar": {
-    "name": "Horse Collar",
+    "name": "Fertilisers",
     "building": "mill",
     "age": 1,
     "cost": {
@@ -258,7 +258,7 @@
     ]
   },
   "heavy_plow": {
-    "name": "Heavy Plow",
+    "name": "Precision Farming",
     "building": "mill",
     "age": 2,
     "cost": {
@@ -283,14 +283,14 @@
     "requires": "horse_collar"
   },
   "forging": {
-    "name": "Forging",
+    "name": "Hollow-Point Rounds",
     "building": "blacksmith",
     "age": 1,
     "cost": {
       "food": 150
     },
     "time": 50,
-    "description": "Infantry and cavalry +1 attack.",
+    "description": "Infantry and vehicles +1 attack.",
     "effects": [
       {
         "type": "unit",
@@ -303,7 +303,7 @@
     ]
   },
   "iron_casting": {
-    "name": "Iron Casting",
+    "name": "Smart Optics",
     "building": "blacksmith",
     "age": 2,
     "cost": {
@@ -311,7 +311,7 @@
       "gold": 120
     },
     "time": 75,
-    "description": "Infantry and cavalry a further +1 attack.",
+    "description": "Infantry and vehicles a further +1 attack.",
     "effects": [
       {
         "type": "unit",
@@ -325,7 +325,7 @@
     "requires": "forging"
   },
   "fletching": {
-    "name": "Fletching",
+    "name": "Rifle Scopes",
     "building": "blacksmith",
     "age": 1,
     "cost": {
@@ -333,7 +333,7 @@
       "gold": 50
     },
     "time": 30,
-    "description": "Archers +1 attack and +1 range.",
+    "description": "Riflemen +1 attack and +1 range.",
     "effects": [
       {
         "type": "unit",
@@ -346,7 +346,7 @@
     ]
   },
   "bodkin_arrow": {
-    "name": "Bodkin Arrow",
+    "name": "Armour-Piercing Rounds",
     "building": "blacksmith",
     "age": 2,
     "cost": {
@@ -354,7 +354,7 @@
       "gold": 100
     },
     "time": 35,
-    "description": "Archers a further +1 attack and +1 range.",
+    "description": "Riflemen a further +1 attack and +1 range.",
     "effects": [
       {
         "type": "unit",
@@ -368,7 +368,7 @@
     "requires": "fletching"
   },
   "scale_mail": {
-    "name": "Scale Mail Armour",
+    "name": "Kevlar Vests",
     "building": "blacksmith",
     "age": 1,
     "cost": {
@@ -388,7 +388,7 @@
     ]
   },
   "chain_mail": {
-    "name": "Chain Mail Armour",
+    "name": "Ceramic Plates",
     "building": "blacksmith",
     "age": 2,
     "cost": {
@@ -410,14 +410,14 @@
     "requires": "scale_mail"
   },
   "scale_barding": {
-    "name": "Scale Barding",
+    "name": "Appliqué Armour",
     "building": "blacksmith",
     "age": 1,
     "cost": {
       "food": 150
     },
     "time": 45,
-    "description": "Cavalry +1 melee and +1 pierce armour.",
+    "description": "Vehicles +1 melee and +1 pierce armour.",
     "effects": [
       {
         "type": "unit",
@@ -430,7 +430,7 @@
     ]
   },
   "chain_barding": {
-    "name": "Chain Barding",
+    "name": "Reactive Armour",
     "building": "blacksmith",
     "age": 2,
     "cost": {
@@ -438,7 +438,7 @@
       "gold": 150
     },
     "time": 60,
-    "description": "Cavalry a further +1/+1 armour.",
+    "description": "Vehicles a further +1/+1 armour.",
     "effects": [
       {
         "type": "unit",
@@ -452,14 +452,14 @@
     "requires": "scale_barding"
   },
   "padded_archer": {
-    "name": "Padded Archer Armour",
+    "name": "Plate Carriers",
     "building": "blacksmith",
     "age": 1,
     "cost": {
       "food": 100
     },
     "time": 40,
-    "description": "Archers +1 melee and +1 pierce armour.",
+    "description": "Riflemen +1 melee and +1 pierce armour.",
     "effects": [
       {
         "type": "unit",
@@ -472,7 +472,7 @@
     ]
   },
   "leather_archer": {
-    "name": "Leather Archer Armour",
+    "name": "Combat Exosuits",
     "building": "blacksmith",
     "age": 2,
     "cost": {
@@ -480,7 +480,7 @@
       "gold": 150
     },
     "time": 55,
-    "description": "Archers a further +1/+1 armour.",
+    "description": "Riflemen a further +1/+1 armour.",
     "effects": [
       {
         "type": "unit",
@@ -494,7 +494,7 @@
     "requires": "padded_archer"
   },
   "swordsman": {
-    "name": "Swordsman",
+    "name": "Assault Breacher",
     "building": "barracks",
     "age": 2,
     "cost": {
@@ -502,12 +502,12 @@
       "gold": 65
     },
     "time": 45,
-    "description": "Upgrade militia to swordsmen: +4 attack, +15 HP.",
+    "description": "Upgrade breachers to assault breachers: +4 attack, +15 HP.",
     "effects": [
       {
         "type": "upgrade",
         "unit": "militia",
-        "name": "Swordsman"
+        "name": "Assault Breacher"
       },
       {
         "type": "unit",
@@ -521,7 +521,7 @@
     "icon": "militia"
   },
   "pikeman": {
-    "name": "Pikeman",
+    "name": "Missile Team",
     "building": "barracks",
     "age": 2,
     "cost": {
@@ -529,12 +529,12 @@
       "gold": 90
     },
     "time": 45,
-    "description": "Upgrade spearmen to pikemen: +1 attack, +10 HP.",
+    "description": "Upgrade AT troopers to guided-missile teams: +1 attack, +10 HP.",
     "effects": [
       {
         "type": "upgrade",
         "unit": "spearman",
-        "name": "Pikeman"
+        "name": "Missile Team"
       },
       {
         "type": "unit",
@@ -548,7 +548,7 @@
     "icon": "spearman"
   },
   "crossbowman": {
-    "name": "Crossbowman",
+    "name": "Marksman",
     "building": "archery_range",
     "age": 2,
     "cost": {
@@ -556,12 +556,12 @@
       "gold": 75
     },
     "time": 35,
-    "description": "Upgrade archers to crossbowmen: +1 attack, +1 range, +5 HP.",
+    "description": "Upgrade riflemen to marksmen: +1 attack, +1 range, +5 HP.",
     "effects": [
       {
         "type": "upgrade",
         "unit": "archer",
-        "name": "Crossbowman"
+        "name": "Marksman"
       },
       {
         "type": "unit",
@@ -576,7 +576,7 @@
     "icon": "archer"
   },
   "light_cavalry": {
-    "name": "Light Cavalry",
+    "name": "Strike Buggy",
     "building": "stable",
     "age": 2,
     "cost": {
@@ -584,12 +584,12 @@
       "gold": 50
     },
     "time": 45,
-    "description": "Upgrade scouts to light cavalry: +4 attack, +15 HP, +2 sight.",
+    "description": "Upgrade recon buggies to strike buggies: +4 attack, +15 HP, +2 sight.",
     "effects": [
       {
         "type": "upgrade",
         "unit": "scout",
-        "name": "Light Cavalry"
+        "name": "Strike Buggy"
       },
       {
         "type": "unit",
@@ -604,7 +604,7 @@
     "icon": "scout"
   },
   "masonry": {
-    "name": "Masonry",
+    "name": "Reinforced Concrete",
     "building": "university",
     "age": 2,
     "cost": {
@@ -623,7 +623,7 @@
     ]
   },
   "treadmill_crane": {
-    "name": "Treadmill Crane",
+    "name": "Tower Cranes",
     "building": "university",
     "age": 2,
     "cost": {
@@ -631,7 +631,7 @@
       "wood": 300
     },
     "time": 40,
-    "description": "Villagers build 20% faster.",
+    "description": "Engineers build 20% faster.",
     "effects": [
       {
         "type": "buildSpeed",
@@ -640,7 +640,7 @@
     ]
   },
   "guard_tower": {
-    "name": "Guard Tower",
+    "name": "Gun Tower",
     "building": "watch_tower",
     "age": 2,
     "cost": {
@@ -648,20 +648,20 @@
       "stone": 250
     },
     "time": 30,
-    "description": "Upgrade all towers to guard towers: +500 HP, +1 attack.",
+    "description": "Upgrade all towers to gun towers: +500 HP, +1 attack.",
     "effects": [
       {
         "type": "defense",
         "tower": {
           "hp": 500,
           "attack": 1,
-          "name": "Guard Tower"
+          "name": "Gun Tower"
         }
       }
     ]
   },
   "keep": {
-    "name": "Keep",
+    "name": "Missile Turret",
     "building": "watch_tower",
     "age": 3,
     "cost": {
@@ -669,7 +669,7 @@
       "wood": 350
     },
     "time": 75,
-    "description": "Upgrade all towers to keeps: +750 HP, +2 attack, +1 range.",
+    "description": "Upgrade all towers to missile turrets: +750 HP, +2 attack, +1 range.",
     "effects": [
       {
         "type": "defense",
@@ -677,14 +677,14 @@
           "hp": 750,
           "attack": 2,
           "range": 1,
-          "name": "Keep"
+          "name": "Missile Turret"
         }
       }
     ],
     "requires": "guard_tower"
   },
   "fortified_wall": {
-    "name": "Fortified Wall",
+    "name": "Blast-Proof Walls",
     "building": "university",
     "age": 3,
     "cost": {
@@ -692,7 +692,7 @@
       "stone": 100
     },
     "time": 50,
-    "description": "Stone walls and gates +60% HP.",
+    "description": "Concrete walls and blast gates +60% HP.",
     "effects": [
       {
         "type": "defense",
@@ -701,7 +701,7 @@
     ]
   },
   "architecture": {
-    "name": "Architecture",
+    "name": "Composite Structures",
     "building": "university",
     "age": 3,
     "cost": {
@@ -721,7 +721,7 @@
     "requires": "masonry"
   },
   "hoardings": {
-    "name": "Hoardings",
+    "name": "Active Protection",
     "building": "university",
     "age": 3,
     "cost": {
@@ -729,7 +729,7 @@
       "wood": 400
     },
     "time": 75,
-    "description": "Castles +20% HP.",
+    "description": "Fortresses +20% HP.",
     "effects": [
       {
         "type": "defense",
@@ -738,7 +738,7 @@
     ]
   },
   "murder_holes": {
-    "name": "Murder Holes",
+    "name": "Close-In Weapons",
     "building": "university",
     "age": 2,
     "cost": {
@@ -746,7 +746,7 @@
       "stone": 100
     },
     "time": 60,
-    "description": "Towers and castles hit enemies right at their walls.",
+    "description": "Towers and fortresses hit enemies right at their walls.",
     "effects": [
       {
         "type": "defense",
@@ -755,7 +755,7 @@
     ]
   },
   "arrowslits": {
-    "name": "Arrowslits",
+    "name": "Twin Mounts",
     "building": "university",
     "age": 2,
     "cost": {
@@ -774,7 +774,7 @@
     ]
   },
   "siege_engineers": {
-    "name": "Siege Engineers",
+    "name": "Combat Engineering",
     "building": "university",
     "age": 3,
     "cost": {
@@ -782,7 +782,7 @@
       "wood": 600
     },
     "time": 45,
-    "description": "Siege +1 range and +20% damage against buildings.",
+    "description": "Heavy weapons +1 range and +20% damage against buildings.",
     "effects": [
       {
         "type": "unit",
@@ -795,7 +795,7 @@
     ]
   },
   "ballistics": {
-    "name": "Ballistics",
+    "name": "Fire Control",
     "building": "university",
     "age": 2,
     "cost": {
@@ -803,7 +803,7 @@
       "gold": 175
     },
     "time": 60,
-    "description": "Archers, scorpions, mangonels and towers lead moving targets.",
+    "description": "Riflemen, gun trucks, howitzers and towers lead moving targets.",
     "effects": [
       {
         "type": "ballistics"
@@ -811,7 +811,7 @@
     ]
   },
   "sappers": {
-    "name": "Sappers",
+    "name": "Breaching Charges",
     "building": "castle",
     "age": 2,
     "cost": {
@@ -819,7 +819,7 @@
       "gold": 200
     },
     "time": 10,
-    "description": "Villagers +15 attack against buildings.",
+    "description": "Engineers +15 attack against buildings.",
     "effects": [
       {
         "type": "unit",
@@ -831,19 +831,19 @@
     ]
   },
   "capped_ram": {
-    "name": "Capped Ram",
+    "name": "Armoured Dozer",
     "building": "siege_workshop",
     "age": 3,
     "cost": {
       "food": 300
     },
     "time": 50,
-    "description": "Rams +5 attack and +20 HP.",
+    "description": "Breaching dozers +5 attack and +20 HP.",
     "effects": [
       {
         "type": "upgrade",
         "unit": "ram",
-        "name": "Capped Ram"
+        "name": "Armoured Dozer"
       },
       {
         "type": "unit",
@@ -857,7 +857,7 @@
     "icon": "ram"
   },
   "onager": {
-    "name": "Onager",
+    "name": "Rocket Artillery",
     "building": "siege_workshop",
     "age": 3,
     "cost": {
@@ -865,12 +865,12 @@
       "gold": 500
     },
     "time": 75,
-    "description": "Mangonels +10 attack and +1 range.",
+    "description": "Howitzers +10 attack and +1 range.",
     "effects": [
       {
         "type": "upgrade",
         "unit": "mangonel",
-        "name": "Onager"
+        "name": "Rocket Artillery"
       },
       {
         "type": "unit",
@@ -884,7 +884,7 @@
     "icon": "mangonel"
   },
   "gillnets": {
-    "name": "Gillnets",
+    "name": "Sonar Nets",
     "building": "dock",
     "age": 1,
     "cost": {
@@ -892,7 +892,7 @@
       "wood": 200
     },
     "time": 40,
-    "description": "Fishing ships and shore fishers gather 25% faster.",
+    "description": "Trawlers and shore fishers gather 25% faster.",
     "effects": [
       {
         "type": "gather",
@@ -905,7 +905,7 @@
     ]
   },
   "careening": {
-    "name": "Careening",
+    "name": "Composite Hulls",
     "building": "dock",
     "age": 2,
     "cost": {
@@ -925,7 +925,7 @@
     ]
   },
   "dry_dock": {
-    "name": "Dry Dock",
+    "name": "Gas Turbines",
     "building": "dock",
     "age": 2,
     "cost": {
@@ -933,7 +933,7 @@
       "gold": 400
     },
     "time": 60,
-    "description": "Ships 15% faster; Docks build ships 15% faster.",
+    "description": "Ships 15% faster; Naval Docks build ships 15% faster.",
     "requires": "careening",
     "effects": [
       {
@@ -950,7 +950,7 @@
     ]
   },
   "shipwright": {
-    "name": "Shipwright",
+    "name": "Modular Shipbuilding",
     "building": "dock",
     "age": 3,
     "cost": {
@@ -967,7 +967,7 @@
     ]
   },
   "war_galley": {
-    "name": "War Galley",
+    "name": "Missile Boat",
     "building": "dock",
     "age": 2,
     "cost": {
@@ -975,7 +975,7 @@
       "gold": 100
     },
     "time": 50,
-    "description": "Galleys become War Galleys: +1 attack, +1 range, +15 HP.",
+    "description": "Patrol Boats become Missile Boats: +1 attack, +1 range, +15 HP.",
     "effects": [
       {
         "type": "unit",
@@ -989,12 +989,12 @@
       {
         "type": "upgrade",
         "unit": "galley",
-        "name": "War Galley"
+        "name": "Missile Boat"
       }
     ]
   },
   "heated_shot": {
-    "name": "Heated Shot",
+    "name": "Anti-Ship Missiles",
     "building": "university",
     "age": 2,
     "cost": {
@@ -1002,7 +1002,7 @@
       "gold": 100
     },
     "time": 40,
-    "description": "Towers, Castles and Town Centers do double damage to ships.",
+    "description": "Towers, Fortresses and Command Centers do double damage to ships.",
     "effects": [
       {
         "type": "defense",

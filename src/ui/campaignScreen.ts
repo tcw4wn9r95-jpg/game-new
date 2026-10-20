@@ -5,7 +5,7 @@ import { CAMPAIGNS, type CampaignDef } from '../sim/campaigns';
 import { SCENARIOS } from '../sim/scenario';
 import { emblemSvg } from './logo';
 
-const KEY = 'hc.campaign';
+const KEY = 'ss.campaign';
 
 interface Progress {
   /** Chapters won: id -> best (shortest) match time in seconds. */
@@ -90,7 +90,7 @@ export function showCampaigns(parent: HTMLElement, hooks: { onStart: (id: string
             <div class="chap-title">${def.title}</div>
             <div class="chap-len">${def.length}${progress.done[chapter] ? ` · won in ${clock(progress.done[chapter])}` : ''}</div>
             <div class="chap-brief">${def.briefing.map((p) => `<p>${p}</p>`).join('')}</div>
-            ${def.variants ? `<div class="setup-label">Length of the siege</div><div class="seg chap-variants">${def.variants.map((v) => `<button class="seg-btn" data-v="${v.id}" aria-pressed="${v.id === variant}">${v.label}</button>`).join('')}</div><div class="chap-note">${def.variants.find((v) => v.id === variant)?.note ?? ''}</div>` : ''}
+            ${def.variants ? `<div class="setup-label">Length of the defence</div><div class="seg chap-variants">${def.variants.map((v) => `<button class="seg-btn" data-v="${v.id}" aria-pressed="${v.id === variant}">${v.label}</button>`).join('')}</div><div class="chap-note">${def.variants.find((v) => v.id === variant)?.note ?? ''}</div>` : ''}
           </div>
           <div class="chap-actions">
             <button class="btn btn-wood btn-small" data-a="back">Back</button>

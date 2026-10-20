@@ -241,41 +241,41 @@ export class Tutorial {
 
 const STEPS: Step[] = [
   {
-    title: 'Welcome, my liege',
+    title: 'Welcome, Commander',
     text: () =>
-      'This short lesson takes you from a camp in the wilds to your first battle. <b>Drag</b> to look around and <b>pinch</b> to zoom. The game waits for you at every step.',
+      'This short briefing takes you from a bare forward base to your first battle. <b>Drag</b> to look around and <b>pinch</b> to zoom. The game waits for you at every step.',
   },
   {
-    title: 'Your villagers',
-    text: () => 'Villagers gather, build and repair. <b>Tap one of your villagers</b> by the Town Center to select it.',
+    title: 'Your engineers',
+    text: () => 'Engineers gather, build and repair. <b>Tap one of your engineers</b> by the Command Center to select one.',
     done: (t) => t.selected((u) => u.type === 'villager'),
-    glow: ['.side-btn[aria-label="Idle Villagers"]'],
+    glow: ['.side-btn[aria-label="Idle Engineers"]'],
     mark: (t) => t.units((u) => u.type === 'villager')[0] ?? null,
   },
   {
     title: 'Gather food',
-    text: () => 'With a villager selected, <b>tap the sheep or the berry bushes</b>. Food trains villagers and soldiers and advances your age.',
+    text: () => 'With an engineer selected, <b>tap the livestock or the berry bushes</b>. Food trains engineers and soldiers and advances your age.',
     done: (t) => t.gathering('food') >= 1,
     mark: (t) => t.nearest('food'),
   },
   {
-    title: 'Chop wood',
-    text: () => 'Select another villager and <b>tap a tree</b>. Wood is for buildings. <i>Tip: the idle villager button finds the next villager with nothing to do.</i>',
+    title: 'Cut timber',
+    text: () => 'Select another engineer and <b>tap a tree</b>. Wood is for buildings. <i>Tip: the idle engineer button finds the next engineer with nothing to do.</i>',
     done: (t) => t.gathering('wood') >= 1,
-    progress: (t) => `Food ${t.gathering('food')} · Wood ${t.gathering('wood')} villagers`,
-    glow: ['.side-btn[aria-label="Idle Villagers"]'],
+    progress: (t) => `Food ${t.gathering('food')} · Wood ${t.gathering('wood')} engineers`,
+    glow: ['.side-btn[aria-label="Idle Engineers"]'],
     mark: (t) => t.nearest('tree'),
   },
   {
-    title: 'Build a House',
-    text: () => 'Each House shelters 5 people. Select a villager, tap <b>Build Economy</b>, then <b>House</b>. Tap the ground where it should go and confirm with the <b>✓</b>.',
+    title: 'Build Housing',
+    text: () => 'Each Housing Unit holds 5 people. Select an engineer, tap <b>Build Economy</b>, then <b>Housing Unit</b>. Tap the ground where it should go and confirm with the <b>✓</b>.',
     start: (t) => t.afford(buildingCost(t.world, t.me, 'house')),
     done: (t) => t.buildings('house').length > 0,
-    glow: [btn('Build Economy'), btn('House'), btn('Place House')],
+    glow: [btn('Build Economy'), btn('Housing Unit'), btn('Place Housing Unit')],
   },
   {
-    title: 'Raise the walls',
-    text: () => 'Your villager is building the House. <b>Wait for it to finish</b>; more villagers on the job build faster.',
+    title: 'Prefab going up',
+    text: () => 'Your engineer is building the Housing Unit. <b>Wait for it to finish</b>; more engineers on the job build faster.',
     done: (t) => t.buildings('house', true).length > 0,
     mark: (t) => {
       const h = t.buildings('house')[0];
@@ -283,8 +283,8 @@ const STEPS: Step[] = [
     },
   },
   {
-    title: 'A new villager',
-    text: () => 'More hands, more of everything. <b>Tap the Town Center</b> and <b>Train Villager</b>.',
+    title: 'A new engineer',
+    text: () => 'More hands, more of everything. <b>Tap the Command Center</b> and <b>Train Engineer</b>.',
     start: (t) => {
       t.villagersAtStart = t.units((u) => u.type === 'villager').length;
       t.afford(unitCost(t.world, t.me, 'villager'));
@@ -295,18 +295,18 @@ const STEPS: Step[] = [
       const q = tc?.queue[0];
       return q?.unit ? `Training… ${Math.floor(q.progress * 100)}%` : '';
     },
-    glow: [btn('Train Villager')],
+    glow: [btn('Train Engineer')],
     mark: (t) => {
       const tc = t.townCenter();
       return tc ? { x: tc.x + tc.size / 2, y: tc.y + tc.size / 2 } : null;
     },
   },
   {
-    title: 'A Lumber Camp',
-    text: () => 'To advance an age you need two buildings of this age. Start with a <b>Lumber Camp</b> beside the trees (Build Economy): woodcutters drop their loads there.',
+    title: 'A Sawmill',
+    text: () => 'To advance an age you need two buildings of this age. Start with a <b>Sawmill</b> beside the trees (Build Economy): woodcutters drop their loads there.',
     start: (t) => t.afford(buildingCost(t.world, t.me, 'lumber_camp')),
     done: (t) => t.buildings('lumber_camp').length > 0,
-    glow: [btn('Build Economy'), btn('Lumber Camp'), btn('Place Lumber Camp')],
+    glow: [btn('Build Economy'), btn('Sawmill'), btn('Place Sawmill')],
     mark: (t) => t.nearest('tree'),
   },
   {
@@ -320,36 +320,36 @@ const STEPS: Step[] = [
     title: 'Advance an age',
     text: (t) =>
       t.buildings('lumber_camp', true).length && t.buildings('barracks', true).length
-        ? 'Both are standing. Select the <b>Town Center</b> and research the <b>Township Age</b>. It takes a while: tap the <b>1×</b> button to speed the game up.'
-        : 'Wait for the Lumber Camp and Barracks to be finished, then select the <b>Town Center</b> and research the <b>Township Age</b>. Tap <b>1×</b> to speed things up.',
+        ? 'Both are standing. Select the <b>Command Center</b> and research the <b>Expansion Age</b>. It takes a while: tap the <b>1×</b> button to speed the game up.'
+        : 'Wait for the Sawmill and Barracks to be finished, then select the <b>Command Center</b> and research the <b>Expansion Age</b>. Tap <b>1×</b> to speed things up.',
     start: (t) => t.afford({ food: 500 }),
     done: (t) => t.world.players[t.me].age >= 1,
     progress: (t) => {
       const q = t.townCenter()?.queue.find((x) => x.tech === 'age2');
       return q ? `Advancing… ${Math.floor(q.progress * 100)}%` : '';
     },
-    glow: [btn('Research Township Age'), '.speed-btn'],
+    glow: [btn('Research Expansion Age'), '.speed-btn'],
     mark: (t) => {
       const tc = t.townCenter();
       return tc ? { x: tc.x + tc.size / 2, y: tc.y + tc.size / 2 } : null;
     },
   },
   {
-    title: 'Wall the town',
+    title: 'Fortify the base',
     text: () =>
-      'Walls make attackers pay. Select a villager, tap <b>Build Defense</b> and <b>Palisade Wall</b>, then <b>drag along the ground</b> to draw a line and confirm. Gates let your own people through.',
+      'Walls make attackers pay. Select an engineer, tap <b>Build Defense</b> and <b>Sandbag Wall</b>, then <b>drag along the ground</b> to draw a line and confirm. Checkpoints let your own people through.',
     start: (t) => t.afford({ wood: 120 }),
     done: (t) => t.buildings('palisade_wall').length + t.buildings('palisade_gate').length >= 5,
     progress: (t) => `${t.buildings('palisade_wall').length + t.buildings('palisade_gate').length} of 5 segments`,
-    glow: [btn('Build Defense'), btn('Palisade Wall'), btn('Place Palisade Wall')],
+    glow: [btn('Build Defense'), btn('Sandbag Wall'), btn('Place Sandbag Wall')],
   },
   {
     title: 'Raise an army',
-    text: () => 'Select the <b>Barracks</b> and train <b>5 soldiers</b>. Militia are sturdy swordsmen; Spearmen stop horsemen.',
+    text: () => 'Select the <b>Barracks</b> and train <b>5 soldiers</b>. Breachers are tough close-quarters troops; AT Troopers stop vehicles.',
     start: (t) => t.afford(unitCost(t.world, t.me, 'militia'), 5),
     done: (t) => t.soldiers().length >= 5,
     progress: (t) => `${Math.min(5, t.soldiers().length)} of 5 soldiers`,
-    glow: [btn('Train Militia'), btn('Train Spearman')],
+    glow: [btn('Train Breacher'), btn('Train AT Trooper')],
     mark: (t) => {
       const b = t.buildings('barracks')[0];
       return b ? { x: b.x + b.size / 2, y: b.y + b.size / 2 } : null;
@@ -358,7 +358,7 @@ const STEPS: Step[] = [
   {
     title: 'Attack!',
     text: () =>
-      'Scouts report an enemy outpost (the ping on the minimap). Tap the <b>crossed swords</b> to select your whole army, then <b>tap the enemy Barracks</b> to attack. Tap <b>Show me</b> to look.',
+      'A recon drone has spotted an enemy outpost (the ping on the minimap). Tap the <b>crosshair</b> to select your whole army, then <b>tap the enemy Barracks</b> to attack. Tap <b>Show me</b> to look.',
     // The scouts' report puts the outpost on the map.
     start: (t) => {
       const b = t.world.building(t.outpost);
@@ -374,6 +374,6 @@ const STEPS: Step[] = [
   {
     title: 'Victory!',
     text: () =>
-      'The outpost has fallen. You know the essentials: gather, build, advance, fortify and fight. A real match is longer: four ages, siege engines, ships, and an opponent who fights back.',
+      'The outpost has fallen. You know the essentials: gather, build, advance, fortify and fight. A real match is longer: four ages, heavy weapons, warships, and an opponent who fights back.',
   },
 ];

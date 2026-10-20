@@ -16,7 +16,7 @@ import { type SaveData, saveWorld } from './sim/save';
 import { type Difficulty, type Opponent, makeOpponent } from './sim/ai/opponent';
 import type { GameMode } from './sim/modes';
 
-const PLAYER_NAMES = ['Blue', 'Red', 'Gold', 'Green'];
+const PLAYER_NAMES = ['Blue', 'Red', 'Yellow', 'Green'];
 import type { SaveMeta } from './ui/saves';
 import { settings } from './ui/settings';
 import { Tutorial } from './ui/tutorial';
@@ -161,7 +161,7 @@ export class Game {
       if (d < bd) (bd = d), (best = b);
     }
     if (best) w.issue(this.player, { type: 'garrison', ids: [king.id], id: best.id });
-    else this.hud.toast('No Castle or tower to shelter in');
+    else this.hud.toast('No Fortress or tower to shelter in');
   }
 
   /** Seconds-clock of the last attack alert, and where, so alerts don't spam. */
@@ -230,7 +230,7 @@ export class Game {
       }
       if (ev.type === 'death') this.renderer.addDeath(ev, this.deaths++, nowS);
       else if (ev.type === 'destroyed') this.renderer.addRuin(ev, nowS);
-      if (ev.type === 'converted' && ev.from === this.player) this.alert('A unit was converted by an enemy monk!', ev.x, ev.y, nowS, true, 'convert');
+      if (ev.type === 'converted' && ev.from === this.player) this.alert('A unit was turned by an enemy agent!', ev.x, ev.y, nowS, true, 'convert');
       if (ev.type === 'victory' && this.world.scenario) {
         const won = ev.team === this.world.players[this.player].team;
         audio.play(won ? 'victory' : 'defeat');
@@ -254,7 +254,7 @@ export class Game {
       }
       if (ev.type === 'defeated' && ev.owner !== this.player) {
         const ally = !this.world.isEnemy(this.player, ev.owner);
-        const how = this.world.mode === 'regicide' && !kingOf(this.world, ev.owner) ? "'s King has fallen" : ' has been defeated';
+        const how = this.world.mode === 'regicide' && !kingOf(this.world, ev.owner) ? "'s Commander has fallen" : ' has been defeated';
         this.hud.toast(`${ally ? 'Your ally' : 'An enemy'} (${PLAYER_NAMES[ev.owner] ?? 'player'})${how}`);
         continue;
       }
@@ -262,10 +262,10 @@ export class Game {
         const ours = !this.world.isEnemy(this.player, ev.owner);
         const msg =
           ev.message === 'Site captured'
-            ? ours ? 'A Banner Site is ours' : 'The enemy has taken a Banner Site!'
-            : ev.message === 'Wonder finished'
-              ? ours ? 'Our Wonder stands! Hold it for 8 minutes.' : 'The enemy has finished a Wonder! Destroy it within 8 minutes.'
-              : ours ? 'A relic is safe in our Monastery' : 'The enemy has secured a relic';
+            ? ours ? 'A control point is ours' : 'The enemy has taken a control point!'
+            : ev.message === 'Launch Complex finished'
+              ? ours ? 'Our Launch Complex stands! Hold it for 8 minutes.' : 'The enemy has finished a Launch Complex! Destroy it within 8 minutes.'
+              : ours ? 'A relic is safe in our Monastery' : 'The enemy has secured an intel drive';
         this.alert(msg, ev.x, ev.y, nowS, true, 'bell');
         continue;
       }
@@ -275,14 +275,14 @@ export class Game {
         const holder = t?.kind === 'building' && king?.inside === t.id;
         if ((t?.kind === 'unit' && t.type === 'king') || (holder && t.hp < buildingMaxHp(this.world, t) * 0.5)) {
           this.lastKingAlert = nowS;
-          this.alert(holder ? "The King's stronghold is failing!" : 'Your King is under attack!', ev.x, ev.y, nowS, true, 'alertKing');
+          this.alert(holder ? "The Commander's shelter is failing!" : 'Your Commander is under attack!', ev.x, ev.y, nowS, true, 'alertKing');
           continue;
         }
       }
       if (ev.owner !== this.player) continue;
       if (ev.type === 'bell') {
         audio.play(ev.on ? 'alertWall' : 'bell');
-        this.hud.toast(ev.on ? 'The town bell rings: villagers take shelter!' : 'All clear: villagers back to work');
+        this.hud.toast(ev.on ? 'Air-raid siren: engineers take cover!' : 'All clear: engineers back to work');
         continue;
       }
       if (ev.type === 'hit' && ev.by !== this.player && ev.by >= 0) {
@@ -290,7 +290,7 @@ export class Game {
         const t = this.world.get(ev.id);
         const wall = t?.kind === 'building' && !!BUILDING_DEFS[t.type].wall;
         const ship = (t?.kind === 'unit' && !!UNIT_DEFS[t.type].naval) || (t?.kind === 'building' && (t.type === 'dock' || t.type === 'fish_trap'));
-        const msg = wall ? 'Your walls are under attack!' : ship ? 'Your ships are under attack!' : ev.building ? 'Your town is under attack!' : 'Your units are under attack!';
+        const msg = wall ? 'Your walls are under attack!' : ship ? 'Your ships are under attack!' : ev.building ? 'Your base is under attack!' : 'Your units are under attack!';
         this.alert(msg, ev.x, ev.y, nowS, false, wall ? 'alertWall' : ship ? 'alertShip' : 'alertTown');
         continue;
       }

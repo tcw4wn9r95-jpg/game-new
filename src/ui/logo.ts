@@ -74,5 +74,5 @@ export function emblemSvg(opts: { animated?: boolean; className?: string } = {})
 
 /** "Hearth & Crown" in engraved gold, the ampersand as a flourish of flame. */
 export function wordmarkHtml(className = ''): string {
-  return `<span class="wordmark ${className}"><span class="wm-word">Hearth</span><span class="wm-amp">&amp;</span><span class="wm-word">Crown</span></span>`;
+  return `<span class="wordmark ${className}"><span class="wm-word">Steel</span><span class="wm-amp">&amp;</span><span class="wm-word">Signal</span></span>`;
 }

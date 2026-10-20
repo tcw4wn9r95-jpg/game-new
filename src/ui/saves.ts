@@ -22,7 +22,7 @@ interface Record_ {
   data: ArrayBuffer | string;
 }
 
-const DB = 'hearth-crown';
+const DB = 'steel-signal';
 const STORE = 'saves';
 
 function open(): Promise<IDBDatabase> {

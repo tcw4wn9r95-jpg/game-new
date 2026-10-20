@@ -3,7 +3,7 @@
 // the cached index.html for navigations so the game launches offline.
 const VERSION = __VERSION__;
 const PRECACHE = __PRECACHE__;
-const CACHE = `hearth-${VERSION}`;
+const CACHE = `steel-signal-${VERSION}`;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)));
@@ -13,7 +13,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('hearth-') && k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('steel-signal-') && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });

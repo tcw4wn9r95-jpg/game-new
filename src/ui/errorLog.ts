@@ -1,7 +1,7 @@
 // A small on-device error log: phones hide the browser console, so errors
 // (with stack traces) are kept here and can be viewed and copied from the
 // pause menu to report a bug.
-const KEY = 'hc.errors';
+const KEY = 'ss.errors';
 const MAX = 30;
 
 export interface LoggedError {

@@ -12,21 +12,21 @@ import { GAME_MODES, type GameMode, MODE_NAMES } from '../sim/modes';
 import { FACTIONS, FACTION_IDS, type FactionId } from '../sim/techs';
 import { UNIT_DEFS } from '../sim/entities';
 
-const STORAGE_KEY = 'hc.setup';
+const STORAGE_KEY = 'ss.setup';
 
 const MAP_INFO: Record<MapType, { name: string; desc: string }> = {
-  heartland: { name: 'Heartland', desc: 'Open farmland cut by a river. Hold the fords; wall the gaps.' },
+  heartland: { name: 'Heartland', desc: 'Open farmland cut by a river. Hold the crossings; wall the gaps.' },
   coastal: { name: 'Coastal', desc: 'A long shore on one flank. Rule the sea for fish and a second front.' },
-  lakes: { name: 'Lakes', desc: 'A great lake at the heart of the realm. Docks are optional, but useful.' },
-  islands: { name: 'Islands', desc: 'Every realm on its own isle. Only ships carry armies to war.' },
+  lakes: { name: 'Lakes', desc: 'A great lake at the heart of the map. Naval Docks are optional, but useful.' },
+  islands: { name: 'Islands', desc: 'Every nation on its own island. Only landing craft carry armies to war.' },
 };
 const SIZE_LABELS: Record<MapSize, string> = { skirmish: 'Skirmish', standard: 'Standard', epic: 'Epic' };
 const AI_LABELS: Record<Difficulty, string> = { easy: 'Easy', normal: 'Normal', hard: 'Hard' };
 const TREATY_LABELS: Record<number, string> = { 0: 'Off', 10: '10m', 20: '20m', 30: '30m' };
 const MODE_INFO: Record<GameMode, string> = {
-  standard: 'Win by conquest, by a Wonder standing 8 minutes, or by holding every relic for 8 minutes.',
-  regicide: 'Each realm starts with a King in a Castle. Slay theirs; keep yours alive.',
-  domination: 'Hold the Banner Sites to score. First to the target, or holding every site for 3 minutes, wins.',
+  standard: 'Win by conquest, by a Launch Complex standing 8 minutes, or by holding every intel drive for 8 minutes.',
+  regicide: 'Each nation starts with a Commander in a Fortress. Take out theirs; keep yours alive.',
+  domination: 'Hold the control points to score. First to the target, or holding every point for 3 minutes, wins.',
 };
 
 /** Opponent strength and Peace Treaty length (minutes, 0 for none). */
@@ -230,7 +230,7 @@ export function showSetup(root: HTMLElement, hooks: SetupHooks): void {
   // First time here: point at the tutorial.
   if (!appSettings.tutorialSeen) {
     el.querySelector('.tutorial')!.classList.add('tut-glow');
-    el.querySelector('[data-v=note]')!.textContent = 'New to Hearth & Crown? Try the Tutorial first: about ten minutes.';
+    el.querySelector('[data-v=note]')!.textContent = 'New to Steel & Signal? Try the Tutorial first: about ten minutes.';
   }
   el.querySelector('.load')!.addEventListener('click', () => showSlots(document.body, 'load', leave, () => {}));
   void listSaves().then((saves) => {

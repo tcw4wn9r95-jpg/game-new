@@ -1,5 +1,5 @@
 // The title card shown when the game starts: the emblem with its fire alight,
-// the wordmark, drifting embers and "Tap to begin". The tap also unlocks
+// the wordmark, drifting embers and "Tap to deploy". The tap also unlocks
 // sound on iOS, so the fanfare that greets it is the first thing heard.
 import { audio } from './audio';
 import { emblemSvg, wordmarkHtml } from './logo';
@@ -16,8 +16,8 @@ export function showSplash(onDone: () => void = () => {}): void {
     <div class="splash-center">
       ${emblemSvg({ animated: true, className: 'splash-emblem' })}
       <div class="splash-title">${wordmarkHtml('wm-big')}</div>
-      <div class="splash-tag">Kindle a hearth. Raise a realm. Claim the crown.</div>
-      <div class="splash-tap">Tap to begin</div>
+      <div class="splash-tag">Build the base. Field the army. Hold the line.</div>
+      <div class="splash-tap">Tap to deploy</div>
     </div>`;
   let gone = false;
   const go = () => {

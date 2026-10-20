@@ -1,10 +1,10 @@
 {
   "highland": {
-    "name": "Highland Clans",
+    "name": "Boreal Rangers",
     "banner": "swallowtail",
     "unique": "claymore",
     "bonuses": [
-      "Villagers chop wood 15% faster",
+      "Engineers cut wood 15% faster",
       "Infantry +10% HP"
     ],
     "effects": [
@@ -23,15 +23,15 @@
         "hpMult": 1.1
       }
     ],
-    "description": "Woodsmen and swordsmen of the hills. Strong early infantry and a fast wood economy."
+    "description": "Forest commandos of the northern woods. Strong early infantry and a fast wood economy."
   },
   "steppe": {
-    "name": "Steppe Riders",
+    "name": "Dune Raiders",
     "banner": "pennant",
     "unique": "horse_archer",
     "bonuses": [
-      "Stables work 20% faster",
-      "Cavalry cost 10% less"
+      "Motor Pools work 20% faster",
+      "Vehicles cost 10% less"
     ],
     "effects": [
       {
@@ -47,15 +47,15 @@
         "mult": 0.9
       }
     ],
-    "description": "Horse lords of the open plains. Many riders, quickly."
+    "description": "Desert mobile forces. Many vehicles, quickly."
   },
   "coastal": {
-    "name": "Coastal League",
+    "name": "Harbor Coalition",
     "banner": "square",
     "unique": "arbalest_guard",
     "bonuses": [
-      "Ships +10% HP and Docks cost half",
-      "Market fees halved"
+      "Ships +10% HP and Naval Docks cost half",
+      "Exchange fees halved"
     ],
     "effects": [
       {
@@ -77,10 +77,10 @@
         "sellShare": 0.85
       }
     ],
-    "description": "Merchant ports and fleets. At home on the water and in the market."
+    "description": "Port cities and fleets. At home on the water and in the markets."
   },
   "mountain": {
-    "name": "Mountain Throne",
+    "name": "Iron Ridge",
     "banner": "tongued",
     "unique": "iron_bear",
     "bonuses": [
@@ -104,6 +104,6 @@
         "hpMult": 1.15
       }
     ],
-    "description": "Stone-builders of the high passes. Walls, towers and castles that will not fall."
+    "description": "Engineers of the high passes. Bunkers, walls and fortresses that will not fall."
   }
 }

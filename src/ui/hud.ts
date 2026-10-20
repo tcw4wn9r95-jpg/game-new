@@ -108,12 +108,12 @@ export class Hud {
       side.appendChild(b);
       return b;
     };
-    this.idleBtn = sideBtn('idle', ICONS.villager, 'Idle Villagers', 'Jump to the next villager with nothing to do.', () => this.onIdleVillager());
+    this.idleBtn = sideBtn('idle', ICONS.villager, 'Idle Engineers', 'Jump to the next villager with nothing to do.', () => this.onIdleVillager());
     this.armyBtn = sideBtn('idleArmy', ICONS.helmet, 'Idle Military', 'Jump to the next soldier awaiting orders.', () => this.onIdleMilitary());
     sideBtn('army', ICONS.military, 'Select All Military', 'Select every soldier you command.', () => this.onAllMilitary(), false);
     sideBtn('ships', ICONS.ship, 'Select All Ships', 'Available once you have a Dock.', () => {}, false).disabled = true;
     let lastKingTap = 0;
-    this.kingBtn = sideBtn('king', ICONS.crown, 'Your King', 'Tap to find him; tap twice quickly to send him into the nearest Castle or tower.', () => {
+    this.kingBtn = sideBtn('king', ICONS.crown, 'Your Commander', 'Tap to find them; tap twice quickly to send them into the nearest Fortress or tower.', () => {
       const now = performance.now();
       if (now - lastKingTap < 400) this.onKingShelter();
       else this.onKing();
@@ -159,7 +159,7 @@ export class Hud {
     const workers = (RESOURCE_KINDS as string[]).includes(key);
     s.innerHTML = `<span class="icon">${icon}</span><span class="stat-v" data-v="${key}">0</span>${workers ? `<span class="workers" data-v="${key}W">0</span>` : ''}`;
     s.querySelectorAll<HTMLElement>('[data-v]').forEach((n) => this.values.set(n.dataset.v!, n));
-    tip(s, () => `<div class="tip-title">${title}</div><div class="tip-body">${workers ? 'Stockpile, and villagers gathering it.' : 'Population / capacity. Build houses to raise it.'}</div>`);
+    tip(s, () => `<div class="tip-title">${title}</div><div class="tip-body">${workers ? 'Stockpile, and engineers gathering it.' : 'Population / capacity. Build housing units to raise it.'}</div>`);
     return s;
   }
 
@@ -256,13 +256,13 @@ export class Hud {
       const sites = w.modeState.sites.map((s) => `<i class="ms-site" style="--c:${s.owner >= 0 ? PLAYER_COLORS[s.owner % PLAYER_COLORS.length] : '#d8d0bc'}"></i>`).join('');
       parts.push(`${scores}<span class="ms-dim">/ ${target}</span><span class="ms-sites">${sites}</span>`);
       const h = w.modeState.siteHold;
-      if (h) parts.push(`<span class="ms-timer" style="--c:${teamColor(h.team)}">${holds(h.team)} every site · ${formatClock(Math.max(0, ALL_SITES_HOLD - (w.time - h.since)))}</span>`);
-      if (w.peace) parts.push('<span class="ms-dim">Sites open when the treaty ends</span>');
+      if (h) parts.push(`<span class="ms-timer" style="--c:${teamColor(h.team)}">${holds(h.team)} every point · ${formatClock(Math.max(0, ALL_SITES_HOLD - (w.time - h.since)))}</span>`);
+      if (w.peace) parts.push('<span class="ms-dim">Control points open when the treaty ends</span>');
     }
     const wc = wonderClock(w);
-    if (wc && w.mode !== 'domination') parts.push(`<span class="ms-timer" style="--c:${PLAYER_COLORS[wc.owner % PLAYER_COLORS.length]}">${whose(w.players[wc.owner].team)} Wonder · ${formatClock(wc.left)}</span>`);
+    if (wc && w.mode !== 'domination') parts.push(`<span class="ms-timer" style="--c:${PLAYER_COLORS[wc.owner % PLAYER_COLORS.length]}">${whose(w.players[wc.owner].team)} Launch Complex · ${formatClock(wc.left)}</span>`);
     const rh = w.modeState.relicHold;
-    if (rh && w.mode === 'standard') parts.push(`<span class="ms-timer" style="--c:${teamColor(rh.team)}">${holds(rh.team)} all relics · ${formatClock(Math.max(0, RELIC_HOLD - (w.time - rh.since)))}</span>`);
+    if (rh && w.mode === 'standard') parts.push(`<span class="ms-timer" style="--c:${teamColor(rh.team)}">${holds(rh.team)} all intel · ${formatClock(Math.max(0, RELIC_HOLD - (w.time - rh.since)))}</span>`);
     const html = parts.join('');
     this.modeStrip.hidden = !html;
     if (this.last.get('modeStrip') !== html) {
@@ -286,9 +286,9 @@ export class Hud {
     const bg = el('div', 'panel-backdrop');
     bg.innerHTML = `
       <div class="panel frame end-panel ${won ? 'won' : 'lost'}">
-        <h2 class="panel-title">${won ? 'Chapter Complete' : 'Defeat'}</h2>
+        <h2 class="panel-title">${won ? 'Mission Complete' : 'Defeat'}</h2>
         <div class="end-detail"><b>${title}</b><br>${detail}. Time ${formatClock(time)}.</div>
-        ${won && actions.next ? '<button class="btn btn-gold" data-a="next">Next Chapter</button>' : ''}
+        ${won && actions.next ? '<button class="btn btn-gold" data-a="next">Next Mission</button>' : ''}
         ${!won ? '<button class="btn btn-gold" data-a="retry">Try Again</button>' : ''}
         <button class="btn btn-wood" data-a="campaigns">Campaigns</button>
         <button class="btn btn-wood btn-small" data-a="watch">${won ? 'Look Around' : 'Keep Watching'}</button>
@@ -311,7 +311,7 @@ export class Hud {
     bg.innerHTML = `
       <div class="panel frame end-panel ${won ? 'won' : 'lost'}">
         <h2 class="panel-title">${won ? 'Victory' : 'Defeat'}</h2>
-        <div class="end-detail">${reason || (won ? 'Every enemy has fallen.' : 'Your realm has fallen.')} Match time ${formatClock(time)}.</div>
+        <div class="end-detail">${reason || (won ? 'Every enemy has fallen.' : 'Your nation has fallen.')} Match time ${formatClock(time)}.</div>
         <button class="btn btn-gold" data-a="new">New Match</button>
         <button class="btn btn-wood" data-a="watch">${won ? 'Look Around' : 'Keep Watching'}</button>
       </div>`;
@@ -333,7 +333,7 @@ export class Hud {
     const p = w.players[this.player];
     const next = ages[p.age + 1] as { name: string; cost: Record<string, number>; requires?: { buildings: number } } | undefined;
     const body = next
-      ? `Next: the ${next.name} Age, for ${Object.entries(next.cost).map(([k, v]) => `${v} ${k}`).join(' and ')}, researched at the Town Center. Needs ${next.requires?.buildings ?? 2} different ${ages[p.age].name} Age buildings.`
+      ? `Next: the ${next.name} Age, for ${Object.entries(next.cost).map(([k, v]) => `${v} ${k}`).join(' and ')}, researched at the Command Center. Needs ${next.requires?.buildings ?? 2} different ${ages[p.age].name} Age buildings.`
       : 'The highest age.';
     return `<div class="tip-title">${ages[p.age].name} Age</div><div class="tip-body">${body}</div>`;
   }

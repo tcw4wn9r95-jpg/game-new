@@ -314,7 +314,7 @@ function moveLand(w: World, player: number, units: Unit[], x: number, y: number)
     left = left.filter((u) => !taken.includes(u));
   }
   const rest = units.filter((u) => left.includes(u) || !waiting.includes(u));
-  if (left.length) w.events.push({ type: 'error', owner: player, message: transportsNear(w, player, x, y).length || waiting.length < units.length ? 'No path' : 'No path: build a Transport Ship' });
+  if (left.length) w.events.push({ type: 'error', owner: player, message: transportsNear(w, player, x, y).length || waiting.length < units.length ? 'No path' : 'No path: build a Landing Craft' });
   if (rest.length) moveGroup(w, rest, x, y);
 }
 

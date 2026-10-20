@@ -12,7 +12,7 @@ function buildId(): string {
 
 export default defineConfig({
   // GitHub Pages serves the site at /<repo-name>/.
-  base: process.env.BASE_PATH ?? '/game/',
+  base: process.env.BASE_PATH ?? '/game-new/',
   define: {
     __BUILD_ID__: JSON.stringify(buildId()),
   },

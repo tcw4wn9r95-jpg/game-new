@@ -1,6 +1,6 @@
 {
   "town_center": {
-    "name": "Town Center",
+    "name": "Command Center",
     "size": 4,
     "hp": 2400,
     "buildTime": 150,
@@ -18,7 +18,7 @@
     ],
     "age": 0,
     "buildable": false,
-    "description": "Trains villagers and stores every resource. Lose them all and the realm falls.",
+    "description": "Trains engineers and stores every resource. Lose them all and your nation falls.",
     "meleeArmor": 3,
     "pierceArmor": 5,
     "trains": [
@@ -37,7 +37,7 @@
     "garrison": 15
   },
   "house": {
-    "name": "House",
+    "name": "Housing Unit",
     "size": 2,
     "hp": 550,
     "buildTime": 25,
@@ -58,7 +58,7 @@
     ]
   },
   "lumber_camp": {
-    "name": "Lumber Camp",
+    "name": "Sawmill",
     "size": 2,
     "hp": 600,
     "buildTime": 35,
@@ -82,7 +82,7 @@
     "advance": true
   },
   "mining_camp": {
-    "name": "Mining Camp",
+    "name": "Mining Depot",
     "size": 2,
     "hp": 600,
     "buildTime": 35,
@@ -97,7 +97,7 @@
     ],
     "age": 0,
     "buildable": true,
-    "description": "Drop-off for gold and stone. Build it beside a mine.",
+    "description": "Drop-off for gold and stone. Build it beside a mine or quarry.",
     "meleeArmor": 0,
     "pierceArmor": 7,
     "trains": [],
@@ -107,7 +107,7 @@
     "advance": true
   },
   "mill": {
-    "name": "Mill",
+    "name": "Food Depot",
     "size": 2,
     "hp": 600,
     "buildTime": 35,
@@ -168,7 +168,7 @@
     "dropoff": [],
     "age": 0,
     "buildable": true,
-    "description": "A field of wheat worked by one villager. Replants itself when harvested, if you have the wood.",
+    "description": "An irrigated field worked by one engineer. Replants itself when harvested, if you have the wood.",
     "meleeArmor": 0,
     "pierceArmor": 0,
     "trains": [],
@@ -180,7 +180,7 @@
     ]
   },
   "archery_range": {
-    "name": "Archery Range",
+    "name": "Firing Range",
     "size": 3,
     "hp": 1200,
     "buildTime": 50,
@@ -192,7 +192,7 @@
     "dropoff": [],
     "age": 1,
     "buildable": true,
-    "description": "Trains archers and skirmishers.",
+    "description": "Trains riflemen and shield troopers.",
     "meleeArmor": 0,
     "pierceArmor": 7,
     "trains": [
@@ -205,7 +205,7 @@
     "advance": true
   },
   "stable": {
-    "name": "Stable",
+    "name": "Motor Pool",
     "size": 3,
     "hp": 1200,
     "buildTime": 50,
@@ -217,7 +217,7 @@
     "dropoff": [],
     "age": 1,
     "buildable": true,
-    "description": "Trains scouts and knights.",
+    "description": "Builds recon buggies and battle tanks.",
     "meleeArmor": 0,
     "pierceArmor": 7,
     "trains": [
@@ -230,7 +230,7 @@
     "advance": true
   },
   "monastery": {
-    "name": "Monastery",
+    "name": "Intel HQ",
     "size": 3,
     "hp": 1400,
     "buildTime": 60,
@@ -242,7 +242,7 @@
     "dropoff": [],
     "age": 2,
     "buildable": true,
-    "description": "Trains monks.",
+    "description": "Trains field agents. Holds recovered intel drives.",
     "meleeArmor": 0,
     "pierceArmor": 7,
     "trains": [
@@ -255,7 +255,7 @@
     "garrison": 0
   },
   "blacksmith": {
-    "name": "Blacksmith",
+    "name": "Armory",
     "size": 3,
     "hp": 1500,
     "buildTime": 50,
@@ -267,7 +267,7 @@
     "dropoff": [],
     "age": 1,
     "buildable": true,
-    "description": "Forges better weapons and armour.",
+    "description": "Develops better weapons and body armour.",
     "meleeArmor": 1,
     "pierceArmor": 7,
     "trains": [],
@@ -277,7 +277,7 @@
     "advance": true
   },
   "market": {
-    "name": "Market",
+    "name": "Exchange",
     "size": 3,
     "hp": 1500,
     "buildTime": 50,
@@ -299,7 +299,7 @@
     "advance": true
   },
   "university": {
-    "name": "University",
+    "name": "Research Lab",
     "size": 3,
     "hp": 1700,
     "buildTime": 60,
@@ -311,7 +311,7 @@
     "dropoff": [],
     "age": 2,
     "buildable": true,
-    "description": "Researches masonry and building techniques.",
+    "description": "Researches construction and defence technology.",
     "meleeArmor": 1,
     "pierceArmor": 7,
     "trains": [],
@@ -321,7 +321,7 @@
     "advance": true
   },
   "palisade_wall": {
-    "name": "Palisade Wall",
+    "name": "Sandbag Wall",
     "size": 1,
     "hp": 250,
     "buildTime": 6,
@@ -333,7 +333,7 @@
     "dropoff": [],
     "age": 0,
     "buildable": true,
-    "description": "Sharpened stakes. Cheap and quick; blocks early raids but burns down fast.",
+    "description": "Sandbags and timber. Cheap and quick; blocks early raids but gives way fast.",
     "meleeArmor": 2,
     "pierceArmor": 5,
     "trains": [],
@@ -345,7 +345,7 @@
     "gate": false
   },
   "palisade_gate": {
-    "name": "Palisade Gate",
+    "name": "Checkpoint",
     "size": 1,
     "hp": 400,
     "buildTime": 15,
@@ -357,7 +357,7 @@
     "dropoff": [],
     "age": 0,
     "buildable": true,
-    "description": "Opens for you alone; can be locked. Set it into one of your palisade walls, or on open ground.",
+    "description": "A boom barrier that opens for you alone; can be locked. Set it into one of your sandbag walls, or on open ground.",
     "meleeArmor": 2,
     "pierceArmor": 5,
     "trains": [],
@@ -369,7 +369,7 @@
     "gate": true
   },
   "stone_wall": {
-    "name": "Stone Wall",
+    "name": "Concrete Wall",
     "size": 1,
     "hp": 1800,
     "buildTime": 10,
@@ -381,7 +381,7 @@
     "dropoff": [],
     "age": 1,
     "buildable": true,
-    "description": "The main town wall. Only siege breaks it quickly.",
+    "description": "Precast blast walls. Only heavy weapons break them quickly.",
     "meleeArmor": 8,
     "pierceArmor": 10,
     "trains": [],
@@ -393,7 +393,7 @@
     "gate": false
   },
   "gate": {
-    "name": "Gate",
+    "name": "Blast Gate",
     "size": 1,
     "hp": 2750,
     "buildTime": 25,
@@ -405,7 +405,7 @@
     "dropoff": [],
     "age": 1,
     "buildable": true,
-    "description": "A stone gate that opens for you alone; can be locked. Set it into one of your stone walls, or on open ground.",
+    "description": "A steel gate that opens for you alone; can be locked. Set it into one of your concrete walls, or on open ground.",
     "meleeArmor": 6,
     "pierceArmor": 6,
     "trains": [],
@@ -417,7 +417,7 @@
     "gate": true
   },
   "watch_tower": {
-    "name": "Watch Tower",
+    "name": "Sentry Tower",
     "size": 1,
     "hp": 1000,
     "buildTime": 40,
@@ -430,7 +430,7 @@
     "dropoff": [],
     "age": 1,
     "buildable": true,
-    "description": "Shoots arrows at enemies in range. Garrison villagers or foot soldiers for more arrows.",
+    "description": "Fires on enemies in range. Garrison engineers or foot soldiers for more guns.",
     "meleeArmor": 1,
     "pierceArmor": 7,
     "trains": [],
@@ -448,7 +448,7 @@
     "garrison": 5
   },
   "castle": {
-    "name": "Castle",
+    "name": "Fortress",
     "size": 4,
     "hp": 4800,
     "buildTime": 200,
@@ -460,7 +460,7 @@
     "dropoff": [],
     "age": 2,
     "buildable": true,
-    "description": "A fortress that showers attackers with arrows and holds 20 men. Hard to take without siege.",
+    "description": "A hardened base that rakes attackers with fire and holds 20 troops. Hard to take without heavy weapons.",
     "meleeArmor": 8,
     "pierceArmor": 11,
     "trains": [
@@ -486,7 +486,7 @@
     "advance": true
   },
   "siege_workshop": {
-    "name": "Siege Workshop",
+    "name": "Vehicle Factory",
     "size": 3,
     "hp": 1500,
     "buildTime": 50,
@@ -498,7 +498,7 @@
     "dropoff": [],
     "age": 2,
     "buildable": true,
-    "description": "Builds rams, mangonels, scorpions and siege towers.",
+    "description": "Builds breaching dozers, howitzers, gun trucks and assault bridges.",
     "meleeArmor": 1,
     "pierceArmor": 7,
     "trains": [
@@ -513,7 +513,7 @@
     "advance": true
   },
   "dock": {
-    "name": "Dock",
+    "name": "Naval Dock",
     "size": 3,
     "hp": 1800,
     "buildTime": 35,
@@ -527,7 +527,7 @@
     ],
     "age": 0,
     "buildable": true,
-    "description": "Built on the shore. Trains ships and takes in fish.",
+    "description": "Built on the shore. Builds ships and takes in fish.",
     "meleeArmor": 1,
     "pierceArmor": 7,
     "trains": [
@@ -545,7 +545,7 @@
     "advance": true
   },
   "fish_trap": {
-    "name": "Fish Trap",
+    "name": "Fish Farm",
     "size": 3,
     "hp": 300,
     "buildTime": 25,
@@ -557,7 +557,7 @@
     "dropoff": [],
     "age": 0,
     "buildable": true,
-    "description": "Stakes and nets in deep water, worked by a fishing ship. Restocks itself when emptied, if you have the wood.",
+    "description": "Floating net pens in deep water, worked by a trawler. Restocks itself when emptied, if you have the wood.",
     "meleeArmor": 0,
     "pierceArmor": 0,
     "trains": [],
@@ -570,7 +570,7 @@
     "naval": true
   },
   "wonder": {
-    "name": "Wonder",
+    "name": "Launch Complex",
     "size": 5,
     "hp": 4800,
     "buildTime": 900,
@@ -585,7 +585,7 @@
     "dropoff": [],
     "age": 3,
     "buildable": true,
-    "description": "A monument for the ages. Keep it standing for 8 minutes after it is finished and you win.",
+    "description": "A spaceport for the new century. Keep it standing for 8 minutes after it is finished and you win.",
     "meleeArmor": 3,
     "pierceArmor": 10,
     "trains": [],

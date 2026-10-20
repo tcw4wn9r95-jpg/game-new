@@ -160,7 +160,7 @@ function reseed(w: World, farm: Building): void {
     farm.amount = (def.food ?? 0) + (w.players[farm.owner]?.mods.farmFood ?? 0);
   } else {
     if (p.autoReseed)
-      w.events.push({ type: 'error', owner: farm.owner, message: farm.type === 'farm' ? 'A farm ran out: not enough wood to replant' : 'A fish trap ran out: not enough wood to restock' });
+      w.events.push({ type: 'error', owner: farm.owner, message: farm.type === 'farm' ? 'A farm ran out: not enough wood to replant' : 'A fish farm ran out: not enough wood to restock' });
     w.remove(farm.id);
   }
 }
