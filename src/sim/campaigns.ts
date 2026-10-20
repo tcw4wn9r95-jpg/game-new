@@ -19,7 +19,7 @@ const min = (m: number) => m * 60;
 
 // ---------- Operation Ember (short: learn to hold a base) ----------
 
-const firstHearth: ScenarioDef = {
+const forwardBase: ScenarioDef = {
   id: 'ember-1',
   campaign: 'ember',
   title: 'Forward Base',
@@ -509,7 +509,7 @@ const kingslayer: ScenarioDef = {
   }),
 };
 
-registerScenarios([firstHearth, raidersAtTheFord, watchfort, saltAndTimber, saintsBones, usurper, lastBastion, landfall, seaLanes, seaKing, crossings, fieldOfBanners, hungryWinter, ironwood, wonderRace, kingslayer]);
+registerScenarios([forwardBase, raidersAtTheFord, watchfort, saltAndTimber, saintsBones, usurper, lastBastion, landfall, seaLanes, seaKing, crossings, fieldOfBanners, hungryWinter, ironwood, wonderRace, kingslayer]);
 
 export const CAMPAIGNS: CampaignDef[] = [
   { id: 'ember', title: 'Operation Ember', length: 'Short · 3 missions · about 50 min', blurb: 'Rebuild a base in an empty valley and see off the raiders who prey on it.', chapters: ['ember-1', 'ember-2', 'ember-3'] },

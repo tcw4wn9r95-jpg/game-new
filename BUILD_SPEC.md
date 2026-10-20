@@ -1,5 +1,7 @@
 # Hearth & Crown: Build Spec for Claude Code
 
+> **Steel & Signal** is the 21st-century edition built from this spec. The rules below still apply unchanged; unit, building, tech and mode names map to their modern equivalents as listed in [README.md](README.md). The medieval setting, art and "no gunpowder" scope notes below describe the original game.
+
 A single-player, real-time strategy game for iPhone, played in Safari or installed to the Home Screen, hosted on GitHub Pages. Inspired by what made Age of Empires II work. All names, art and text are original. Do not use Age of Empires names, logos, unit art, sounds or civilization flavor text.
 
 How to use this file: put it in the repo root as `BUILD_SPEC.md`, then tell Claude Code: "Read BUILD_SPEC.md and build milestone M0. Stop at the end of each milestone, run the acceptance checks, and tell me what to test on my phone."
