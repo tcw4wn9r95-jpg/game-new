@@ -67,7 +67,7 @@ const TEXTURE_K = Math.SQRT2;
 const SPRITE_K = 1.6;
 
 /** Weapon each unit swings in its attack animation. */
-const ATTACK_TOOL: Record<string, Tool> = { villager: 'axe', militia: 'sword', spearman: 'spear', archer: 'bow', skirmisher: 'javelin', scout: 'spear', knight: 'spear', monk: 'staff', claymore: 'sword', horse_archer: 'bow', arbalest_guard: 'bow', iron_bear: 'spear', king: 'sword' };
+const ATTACK_TOOL: Record<string, Tool> = { villager: 'sword', militia: 'rifle', spearman: 'launcher', archer: 'rifle', skirmisher: 'rifle', scout: 'rifle', knight: 'rifle', monk: 'tablet', claymore: 'rifle', horse_archer: 'rifle', arbalest_guard: 'rifle', iron_bear: 'rifle', king: 'rifle' };
 /** How long the fallen stay on the field, and rubble after a building falls (seconds). */
 const CORPSE_S = 14;
 const RUIN_S = 45;

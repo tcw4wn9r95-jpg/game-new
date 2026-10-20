@@ -13,51 +13,56 @@ export function drawSpriteSheet(view: View, zoom = 4): void {
   ctx.fillStyle = '#5a8a3c';
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   const cell = 32 * zoom * view.dpr * 1.05;
-  let col = 0, row = 0;
-  const put = (type: UnitType, player: number, look: number, pose: Parameters<UnitSprites['get']>[3]) => {
-    const sp = sprites.get(type, player, look, pose);
-    const x = (col + 0.5) * cell * (type === 'scout' || type === 'knight' ? 1.5 : 1), y = (row + 0.9) * cell * 1.3;
-    ctx.drawImage(sp.c, x - sp.ax, y - sp.ay);
-    col++;
+  let x = cell * 0.5, row = 0;
+  const put = (type: UnitType, player: number, look: number, pose: Parameters<UnitSprites['get']>[3], elite = false) => {
+    const sp = sprites.get(type, player, look, pose, elite);
+    if (x + sp.c.width > ctx.canvas.width) {
+      x = cell * 0.5;
+      row++;
+    }
+    const y = (row + 0.9) * cell * 1.3;
+    ctx.drawImage(sp.c, x, y - sp.ay);
+    x += sp.c.width + cell * 0.15;
+  };
+  const next = () => {
+    x = cell * 0.5;
+    row++;
   };
   const base = { left: false, frame: 0, tool: 'none' as Tool, carry: null };
   for (const v of ['front', 'side', 'back'] as const) put('villager', 0, 0, { ...base, view: v, anim: 'idle' });
-  for (let f = 0; f < 6; f++) put('villager', 1, 1, { ...base, view: 'side', anim: 'walk', frame: f });
-  row++;
-  col = 0;
-  for (const tool of ['axe', 'pick', 'hammer', 'basket', 'knife', 'spear'] as Tool[]) put('villager', 0, 2 + (col % 2), { ...base, view: 'side', anim: 'work', frame: tool === 'axe' ? 0 : 2, tool });
+  for (let f = 0; f < 3; f++) put('villager', 1, 1, { ...base, view: 'side', anim: 'walk', frame: f * 2 });
+  for (const tool of ['axe', 'pick', 'hammer', 'basket', 'spear', 'hoe'] as Tool[]) put('villager', 0, 2 + (x % 3 | 0), { ...base, view: 'side', anim: 'work', frame: 2, tool });
   for (const carry of ['wood', 'food', 'gold'] as const) put('villager', 2, 4, { ...base, view: 'side', anim: 'walk', frame: 1, carry });
-  row++;
-  col = 0;
-  for (const v of ['front', 'back'] as const) put('villager', 3, 5, { ...base, view: v, anim: 'walk', frame: 1, carry: 'stone' });
-  for (const v of ['front', 'side', 'back'] as const) put('militia', 0, 1, { ...base, view: v, anim: 'idle' });
-  put('militia', 1, 2, { ...base, view: 'side', anim: 'work', frame: 2 });
-  row++;
-  col = 0;
-  for (const t of ['spearman', 'archer', 'skirmisher', 'monk'] as const) {
-    const tool: Tool = t === 'spearman' ? 'spear' : t === 'archer' ? 'bow' : t === 'skirmisher' ? 'javelin' : 'staff';
+  next();
+  for (const t of ['militia', 'spearman', 'archer', 'skirmisher', 'monk', 'claymore', 'arbalest_guard', 'king', 'petard'] as const) {
     put(t, 0, 3, { ...base, view: 'front', anim: 'idle' });
-    put(t, 1, 3, { ...base, view: 'side', anim: 'work', frame: 2, tool });
+    put(t, 1, 5, { ...base, view: 'side', anim: 'idle' });
+    put(t, 2, 6, { ...base, view: 'side', anim: 'work', frame: 2, tool: 'rifle' });
   }
-  put('knight', 0, 0, { ...base, view: 'side', anim: 'idle' });
-  put('knight', 1, 0, { ...base, view: 'front', anim: 'walk', frame: 1 });
-  row++;
-  col = 0;
+  next();
+  for (const t of ['militia', 'spearman', 'archer'] as const) put(t, 3, 1, { ...base, view: 'side', anim: 'work', frame: 2, tool: 'rifle' }, true);
+  for (const t of ['militia', 'spearman', 'archer', 'skirmisher'] as const) put(t, 0, 2, { ...base, view: 'back', anim: 'walk', frame: 1 });
+  for (const t of ['archer', 'skirmisher'] as const) put(t, 0, 2, { ...base, view: 'side', anim: 'walk', frame: 2 });
+  next();
+  for (const t of ['scout', 'horse_archer', 'knight', 'iron_bear'] as const) {
+    put(t, 0, 0, { ...base, view: 'side', anim: 'walk', frame: 1 });
+    put(t, 1, 0, { ...base, view: 'side', anim: 'work', frame: 2 });
+  }
+  next();
+  for (const t of ['scout', 'horse_archer', 'knight', 'iron_bear'] as const) {
+    put(t, 2, 0, { ...base, view: 'front', anim: 'idle' });
+    put(t, 3, 0, { ...base, view: 'back', anim: 'walk', frame: 1 });
+  }
+  put('scout', 0, 0, { ...base, view: 'side', anim: 'idle' }, true);
+  next();
   for (const t of ['ram', 'mangonel', 'scorpion', 'siege_tower'] as const) {
     put(t, 0, 0, { ...base, view: 'side', anim: 'idle' });
-    col += 0.5;
+    put(t, 1, 0, { ...base, view: 'side', anim: 'work', frame: 2 });
   }
+  next();
   put('trebuchet', 0, 0, { ...base, view: 'side', anim: 'idle', packed: true });
-  col += 0.8;
   put('trebuchet', 1, 0, { ...base, view: 'side', anim: 'work', frame: 2, packed: false });
-  col += 0.5;
-  put('petard', 0, 0, { ...base, view: 'side', anim: 'walk', frame: 1 });
-  row++;
-  col = 0;
-  put('scout', 0, 0, { ...base, view: 'side', anim: 'idle' });
-  put('scout', 1, 0, { ...base, view: 'side', anim: 'walk', frame: 2 });
-  put('scout', 2, 0, { ...base, view: 'front', anim: 'walk', frame: 1 });
-  put('scout', 3, 0, { ...base, view: 'back', anim: 'walk', frame: 3 });
+  put('trebuchet', 2, 0, { ...base, view: 'side', anim: 'idle', packed: false });
 }
 
 /** Debug view (?buildings=zoom): every building at one zoom, on grass. */

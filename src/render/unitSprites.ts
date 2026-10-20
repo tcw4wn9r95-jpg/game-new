@@ -1,31 +1,9 @@
 // Unit sprites rendered lazily from the articulated figures, per zoom level.
 import type { ResourceKind } from '../sim/constants';
 import type { UnitType } from '../sim/entities';
-import {
-  type Anim,
-  CLOTHS,
-  type FigureSpec,
-  HAIRS,
-  type Look,
-  SKINS,
-  type Tool,
-  type View,
-  drawArbalest,
-  drawArcher,
-  drawClaymore,
-  drawHorseArcher,
-  drawIronBear,
-  drawKing,
-  drawKnight,
-  drawMilitia,
-  drawMonk,
-  drawScout,
-  drawSkirmisher,
-  drawSpearman,
-  drawPetard,
-  drawVillager,
-} from './figures';
-import { drawMangonel, drawRam, drawScorpion, drawSiegeTower, drawTrebuchet } from './siegeFigures';
+import { type Anim, CLOTHS, type FigureSpec, HAIRS, type Look, SKINS, type Tool, type View, drawVillager } from './figures';
+import { drawArbalest, drawArcher, drawClaymore, drawKing, drawMilitia, drawMonk, drawPetard, drawSkirmisher, drawSpearman } from './troops';
+import { drawHorseArcher, drawIronBear, drawKnight, drawMangonel, drawRam, drawScorpion, drawScout, drawSiegeTower, drawTrebuchet } from './vehicles';
 import { grade } from './materials';
 import { SHIP_TYPES, type ShipType, shipPortrait, shipSprite } from './shipFigures';
 import { PLAYER_COLORS } from './palette';
@@ -33,25 +11,25 @@ import { type Sprite, SpriteCache, cropSprite } from './sprites';
 
 /** Per-type size (tiles per 100 figure units) and drawing bounds in figure units. */
 const DEFS: Record<Exclude<UnitType, ShipType>, { tilesPer100: number; x0: number; x1: number; y0: number; y1: number; draw: (g: CanvasRenderingContext2D, f: FigureSpec) => void }> = {
-  villager: { tilesPer100: 0.82, x0: -45, x1: 45, y0: -150, y1: 12, draw: drawVillager },
-  scout: { tilesPer100: 1.2, x0: -60, x1: 70, y0: -150, y1: 12, draw: drawScout },
-  militia: { tilesPer100: 0.86, x0: -50, x1: 50, y0: -160, y1: 12, draw: drawMilitia },
-  spearman: { tilesPer100: 0.86, x0: -60, x1: 70, y0: -180, y1: 40, draw: drawSpearman },
-  archer: { tilesPer100: 0.84, x0: -50, x1: 50, y0: -150, y1: 12, draw: drawArcher },
-  skirmisher: { tilesPer100: 0.84, x0: -50, x1: 55, y0: -160, y1: 12, draw: drawSkirmisher },
-  knight: { tilesPer100: 1.25, x0: -70, x1: 110, y0: -160, y1: 12, draw: drawKnight },
-  monk: { tilesPer100: 0.84, x0: -45, x1: 45, y0: -170, y1: 12, draw: drawMonk },
-  petard: { tilesPer100: 0.84, x0: -50, x1: 50, y0: -150, y1: 12, draw: drawPetard },
-  ram: { tilesPer100: 0.95, x0: -75, x1: 95, y0: -100, y1: 14, draw: drawRam },
-  mangonel: { tilesPer100: 0.95, x0: -70, x1: 70, y0: -110, y1: 14, draw: drawMangonel },
-  scorpion: { tilesPer100: 0.95, x0: -50, x1: 70, y0: -80, y1: 12, draw: drawScorpion },
-  siege_tower: { tilesPer100: 0.9, x0: -50, x1: 70, y0: -225, y1: 14, draw: drawSiegeTower },
-  trebuchet: { tilesPer100: 0.95, x0: -100, x1: 115, y0: -250, y1: 14, draw: drawTrebuchet },
-  claymore: { tilesPer100: 0.9, x0: -55, x1: 60, y0: -170, y1: 12, draw: drawClaymore },
-  horse_archer: { tilesPer100: 1.2, x0: -60, x1: 75, y0: -150, y1: 12, draw: drawHorseArcher },
-  arbalest_guard: { tilesPer100: 0.86, x0: -50, x1: 50, y0: -150, y1: 12, draw: drawArbalest },
-  iron_bear: { tilesPer100: 1.3, x0: -70, x1: 110, y0: -160, y1: 12, draw: drawIronBear },
-  king: { tilesPer100: 0.9, x0: -45, x1: 45, y0: -165, y1: 12, draw: drawKing },
+  villager: { tilesPer100: 0.82, x0: -45, x1: 55, y0: -150, y1: 12, draw: drawVillager },
+  scout: { tilesPer100: 1.15, x0: -62, x1: 62, y0: -95, y1: 12, draw: drawScout },
+  militia: { tilesPer100: 0.86, x0: -50, x1: 70, y0: -150, y1: 12, draw: drawMilitia },
+  spearman: { tilesPer100: 0.86, x0: -60, x1: 80, y0: -150, y1: 12, draw: drawSpearman },
+  archer: { tilesPer100: 0.84, x0: -50, x1: 75, y0: -150, y1: 12, draw: drawArcher },
+  skirmisher: { tilesPer100: 0.86, x0: -50, x1: 60, y0: -150, y1: 12, draw: drawSkirmisher },
+  knight: { tilesPer100: 1.2, x0: -80, x1: 125, y0: -110, y1: 14, draw: drawKnight },
+  monk: { tilesPer100: 0.84, x0: -45, x1: 60, y0: -150, y1: 12, draw: drawMonk },
+  petard: { tilesPer100: 0.84, x0: -50, x1: 60, y0: -150, y1: 12, draw: drawPetard },
+  ram: { tilesPer100: 0.95, x0: -70, x1: 75, y0: -110, y1: 14, draw: drawRam },
+  mangonel: { tilesPer100: 0.95, x0: -70, x1: 100, y0: -140, y1: 14, draw: drawMangonel },
+  scorpion: { tilesPer100: 0.95, x0: -60, x1: 60, y0: -90, y1: 12, draw: drawScorpion },
+  siege_tower: { tilesPer100: 0.95, x0: -70, x1: 70, y0: -90, y1: 14, draw: drawSiegeTower },
+  trebuchet: { tilesPer100: 0.8, x0: -110, x1: 115, y0: -190, y1: 14, draw: drawTrebuchet },
+  claymore: { tilesPer100: 0.9, x0: -55, x1: 75, y0: -150, y1: 12, draw: drawClaymore },
+  horse_archer: { tilesPer100: 1.15, x0: -62, x1: 62, y0: -95, y1: 12, draw: drawHorseArcher },
+  arbalest_guard: { tilesPer100: 0.86, x0: -50, x1: 90, y0: -150, y1: 12, draw: drawArbalest },
+  iron_bear: { tilesPer100: 1.25, x0: -85, x1: 140, y0: -115, y1: 14, draw: drawIronBear },
+  king: { tilesPer100: 0.9, x0: -45, x1: 55, y0: -150, y1: 12, draw: drawKing },
 };
 
 /**
@@ -68,7 +46,7 @@ export const unitHeight = (type: UnitType) =>
       : type === 'fishing_ship'
         ? 1.4
         : 1.9
-    : type === 'siege_tower' ? 2 : type === 'trebuchet' ? 1.6 : type === 'scout' || type === 'knight' || type === 'horse_archer' || type === 'iron_bear' ? 1.3 : type === 'ram' || type === 'mangonel' ? 0.95 : type === 'scorpion' ? 0.7 : type === 'villager' ? 0.85 : 0.9;
+    : type === 'siege_tower' ? 0.75 : type === 'trebuchet' ? 1.2 : type === 'scout' || type === 'horse_archer' ? 0.85 : type === 'knight' || type === 'iron_bear' ? 0.85 : type === 'ram' || type === 'mangonel' ? 0.95 : type === 'scorpion' ? 0.7 : type === 'villager' ? 0.85 : 0.9;
 
 /** Eight preset looks so crowds vary; picked by unit id. */
 const LOOKS: Look[] = Array.from({ length: 8 }, (_, i) => ({
@@ -152,21 +130,19 @@ export class UnitSprites {
     const c = document.createElement('canvas');
     c.width = c.height = px;
     const g = c.getContext('2d')!;
-    // Frame the upper body: villagers from the waist up, scouts the rider and horse's head.
-    const mounted = type === 'scout' || type === 'knight' || type === 'horse_archer' || type === 'iron_bear';
-    const engine = ['ram', 'mangonel', 'scorpion', 'siege_tower', 'trebuchet'].includes(type);
+    // Frame foot soldiers from the waist up; vehicles and heavy weapons are shown whole.
+    const engine = ['ram', 'mangonel', 'scorpion', 'siege_tower', 'trebuchet', 'scout', 'knight', 'horse_archer', 'iron_bear'].includes(type);
     if (engine) {
-      // Engines are shown whole.
       const k = Math.min(px / (d.x1 - d.x0), px / (d.y1 - d.y0)) * 0.95;
       g.translate(px / 2 - ((d.x0 + d.x1) / 2) * k, px / 2 - ((d.y0 + d.y1) / 2) * k);
       g.scale(k, k);
       d.draw(g, this.spec(player, look, { view: 'side', left: false, anim: 'idle', frame: 0, tool: 'none', carry: null, packed: false }));
       return c;
     }
-    const k = mounted ? px / 120 : px / 70;
-    g.translate(px / 2 - (mounted ? 8 * k : 0), mounted ? px * 1.0 : px * 1.72);
+    const k = px / 70;
+    g.translate(px / 2, px * 1.72);
     g.scale(k, k);
-    d.draw(g, this.spec(player, look, { view: mounted ? 'side' : 'front', left: false, anim: 'idle', frame: 0, tool: 'none', carry: null }));
+    d.draw(g, this.spec(player, look, { view: 'front', left: false, anim: 'idle', frame: 0, tool: 'none', carry: null }));
     return c;
   }
 

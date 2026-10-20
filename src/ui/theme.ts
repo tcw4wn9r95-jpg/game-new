@@ -1,8 +1,8 @@
 // Fonts (bundled, so they work offline) and the gilded frame used by every panel.
-import '@fontsource/cinzel/latin-400.css';
-import '@fontsource/cinzel/latin-700.css';
-import '@fontsource/alegreya-sans/latin-500.css';
-import '@fontsource/alegreya-sans/latin-700.css';
+import '@fontsource/orbitron/latin-600.css';
+import '@fontsource/orbitron/latin-800.css';
+import '@fontsource/rajdhani/latin-500.css';
+import '@fontsource/rajdhani/latin-700.css';
 import './ui.css';
 import { pnoise } from '../render/textures';
 
