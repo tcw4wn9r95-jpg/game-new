@@ -1,0 +1,597 @@
+{
+  "town_center": {
+    "name": "Town Center",
+    "size": 4,
+    "hp": 2400,
+    "buildTime": 150,
+    "cost": {
+      "wood": 275,
+      "stone": 100
+    },
+    "pop": 5,
+    "los": 8,
+    "dropoff": [
+      "food",
+      "wood",
+      "gold",
+      "stone"
+    ],
+    "age": 0,
+    "buildable": false,
+    "description": "Trains villagers and stores every resource. Lose them all and the realm falls.",
+    "meleeArmor": 3,
+    "pierceArmor": 5,
+    "trains": [
+      "villager"
+    ],
+    "classes": [
+      "building"
+    ],
+    "attack": {
+      "attack": 5,
+      "range": 6,
+      "reload": 2,
+      "arrows": 1,
+      "minRange": 0
+    },
+    "garrison": 15
+  },
+  "house": {
+    "name": "House",
+    "size": 2,
+    "hp": 550,
+    "buildTime": 25,
+    "cost": {
+      "wood": 30
+    },
+    "pop": 5,
+    "los": 2,
+    "dropoff": [],
+    "age": 0,
+    "buildable": true,
+    "description": "Supports 5 population.",
+    "meleeArmor": 0,
+    "pierceArmor": 7,
+    "trains": [],
+    "classes": [
+      "building"
+    ]
+  },
+  "lumber_camp": {
+    "name": "Lumber Camp",
+    "size": 2,
+    "hp": 600,
+    "buildTime": 35,
+    "cost": {
+      "wood": 100
+    },
+    "pop": 0,
+    "los": 3,
+    "dropoff": [
+      "wood"
+    ],
+    "age": 0,
+    "buildable": true,
+    "description": "Drop-off for wood. Build it beside a forest.",
+    "meleeArmor": 0,
+    "pierceArmor": 7,
+    "trains": [],
+    "classes": [
+      "building"
+    ],
+    "advance": true
+  },
+  "mining_camp": {
+    "name": "Mining Camp",
+    "size": 2,
+    "hp": 600,
+    "buildTime": 35,
+    "cost": {
+      "wood": 100
+    },
+    "pop": 0,
+    "los": 3,
+    "dropoff": [
+      "gold",
+      "stone"
+    ],
+    "age": 0,
+    "buildable": true,
+    "description": "Drop-off for gold and stone. Build it beside a mine.",
+    "meleeArmor": 0,
+    "pierceArmor": 7,
+    "trains": [],
+    "classes": [
+      "building"
+    ],
+    "advance": true
+  },
+  "mill": {
+    "name": "Mill",
+    "size": 2,
+    "hp": 600,
+    "buildTime": 35,
+    "cost": {
+      "wood": 100
+    },
+    "pop": 0,
+    "los": 3,
+    "dropoff": [
+      "food"
+    ],
+    "age": 0,
+    "buildable": true,
+    "description": "Drop-off for food from berries, hunting and farms.",
+    "meleeArmor": 0,
+    "pierceArmor": 7,
+    "trains": [],
+    "classes": [
+      "building"
+    ],
+    "advance": true
+  },
+  "barracks": {
+    "name": "Barracks",
+    "size": 3,
+    "hp": 1200,
+    "buildTime": 50,
+    "cost": {
+      "wood": 175
+    },
+    "pop": 0,
+    "los": 5,
+    "dropoff": [],
+    "age": 0,
+    "buildable": true,
+    "description": "Trains infantry.",
+    "meleeArmor": 0,
+    "pierceArmor": 7,
+    "trains": [
+      "militia",
+      "spearman"
+    ],
+    "classes": [
+      "building"
+    ],
+    "advance": true
+  },
+  "farm": {
+    "name": "Farm",
+    "size": 3,
+    "hp": 480,
+    "buildTime": 15,
+    "cost": {
+      "wood": 60
+    },
+    "pop": 0,
+    "los": 1,
+    "dropoff": [],
+    "age": 0,
+    "buildable": true,
+    "description": "A field of wheat worked by one villager. Replants itself when harvested, if you have the wood.",
+    "meleeArmor": 0,
+    "pierceArmor": 0,
+    "trains": [],
+    "walkable": true,
+    "food": 175,
+    "requires": "mill",
+    "classes": [
+      "building"
+    ]
+  },
+  "archery_range": {
+    "name": "Archery Range",
+    "size": 3,
+    "hp": 1200,
+    "buildTime": 50,
+    "cost": {
+      "wood": 175
+    },
+    "pop": 0,
+    "los": 5,
+    "dropoff": [],
+    "age": 1,
+    "buildable": true,
+    "description": "Trains archers and skirmishers.",
+    "meleeArmor": 0,
+    "pierceArmor": 7,
+    "trains": [
+      "archer",
+      "skirmisher"
+    ],
+    "classes": [
+      "building"
+    ],
+    "advance": true
+  },
+  "stable": {
+    "name": "Stable",
+    "size": 3,
+    "hp": 1200,
+    "buildTime": 50,
+    "cost": {
+      "wood": 175
+    },
+    "pop": 0,
+    "los": 5,
+    "dropoff": [],
+    "age": 1,
+    "buildable": true,
+    "description": "Trains scouts and knights.",
+    "meleeArmor": 0,
+    "pierceArmor": 7,
+    "trains": [
+      "scout",
+      "knight"
+    ],
+    "classes": [
+      "building"
+    ],
+    "advance": true
+  },
+  "monastery": {
+    "name": "Monastery",
+    "size": 3,
+    "hp": 1400,
+    "buildTime": 60,
+    "cost": {
+      "wood": 175
+    },
+    "pop": 0,
+    "los": 5,
+    "dropoff": [],
+    "age": 2,
+    "buildable": true,
+    "description": "Trains monks.",
+    "meleeArmor": 0,
+    "pierceArmor": 7,
+    "trains": [
+      "monk"
+    ],
+    "classes": [
+      "building"
+    ],
+    "advance": true,
+    "garrison": 0
+  },
+  "blacksmith": {
+    "name": "Blacksmith",
+    "size": 3,
+    "hp": 1500,
+    "buildTime": 50,
+    "cost": {
+      "wood": 150
+    },
+    "pop": 0,
+    "los": 5,
+    "dropoff": [],
+    "age": 1,
+    "buildable": true,
+    "description": "Forges better weapons and armour.",
+    "meleeArmor": 1,
+    "pierceArmor": 7,
+    "trains": [],
+    "classes": [
+      "building"
+    ],
+    "advance": true
+  },
+  "market": {
+    "name": "Market",
+    "size": 3,
+    "hp": 1500,
+    "buildTime": 50,
+    "cost": {
+      "wood": 175
+    },
+    "pop": 0,
+    "los": 5,
+    "dropoff": [],
+    "age": 1,
+    "buildable": true,
+    "description": "Buy and sell food, wood and stone for gold.",
+    "meleeArmor": 1,
+    "pierceArmor": 7,
+    "trains": [],
+    "classes": [
+      "building"
+    ],
+    "advance": true
+  },
+  "university": {
+    "name": "University",
+    "size": 3,
+    "hp": 1700,
+    "buildTime": 60,
+    "cost": {
+      "wood": 200
+    },
+    "pop": 0,
+    "los": 5,
+    "dropoff": [],
+    "age": 2,
+    "buildable": true,
+    "description": "Researches masonry and building techniques.",
+    "meleeArmor": 1,
+    "pierceArmor": 7,
+    "trains": [],
+    "classes": [
+      "building"
+    ],
+    "advance": true
+  },
+  "palisade_wall": {
+    "name": "Palisade Wall",
+    "size": 1,
+    "hp": 250,
+    "buildTime": 6,
+    "cost": {
+      "wood": 2
+    },
+    "pop": 0,
+    "los": 1,
+    "dropoff": [],
+    "age": 0,
+    "buildable": true,
+    "description": "Sharpened stakes. Cheap and quick; blocks early raids but burns down fast.",
+    "meleeArmor": 2,
+    "pierceArmor": 5,
+    "trains": [],
+    "classes": [
+      "building",
+      "wall"
+    ],
+    "wall": "palisade",
+    "gate": false
+  },
+  "palisade_gate": {
+    "name": "Palisade Gate",
+    "size": 1,
+    "hp": 400,
+    "buildTime": 15,
+    "cost": {
+      "wood": 30
+    },
+    "pop": 0,
+    "los": 2,
+    "dropoff": [],
+    "age": 0,
+    "buildable": true,
+    "description": "Opens for you alone; can be locked. Set it into one of your palisade walls, or on open ground.",
+    "meleeArmor": 2,
+    "pierceArmor": 5,
+    "trains": [],
+    "classes": [
+      "building",
+      "wall"
+    ],
+    "wall": "palisade",
+    "gate": true
+  },
+  "stone_wall": {
+    "name": "Stone Wall",
+    "size": 1,
+    "hp": 1800,
+    "buildTime": 10,
+    "cost": {
+      "stone": 5
+    },
+    "pop": 0,
+    "los": 1,
+    "dropoff": [],
+    "age": 1,
+    "buildable": true,
+    "description": "The main town wall. Only siege breaks it quickly.",
+    "meleeArmor": 8,
+    "pierceArmor": 10,
+    "trains": [],
+    "classes": [
+      "building",
+      "wall"
+    ],
+    "wall": "stone",
+    "gate": false
+  },
+  "gate": {
+    "name": "Gate",
+    "size": 1,
+    "hp": 2750,
+    "buildTime": 25,
+    "cost": {
+      "stone": 30
+    },
+    "pop": 0,
+    "los": 2,
+    "dropoff": [],
+    "age": 1,
+    "buildable": true,
+    "description": "A stone gate that opens for you alone; can be locked. Set it into one of your stone walls, or on open ground.",
+    "meleeArmor": 6,
+    "pierceArmor": 6,
+    "trains": [],
+    "classes": [
+      "building",
+      "wall"
+    ],
+    "wall": "stone",
+    "gate": true
+  },
+  "watch_tower": {
+    "name": "Watch Tower",
+    "size": 1,
+    "hp": 1000,
+    "buildTime": 40,
+    "cost": {
+      "wood": 25,
+      "stone": 125
+    },
+    "pop": 0,
+    "los": 9,
+    "dropoff": [],
+    "age": 1,
+    "buildable": true,
+    "description": "Shoots arrows at enemies in range. Garrison villagers or foot soldiers for more arrows.",
+    "meleeArmor": 1,
+    "pierceArmor": 7,
+    "trains": [],
+    "classes": [
+      "building",
+      "tower"
+    ],
+    "attack": {
+      "attack": 5,
+      "range": 8,
+      "reload": 2,
+      "arrows": 1,
+      "minRange": 1
+    },
+    "garrison": 5
+  },
+  "castle": {
+    "name": "Castle",
+    "size": 4,
+    "hp": 4800,
+    "buildTime": 200,
+    "cost": {
+      "stone": 650
+    },
+    "pop": 20,
+    "los": 11,
+    "dropoff": [],
+    "age": 2,
+    "buildable": true,
+    "description": "A fortress that showers attackers with arrows and holds 20 men. Hard to take without siege.",
+    "meleeArmor": 8,
+    "pierceArmor": 11,
+    "trains": [
+      "trebuchet",
+      "petard",
+      "claymore",
+      "horse_archer",
+      "arbalest_guard",
+      "iron_bear"
+    ],
+    "classes": [
+      "building",
+      "castle"
+    ],
+    "attack": {
+      "attack": 11,
+      "range": 8,
+      "reload": 2,
+      "arrows": 4,
+      "minRange": 1
+    },
+    "garrison": 20,
+    "advance": true
+  },
+  "siege_workshop": {
+    "name": "Siege Workshop",
+    "size": 3,
+    "hp": 1500,
+    "buildTime": 50,
+    "cost": {
+      "wood": 200
+    },
+    "pop": 0,
+    "los": 5,
+    "dropoff": [],
+    "age": 2,
+    "buildable": true,
+    "description": "Builds rams, mangonels, scorpions and siege towers.",
+    "meleeArmor": 1,
+    "pierceArmor": 7,
+    "trains": [
+      "ram",
+      "mangonel",
+      "scorpion",
+      "siege_tower"
+    ],
+    "classes": [
+      "building"
+    ],
+    "advance": true
+  },
+  "dock": {
+    "name": "Dock",
+    "size": 3,
+    "hp": 1800,
+    "buildTime": 35,
+    "cost": {
+      "wood": 150
+    },
+    "pop": 0,
+    "los": 6,
+    "dropoff": [
+      "food"
+    ],
+    "age": 0,
+    "buildable": true,
+    "description": "Built on the shore. Trains ships and takes in fish.",
+    "meleeArmor": 1,
+    "pierceArmor": 7,
+    "trains": [
+      "fishing_ship",
+      "transport_ship",
+      "galley",
+      "fire_ship",
+      "demolition_raft",
+      "siege_barge"
+    ],
+    "classes": [
+      "building"
+    ],
+    "shore": true,
+    "advance": true
+  },
+  "fish_trap": {
+    "name": "Fish Trap",
+    "size": 3,
+    "hp": 300,
+    "buildTime": 25,
+    "cost": {
+      "wood": 100
+    },
+    "pop": 0,
+    "los": 1,
+    "dropoff": [],
+    "age": 0,
+    "buildable": true,
+    "description": "Stakes and nets in deep water, worked by a fishing ship. Restocks itself when emptied, if you have the wood.",
+    "meleeArmor": 0,
+    "pierceArmor": 0,
+    "trains": [],
+    "walkable": true,
+    "food": 420,
+    "requires": "dock",
+    "classes": [
+      "building"
+    ],
+    "naval": true
+  },
+  "wonder": {
+    "name": "Wonder",
+    "size": 5,
+    "hp": 4800,
+    "buildTime": 900,
+    "cost": {
+      "food": 1000,
+      "wood": 1000,
+      "gold": 1000,
+      "stone": 1000
+    },
+    "pop": 0,
+    "los": 8,
+    "dropoff": [],
+    "age": 3,
+    "buildable": true,
+    "description": "A monument for the ages. Keep it standing for 8 minutes after it is finished and you win.",
+    "meleeArmor": 3,
+    "pierceArmor": 10,
+    "trains": [],
+    "classes": [
+      "building",
+      "wonder"
+    ]
+  }
+}

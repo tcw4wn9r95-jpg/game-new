@@ -1,0 +1,22 @@
+{
+  "startResources": {
+    "food": 200,
+    "wood": 200,
+    "gold": 100,
+    "stone": 200
+  },
+  "carryCapacity": 10,
+  "gatherRates": {
+    "berries": 0.35,
+    "deer": 0.4,
+    "sheep": 0.4,
+    "farm": 0.3,
+    "fish": 0.45,
+    "fishTrap": 0.28,
+    "wood": 0.38,
+    "gold": 0.36,
+    "stone": 0.34
+  },
+  "searchRadius": 10,
+  "queueLimit": 15
+}

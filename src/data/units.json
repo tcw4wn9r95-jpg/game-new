@@ -1,0 +1,803 @@
+{
+  "villager": {
+    "name": "Villager",
+    "hp": 25,
+    "speed": 1.1,
+    "los": 5,
+    "radius": 0.22,
+    "pop": 1,
+    "cost": {
+      "food": 50
+    },
+    "trainTime": 25,
+    "attack": 3,
+    "reload": 2.0,
+    "attackType": "melee",
+    "meleeArmor": 0,
+    "pierceArmor": 0,
+    "range": 0,
+    "age": 0,
+    "classes": [
+      "villager"
+    ],
+    "bonus": {},
+    "stance": "passive",
+    "gatherer": true,
+    "builder": true,
+    "description": "Gathers resources, builds and repairs. The heart of your economy.",
+    "strong": "",
+    "weak": "Everything; keep them safe"
+  },
+  "militia": {
+    "name": "Militia",
+    "hp": 45,
+    "speed": 0.9,
+    "los": 4,
+    "radius": 0.24,
+    "pop": 1,
+    "cost": {
+      "food": 60,
+      "gold": 20
+    },
+    "trainTime": 21,
+    "attack": 5,
+    "reload": 2.0,
+    "attackType": "melee",
+    "meleeArmor": 0,
+    "pierceArmor": 1,
+    "range": 0,
+    "age": 0,
+    "classes": [
+      "infantry"
+    ],
+    "bonus": {
+      "infantry": 1.5,
+      "building": 2.0
+    },
+    "stance": "aggressive",
+    "description": "Sword-and-shield foot soldier.",
+    "strong": "Infantry, buildings",
+    "weak": "Archers"
+  },
+  "spearman": {
+    "name": "Spearman",
+    "hp": 45,
+    "speed": 1.0,
+    "los": 4,
+    "radius": 0.24,
+    "pop": 1,
+    "cost": {
+      "food": 35,
+      "wood": 25
+    },
+    "trainTime": 22,
+    "attack": 5,
+    "reload": 2.5,
+    "attackType": "melee",
+    "meleeArmor": 0,
+    "pierceArmor": 0,
+    "range": 0,
+    "age": 1,
+    "classes": [
+      "infantry",
+      "spear"
+    ],
+    "bonus": {
+      "cavalry": 2.5
+    },
+    "stance": "aggressive",
+    "description": "Cheap infantry with a long spear that stops horsemen.",
+    "strong": "Cavalry",
+    "weak": "Archers, infantry"
+  },
+  "archer": {
+    "name": "Archer",
+    "hp": 30,
+    "speed": 0.96,
+    "los": 6,
+    "radius": 0.22,
+    "pop": 1,
+    "cost": {
+      "wood": 25,
+      "gold": 45
+    },
+    "trainTime": 35,
+    "attack": 4,
+    "reload": 2.0,
+    "attackType": "pierce",
+    "meleeArmor": 0,
+    "pierceArmor": 0,
+    "range": 4,
+    "projectileSpeed": 7,
+    "age": 1,
+    "classes": [
+      "archer"
+    ],
+    "bonus": {
+      "infantry": 2.0
+    },
+    "stance": "aggressive",
+    "description": "Shoots from a distance. Keep it behind your front line.",
+    "strong": "Infantry, spearmen",
+    "weak": "Skirmishers, cavalry, siege"
+  },
+  "skirmisher": {
+    "name": "Skirmisher",
+    "hp": 30,
+    "speed": 0.96,
+    "los": 6,
+    "radius": 0.22,
+    "pop": 1,
+    "cost": {
+      "food": 25,
+      "wood": 35
+    },
+    "trainTime": 22,
+    "attack": 2,
+    "reload": 2.5,
+    "attackType": "pierce",
+    "meleeArmor": 0,
+    "pierceArmor": 3,
+    "range": 4,
+    "projectileSpeed": 8,
+    "age": 1,
+    "classes": [
+      "archer",
+      "skirmisher"
+    ],
+    "bonus": {
+      "archer": 3.0
+    },
+    "stance": "aggressive",
+    "description": "Javelin thrower with a wicker shield, cheap and hard to hurt with arrows.",
+    "strong": "Archers",
+    "weak": "Infantry, cavalry"
+  },
+  "scout": {
+    "name": "Scout",
+    "hp": 50,
+    "speed": 2.1,
+    "los": 8,
+    "radius": 0.32,
+    "pop": 1,
+    "cost": {
+      "food": 80
+    },
+    "trainTime": 30,
+    "attack": 4,
+    "reload": 2.0,
+    "attackType": "melee",
+    "meleeArmor": 0,
+    "pierceArmor": 2,
+    "range": 0,
+    "age": 0,
+    "classes": [
+      "cavalry"
+    ],
+    "bonus": {
+      "archer": 2.0,
+      "villager": 1.5,
+      "siege": 2.0,
+      "monk": 2.0
+    },
+    "stance": "aggressive",
+    "description": "Fast mounted explorer and raider.",
+    "strong": "Archers, villagers, siege, monks",
+    "weak": "Spearmen"
+  },
+  "knight": {
+    "name": "Knight",
+    "hp": 100,
+    "speed": 1.35,
+    "los": 4,
+    "radius": 0.34,
+    "pop": 1,
+    "cost": {
+      "food": 60,
+      "gold": 75
+    },
+    "trainTime": 30,
+    "attack": 10,
+    "reload": 1.8,
+    "attackType": "melee",
+    "meleeArmor": 2,
+    "pierceArmor": 2,
+    "range": 0,
+    "age": 2,
+    "classes": [
+      "cavalry"
+    ],
+    "bonus": {
+      "archer": 1.5,
+      "infantry": 1.5,
+      "siege": 1.5,
+      "spear": 0.6
+    },
+    "stance": "aggressive",
+    "description": "Heavily armoured lance on a warhorse.",
+    "strong": "Archers, infantry, siege",
+    "weak": "Spearmen, monks"
+  },
+  "monk": {
+    "name": "Monk",
+    "hp": 30,
+    "speed": 0.7,
+    "los": 11,
+    "radius": 0.22,
+    "pop": 1,
+    "cost": {
+      "gold": 100
+    },
+    "trainTime": 51,
+    "attack": 0,
+    "reload": 1.0,
+    "attackType": "melee",
+    "meleeArmor": 0,
+    "pierceArmor": 0,
+    "range": 9,
+    "age": 2,
+    "classes": [
+      "monk"
+    ],
+    "bonus": {},
+    "stance": "defensive",
+    "healer": true,
+    "converter": true,
+    "description": "Heals nearby wounded and converts enemy units to your side.",
+    "strong": "Converts enemies, heals",
+    "weak": "Light cavalry"
+  },
+  "ram": {
+    "name": "Ram",
+    "hp": 175,
+    "speed": 0.55,
+    "los": 3,
+    "radius": 0.45,
+    "pop": 1,
+    "cost": {
+      "wood": 160,
+      "gold": 75
+    },
+    "trainTime": 36,
+    "attack": 25,
+    "reload": 4,
+    "attackType": "melee",
+    "meleeArmor": -3,
+    "pierceArmor": 50,
+    "range": 0,
+    "age": 2,
+    "classes": [
+      "siege",
+      "ram"
+    ],
+    "bonus": {
+      "building": 4
+    },
+    "stance": "aggressive",
+    "buildingsOnly": true,
+    "cargo": 4,
+    "description": "A roofed battering ram. Smashes gates and walls; shrugs off arrows. Up to 4 infantry inside push it faster.",
+    "strong": "Buildings, walls, gates",
+    "weak": "Infantry, cavalry"
+  },
+  "mangonel": {
+    "name": "Mangonel",
+    "hp": 50,
+    "speed": 0.6,
+    "los": 8,
+    "radius": 0.45,
+    "pop": 1,
+    "cost": {
+      "wood": 160,
+      "gold": 135
+    },
+    "trainTime": 46,
+    "attack": 40,
+    "reload": 6,
+    "attackType": "melee",
+    "meleeArmor": 0,
+    "pierceArmor": 6,
+    "range": 7,
+    "minRange": 3,
+    "splash": 0.9,
+    "projectileSpeed": 6,
+    "age": 2,
+    "classes": [
+      "siege"
+    ],
+    "bonus": {
+      "building": 2
+    },
+    "stance": "aggressive",
+    "groundAttack": true,
+    "description": "Hurls stones that crush whole groups, friend and foe alike. Cannot fire at close range.",
+    "strong": "Massed archers and infantry, walls",
+    "weak": "Cavalry, rams"
+  },
+  "scorpion": {
+    "name": "Scorpion",
+    "hp": 40,
+    "speed": 0.65,
+    "los": 9,
+    "radius": 0.4,
+    "pop": 1,
+    "cost": {
+      "wood": 75,
+      "gold": 75
+    },
+    "trainTime": 30,
+    "attack": 12,
+    "reload": 3.6,
+    "attackType": "pierce",
+    "meleeArmor": 0,
+    "pierceArmor": 6,
+    "range": 7,
+    "minRange": 1,
+    "pierce": true,
+    "projectileSpeed": 12,
+    "age": 2,
+    "classes": [
+      "siege"
+    ],
+    "bonus": {
+      "building": 0.3
+    },
+    "stance": "aggressive",
+    "description": "A giant crossbow whose bolts pass through every enemy in a line.",
+    "strong": "Lines of infantry and archers",
+    "weak": "Cavalry, buildings"
+  },
+  "siege_tower": {
+    "name": "Siege Tower",
+    "hp": 220,
+    "speed": 0.8,
+    "los": 7,
+    "radius": 0.5,
+    "pop": 1,
+    "cost": {
+      "wood": 200,
+      "gold": 160
+    },
+    "trainTime": 36,
+    "attack": 0,
+    "reload": 1,
+    "attackType": "melee",
+    "meleeArmor": 2,
+    "pierceArmor": 2,
+    "range": 0,
+    "age": 2,
+    "classes": [
+      "siege"
+    ],
+    "bonus": {},
+    "stance": "passive",
+    "cargo": 8,
+    "description": "Carries 8 foot soldiers up to a wall and lets them out on the far side.",
+    "strong": "Getting troops over walls",
+    "weak": "Everything; escort it"
+  },
+  "trebuchet": {
+    "name": "Trebuchet",
+    "hp": 150,
+    "speed": 0.6,
+    "los": 17,
+    "radius": 0.5,
+    "pop": 1,
+    "cost": {
+      "wood": 200,
+      "gold": 200
+    },
+    "trainTime": 50,
+    "attack": 50,
+    "reload": 10,
+    "attackType": "melee",
+    "meleeArmor": 1,
+    "pierceArmor": 10,
+    "range": 16,
+    "minRange": 4,
+    "splash": 0.6,
+    "projectileSpeed": 7,
+    "age": 3,
+    "classes": [
+      "siege"
+    ],
+    "bonus": {
+      "building": 4
+    },
+    "stance": "aggressive",
+    "packs": true,
+    "groundAttack": true,
+    "description": "The greatest siege engine: outranges every tower. Must unpack to fire and pack to move (5 s each).",
+    "strong": "Buildings, walls, castles",
+    "weak": "Cavalry, anything close"
+  },
+  "petard": {
+    "name": "Petard",
+    "hp": 50,
+    "speed": 1.0,
+    "los": 4,
+    "radius": 0.24,
+    "pop": 1,
+    "cost": {
+      "food": 65,
+      "gold": 20
+    },
+    "trainTime": 25,
+    "attack": 40,
+    "reload": 1,
+    "attackType": "melee",
+    "meleeArmor": 0,
+    "pierceArmor": 2,
+    "range": 0,
+    "splash": 0.7,
+    "age": 2,
+    "classes": [
+      "infantry"
+    ],
+    "bonus": {
+      "building": 4
+    },
+    "stance": "aggressive",
+    "selfDestruct": true,
+    "buildingsOnly": true,
+    "description": "A sapper with a keg of black powder. Blows open one wall segment or gate.",
+    "strong": "Walls and gates",
+    "weak": "Everything, once it goes off"
+  },
+  "fishing_ship": {
+    "pop": 1,
+    "reload": 2.0,
+    "attackType": "pierce",
+    "meleeArmor": 0,
+    "pierceArmor": 4,
+    "range": 0,
+    "bonus": {},
+    "stance": "passive",
+    "naval": true,
+    "name": "Fishing Ship",
+    "hp": 60,
+    "speed": 1.3,
+    "los": 5,
+    "radius": 0.6,
+    "cost": {
+      "wood": 75
+    },
+    "trainTime": 40,
+    "attack": 0,
+    "age": 0,
+    "classes": [
+      "ship"
+    ],
+    "gatherer": true,
+    "builder": true,
+    "carry": 15,
+    "description": "Nets fish in deep water and builds Fish Traps. Brings its catch to a Dock.",
+    "strong": "",
+    "weak": "Every warship"
+  },
+  "transport_ship": {
+    "pop": 1,
+    "reload": 2.0,
+    "attackType": "pierce",
+    "meleeArmor": 4,
+    "pierceArmor": 8,
+    "range": 0,
+    "bonus": {},
+    "stance": "passive",
+    "naval": true,
+    "name": "Transport Ship",
+    "hp": 110,
+    "speed": 1.6,
+    "los": 5,
+    "radius": 0.85,
+    "cost": {
+      "wood": 125
+    },
+    "trainTime": 40,
+    "attack": 0,
+    "age": 1,
+    "classes": [
+      "ship",
+      "transport"
+    ],
+    "cargo": 10,
+    "description": "Carries 10 land units. Tap the ship, then a shore point, to land them.",
+    "strong": "",
+    "weak": "Every warship"
+  },
+  "galley": {
+    "pop": 1,
+    "reload": 3.0,
+    "attackType": "pierce",
+    "meleeArmor": 0,
+    "pierceArmor": 6,
+    "range": 6,
+    "bonus": {
+      "raft": 3,
+      "fireship": 1.5
+    },
+    "stance": "aggressive",
+    "naval": true,
+    "name": "Galley",
+    "hp": 120,
+    "speed": 1.4,
+    "los": 7,
+    "radius": 0.8,
+    "cost": {
+      "wood": 90,
+      "gold": 30
+    },
+    "trainTime": 50,
+    "attack": 6,
+    "projectileSpeed": 8,
+    "age": 1,
+    "classes": [
+      "ship",
+      "galley"
+    ],
+    "description": "Oared warship with archers on deck. Holds the sea lanes and harries the shore.",
+    "strong": "Demolition Rafts, Fire Ships at range, units on the shore",
+    "weak": "Siege Barges, Fire Ships up close"
+  },
+  "fire_ship": {
+    "pop": 1,
+    "reload": 0.25,
+    "attackType": "melee",
+    "meleeArmor": 0,
+    "pierceArmor": 6,
+    "range": 2.5,
+    "bonus": {
+      "galley": 2,
+      "transport": 2,
+      "ship": 1.25
+    },
+    "stance": "aggressive",
+    "naval": true,
+    "name": "Fire Ship",
+    "hp": 110,
+    "speed": 1.55,
+    "los": 6,
+    "radius": 0.75,
+    "cost": {
+      "wood": 75,
+      "gold": 45
+    },
+    "trainTime": 45,
+    "attack": 2,
+    "projectileSpeed": 10,
+    "age": 1,
+    "classes": [
+      "ship",
+      "fireship"
+    ],
+    "description": "Sprays burning pitch at close range. Sets galleys alight.",
+    "strong": "Galleys (2x), transports",
+    "weak": "Siege Barges, Demolition Rafts"
+  },
+  "demolition_raft": {
+    "pop": 1,
+    "reload": 1.0,
+    "attackType": "melee",
+    "meleeArmor": 0,
+    "pierceArmor": 2,
+    "range": 0,
+    "bonus": {
+      "building": 1.5,
+      "ship": 1.2
+    },
+    "stance": "aggressive",
+    "naval": true,
+    "name": "Demolition Raft",
+    "hp": 45,
+    "speed": 1.8,
+    "los": 5,
+    "radius": 0.6,
+    "cost": {
+      "wood": 70,
+      "gold": 50
+    },
+    "trainTime": 35,
+    "attack": 55,
+    "splash": 1.6,
+    "age": 2,
+    "classes": [
+      "ship",
+      "raft"
+    ],
+    "selfDestruct": true,
+    "description": "A raft packed with powder that rams a ship and blows up, wrecking everything around it.",
+    "strong": "Ships in a group, docks",
+    "weak": "Galleys"
+  },
+  "siege_barge": {
+    "pop": 1,
+    "reload": 6.0,
+    "attackType": "melee",
+    "meleeArmor": 0,
+    "pierceArmor": 8,
+    "range": 9,
+    "bonus": {
+      "building": 3,
+      "fireship": 2
+    },
+    "stance": "aggressive",
+    "naval": true,
+    "name": "Siege Barge",
+    "hp": 160,
+    "speed": 0.9,
+    "los": 8,
+    "radius": 0.9,
+    "cost": {
+      "wood": 200,
+      "gold": 150
+    },
+    "trainTime": 60,
+    "attack": 35,
+    "minRange": 3,
+    "splash": 0.8,
+    "projectileSpeed": 6,
+    "age": 3,
+    "classes": [
+      "ship",
+      "barge"
+    ],
+    "groundAttack": true,
+    "description": "A floating catapult. Batters coastal walls and buildings from long range.",
+    "strong": "Coastal buildings and walls (3x), Fire Ships",
+    "weak": "Galleys, anything inside its minimum range"
+  },
+  "claymore": {
+    "pop": 1,
+    "reload": 2.0,
+    "attackType": "melee",
+    "meleeArmor": 1,
+    "pierceArmor": 1,
+    "range": 0,
+    "bonus": {
+      "infantry": 1.3,
+      "building": 1.5
+    },
+    "stance": "aggressive",
+    "name": "Claymore Warrior",
+    "hp": 75,
+    "speed": 0.95,
+    "los": 4,
+    "radius": 0.26,
+    "cost": {
+      "food": 65,
+      "gold": 35
+    },
+    "trainTime": 24,
+    "attack": 10,
+    "splash": 0.6,
+    "age": 2,
+    "classes": [
+      "infantry"
+    ],
+    "faction": "highland",
+    "description": "Highland Clans heavy infantry with a two-handed sword that cleaves through those beside the target.",
+    "strong": "Infantry, packed formations",
+    "weak": "Archers, cavalry"
+  },
+  "horse_archer": {
+    "pop": 1,
+    "reload": 2.1,
+    "attackType": "pierce",
+    "meleeArmor": 1,
+    "pierceArmor": 2,
+    "range": 4,
+    "bonus": {
+      "spear": 1.2
+    },
+    "stance": "aggressive",
+    "name": "Horse Archer",
+    "hp": 65,
+    "speed": 1.45,
+    "los": 6,
+    "radius": 0.4,
+    "cost": {
+      "food": 45,
+      "gold": 60
+    },
+    "trainTime": 26,
+    "attack": 6,
+    "projectileSpeed": 7,
+    "age": 2,
+    "classes": [
+      "cavalry",
+      "archer"
+    ],
+    "faction": "steppe",
+    "description": "Steppe Riders mounted archer: shoots on the move and outruns what it cannot outfight.",
+    "strong": "Infantry, siege",
+    "weak": "Skirmishers, knights"
+  },
+  "arbalest_guard": {
+    "pop": 1,
+    "reload": 2.4,
+    "attackType": "pierce",
+    "meleeArmor": 0,
+    "pierceArmor": 0,
+    "range": 7,
+    "bonus": {
+      "infantry": 1.6
+    },
+    "stance": "aggressive",
+    "name": "Arbalest Guard",
+    "hp": 45,
+    "speed": 0.95,
+    "los": 8,
+    "radius": 0.22,
+    "cost": {
+      "wood": 35,
+      "gold": 55
+    },
+    "trainTime": 27,
+    "attack": 7,
+    "projectileSpeed": 8,
+    "age": 2,
+    "classes": [
+      "archer"
+    ],
+    "faction": "coastal",
+    "description": "Coastal League crossbowman with a heavy arbalest: the longest-reaching foot archer.",
+    "strong": "Infantry, archers",
+    "weak": "Cavalry, skirmishers"
+  },
+  "iron_bear": {
+    "pop": 1,
+    "reload": 2.0,
+    "attackType": "melee",
+    "meleeArmor": 3,
+    "pierceArmor": 3,
+    "range": 0,
+    "bonus": {
+      "building": 1.4
+    },
+    "stance": "aggressive",
+    "name": "Iron Bear Rider",
+    "hp": 220,
+    "speed": 0.95,
+    "los": 5,
+    "radius": 0.45,
+    "cost": {
+      "food": 90,
+      "gold": 85
+    },
+    "trainTime": 34,
+    "attack": 13,
+    "age": 2,
+    "classes": [
+      "cavalry"
+    ],
+    "faction": "mountain",
+    "description": "Mountain Throne heavy cavalry: slow, armoured, very hard to kill.",
+    "strong": "Archers, siege, buildings",
+    "weak": "Spearmen, monks"
+  },
+  "king": {
+    "pop": 1,
+    "reload": 2.0,
+    "attackType": "melee",
+    "meleeArmor": 1,
+    "pierceArmor": 1,
+    "range": 0,
+    "bonus": {},
+    "stance": "defensive",
+    "name": "King",
+    "hp": 75,
+    "speed": 0.8,
+    "los": 10,
+    "radius": 0.24,
+    "cost": {},
+    "trainTime": 1,
+    "attack": 3,
+    "age": 0,
+    "classes": [
+      "king"
+    ],
+    "description": "Your sovereign. Lose the King and you lose the game: keep him behind stone.",
+    "strong": "",
+    "weak": "Everything"
+  }
+}

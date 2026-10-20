@@ -1,0 +1,109 @@
+{
+  "highland": {
+    "name": "Highland Clans",
+    "banner": "swallowtail",
+    "unique": "claymore",
+    "bonuses": [
+      "Villagers chop wood 15% faster",
+      "Infantry +10% HP"
+    ],
+    "effects": [
+      {
+        "type": "gather",
+        "sources": [
+          "tree"
+        ],
+        "mult": 1.15
+      },
+      {
+        "type": "unit",
+        "classes": [
+          "infantry"
+        ],
+        "hpMult": 1.1
+      }
+    ],
+    "description": "Woodsmen and swordsmen of the hills. Strong early infantry and a fast wood economy."
+  },
+  "steppe": {
+    "name": "Steppe Riders",
+    "banner": "pennant",
+    "unique": "horse_archer",
+    "bonuses": [
+      "Stables work 20% faster",
+      "Cavalry cost 10% less"
+    ],
+    "effects": [
+      {
+        "type": "train",
+        "building": "stable",
+        "mult": 0.8
+      },
+      {
+        "type": "cost",
+        "classes": [
+          "cavalry"
+        ],
+        "mult": 0.9
+      }
+    ],
+    "description": "Horse lords of the open plains. Many riders, quickly."
+  },
+  "coastal": {
+    "name": "Coastal League",
+    "banner": "square",
+    "unique": "arbalest_guard",
+    "bonuses": [
+      "Ships +10% HP and Docks cost half",
+      "Market fees halved"
+    ],
+    "effects": [
+      {
+        "type": "unit",
+        "classes": [
+          "ship"
+        ],
+        "hpMult": 1.1
+      },
+      {
+        "type": "buildingCost",
+        "buildings": [
+          "dock"
+        ],
+        "mult": 0.5
+      },
+      {
+        "type": "market",
+        "sellShare": 0.85
+      }
+    ],
+    "description": "Merchant ports and fleets. At home on the water and in the market."
+  },
+  "mountain": {
+    "name": "Mountain Throne",
+    "banner": "tongued",
+    "unique": "iron_bear",
+    "bonuses": [
+      "Walls and towers cost 20% less stone",
+      "Buildings +15% HP"
+    ],
+    "effects": [
+      {
+        "type": "buildingCost",
+        "buildings": [
+          "stone_wall",
+          "gate",
+          "watch_tower",
+          "castle"
+        ],
+        "resource": "stone",
+        "mult": 0.8
+      },
+      {
+        "type": "building",
+        "hpMult": 1.15
+      }
+    ],
+    "description": "Stone-builders of the high passes. Walls, towers and castles that will not fall."
+  }
+}

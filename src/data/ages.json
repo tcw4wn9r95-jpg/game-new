@@ -1,0 +1,46 @@
+[
+  {
+    "name": "Settlement",
+    "numeral": "I",
+    "cost": {},
+    "researchSeconds": 0
+  },
+  {
+    "name": "Township",
+    "numeral": "II",
+    "cost": {
+      "food": 500
+    },
+    "researchSeconds": 160,
+    "requires": {
+      "age": 0,
+      "buildings": 2
+    }
+  },
+  {
+    "name": "Stronghold",
+    "numeral": "III",
+    "cost": {
+      "food": 800,
+      "gold": 200
+    },
+    "researchSeconds": 220,
+    "requires": {
+      "age": 1,
+      "buildings": 2
+    }
+  },
+  {
+    "name": "Dominion",
+    "numeral": "IV",
+    "cost": {
+      "food": 1000,
+      "gold": 800
+    },
+    "researchSeconds": 280,
+    "requires": {
+      "age": 2,
+      "buildings": 2
+    }
+  }
+]
