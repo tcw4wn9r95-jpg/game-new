@@ -63,6 +63,15 @@ export function drawSpriteSheet(view: View, zoom = 4): void {
   put('trebuchet', 0, 0, { ...base, view: 'side', anim: 'idle', packed: true });
   put('trebuchet', 1, 0, { ...base, view: 'side', anim: 'work', frame: 2, packed: false });
   put('trebuchet', 2, 0, { ...base, view: 'side', anim: 'idle', packed: false });
+  next();
+  for (const t of ['recon_drone', 'attack_heli', 'strike_jet', 'aa_vehicle'] as const) {
+    put(t, 0, 0, { ...base, view: 'side', anim: 'walk', frame: 1 });
+    put(t, 1, 0, { ...base, view: 'side', anim: 'work', frame: 2 });
+  }
+  put('aa_trooper', 0, 2, { ...base, view: 'front', anim: 'idle' });
+  put('aa_trooper', 1, 2, { ...base, view: 'side', anim: 'idle' });
+  put('aa_trooper', 2, 2, { ...base, view: 'side', anim: 'work', frame: 2, tool: 'launcher' });
+  put('aa_trooper', 3, 2, { ...base, view: 'back', anim: 'walk', frame: 1 });
 }
 
 /** Debug view (?buildings=zoom): every building at one zoom, on grass. */
@@ -102,6 +111,8 @@ export function drawBuildingSheet(view: View, z = 48): void {
     ['watch_tower', 1, 0],
     ['watch_tower', 1, 1 << 12],
     ['watch_tower', 1, 2 << 12],
+    ['airfield', 4, 0],
+    ['sam_site', 2, 0],
   ];
   let x = 10, y = 10, rowH = 0;
   const ages = Number(new URLSearchParams(location.search).get('age') ?? 0);

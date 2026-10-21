@@ -192,12 +192,13 @@
     "dropoff": [],
     "age": 1,
     "buildable": true,
-    "description": "Trains riflemen and shield troopers.",
+    "description": "Trains riflemen, shield troopers and AA troopers.",
     "meleeArmor": 0,
     "pierceArmor": 7,
     "trains": [
       "archer",
-      "skirmisher"
+      "skirmisher",
+      "aa_trooper"
     ],
     "classes": [
       "building"
@@ -443,7 +444,8 @@
       "range": 8,
       "reload": 2,
       "arrows": 1,
-      "minRange": 1
+      "minRange": 1,
+      "air": "also"
     },
     "garrison": 5
   },
@@ -480,7 +482,8 @@
       "range": 8,
       "reload": 2,
       "arrows": 4,
-      "minRange": 1
+      "minRange": 1,
+      "air": "also"
     },
     "garrison": 20,
     "advance": true
@@ -498,14 +501,15 @@
     "dropoff": [],
     "age": 2,
     "buildable": true,
-    "description": "Builds breaching dozers, howitzers, gun trucks and assault bridges.",
+    "description": "Builds breaching dozers, howitzers, gun trucks, assault bridges and AA vehicles.",
     "meleeArmor": 1,
     "pierceArmor": 7,
     "trains": [
       "ram",
       "mangonel",
       "scorpion",
-      "siege_tower"
+      "siege_tower",
+      "aa_vehicle"
     ],
     "classes": [
       "building"
@@ -568,6 +572,63 @@
       "building"
     ],
     "naval": true
+  },
+  "airfield": {
+    "name": "Airfield",
+    "size": 4,
+    "hp": 2600,
+    "buildTime": 80,
+    "cost": {
+      "wood": 250,
+      "stone": 100
+    },
+    "pop": 0,
+    "los": 7,
+    "dropoff": [],
+    "age": 1,
+    "buildable": true,
+    "description": "A runway and hangar. Builds recon drones, then attack helicopters and strike jets.",
+    "meleeArmor": 1,
+    "pierceArmor": 8,
+    "trains": [
+      "recon_drone",
+      "attack_heli",
+      "strike_jet"
+    ],
+    "classes": [
+      "building"
+    ],
+    "advance": true
+  },
+  "sam_site": {
+    "name": "SAM Site",
+    "size": 2,
+    "hp": 1600,
+    "buildTime": 50,
+    "cost": {
+      "wood": 75,
+      "stone": 200
+    },
+    "pop": 0,
+    "los": 11,
+    "dropoff": [],
+    "age": 2,
+    "buildable": true,
+    "description": "A radar-guided missile battery. Long range and deadly to aircraft; it cannot fire at ground targets.",
+    "meleeArmor": 2,
+    "pierceArmor": 9,
+    "trains": [],
+    "classes": [
+      "building"
+    ],
+    "attack": {
+      "attack": 28,
+      "range": 10,
+      "reload": 3,
+      "arrows": 1,
+      "minRange": 1,
+      "air": "only"
+    }
   },
   "wonder": {
     "name": "Launch Complex",

@@ -67,7 +67,7 @@ const TEXTURE_K = Math.SQRT2;
 const SPRITE_K = 1.6;
 
 /** Weapon each unit swings in its attack animation. */
-const ATTACK_TOOL: Record<string, Tool> = { villager: 'sword', militia: 'rifle', spearman: 'launcher', archer: 'rifle', skirmisher: 'rifle', scout: 'rifle', knight: 'rifle', monk: 'tablet', claymore: 'rifle', horse_archer: 'rifle', arbalest_guard: 'rifle', iron_bear: 'rifle', king: 'rifle' };
+const ATTACK_TOOL: Record<string, Tool> = { villager: 'sword', aa_trooper: 'launcher', militia: 'rifle', spearman: 'launcher', archer: 'rifle', skirmisher: 'rifle', scout: 'rifle', knight: 'rifle', monk: 'tablet', claymore: 'rifle', horse_archer: 'rifle', arbalest_guard: 'rifle', iron_bear: 'rifle', king: 'rifle' };
 /** How long the fallen stay on the field, and rubble after a building falls (seconds). */
 const CORPSE_S = 14;
 const RUIN_S = 45;
@@ -336,7 +336,8 @@ export class Renderer {
         const x = e.px + (e.x - e.px) * v.alpha, y = e.py + (e.y - e.py) * v.alpha;
         if (!onScreen(x, y, pad)) continue;
         if (e.owner !== this.player && !fog.isVisible(x, y)) continue;
-        items.push({ d: x + y, draw: () => this.drawUnit(v, e, x, y) });
+        // Aircraft fly above everything on the ground.
+        items.push({ d: UNIT_DEFS[e.type].air ? x + y + 1e4 : x + y, draw: () => this.drawUnit(v, e, x, y) });
       } else if (e.kind === 'building') {
         if (!onScreen(e.x + e.size / 2, e.y + e.size / 2, pad + e.size * v.S * 2)) continue;
         if (e.owner !== this.player && !fog.isExplored(e.x + e.size / 2, e.y + e.size / 2)) continue;
@@ -446,7 +447,16 @@ export class Renderer {
     const { ctx } = this.view;
     const { S } = v;
     const selected = v.overlay.selection.has(u.id);
-    const px = this.sx(v, x, y), py = this.sy(v, x, y);
+    const px = this.sx(v, x, y);
+    let py = this.sy(v, x, y);
+    const alt = (UNIT_DEFS[u.type].altitude ?? 0) * ZK * S;
+    if (alt) {
+      // A soft shadow on the ground below the aircraft.
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.beginPath();
+      ctx.ellipse(px, py, S * 0.45, S * 0.18, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
     if (selected) {
       ctx.strokeStyle = u.owner === this.player ? 'rgba(255,255,255,0.95)' : 'rgba(255,90,80,0.95)';
       ctx.lineWidth = Math.max(1.5, S / 16);
@@ -467,6 +477,15 @@ export class Renderer {
       const bob = Math.sin(t * 1.7) * 0.04;
       this.put(v, v.art.units.get(u.type, u.owner, 0, p, elite), x + bob, y + bob);
       if (u.cargo.length) this.cargoBadge(v, px, py - S * UNIT_K * (unitHeight(u.type) + 0.45), u.cargo.length);
+    } else if (alt) {
+      // Hovering with a gentle bob.
+      const s = v.art.units.get(u.type, u.owner, 0, p, elite);
+      const bob = Math.sin(t * 2.2) * S * 0.05;
+      this.view.ctx.save();
+      this.view.ctx.translate(0, -alt + bob);
+      this.put(v, s, x, y);
+      this.view.ctx.restore();
+      py -= alt;
     } else {
       const s = v.art.units.get(u.type, u.owner, lookIndex(u.id), p, elite);
       this.put(v, s, x, y);
@@ -659,7 +678,7 @@ export class Renderer {
     const { S } = v;
     const at = (q: number) => {
       const x = p.sx + (p.tx - p.sx) * q, y = p.sy + (p.ty - p.sy) * q;
-      const z = p.arc * 4 * q * (1 - q) + (p.height !== undefined ? p.height * ZK : 0.4) * (1 - q) + 0.2 * q;
+      const z = p.arc * 4 * q * (1 - q) + (p.height !== undefined ? p.height * ZK : 0.4) * (1 - q) + (p.endHeight !== undefined ? p.endHeight * ZK : 0.2) * q;
       return { X: this.sx(v, x, y), Y: this.sy(v, x, y), Z: z * S };
     };
     const a = at(t), b = at(Math.min(1, t + 0.04));
@@ -668,8 +687,8 @@ export class Renderer {
     dx /= l;
     dy /= l;
     const hx = a.X, hy = a.Y - a.Z;
-    const missile = p.from === 'trebuchet' || p.from === 'siege_barge';
-    if (p.splash && missile) {
+    const missile = ((p.from === 'trebuchet' || p.from === 'siege_barge') && !!p.splash) || !!p.homing || p.from === 'aa_trooper' || p.from === 'aa_vehicle';
+    if (missile) {
       // A missile: smoke trail behind, a flaring motor, and the white body.
       for (let k = 6; k >= 1; k--) {
         const q = Math.max(0, t - k * 0.025);
@@ -680,7 +699,7 @@ export class Renderer {
         ctx.arc(c.X, c.Y - c.Z, r, 0, Math.PI * 2);
         ctx.fill();
       }
-      const len = S * (p.from === 'trebuchet' ? 0.6 : 0.42);
+      const len = S * (p.from === 'trebuchet' ? 0.6 : p.homing ? 0.28 : 0.42);
       const fire = ctx.createRadialGradient(hx - dx * len * 0.55, hy - dy * len * 0.55, 0, hx - dx * len * 0.55, hy - dy * len * 0.55, S * 0.22);
       fire.addColorStop(0, 'rgba(255,255,220,1)');
       fire.addColorStop(0.4, 'rgba(255,170,50,0.9)');
@@ -787,8 +806,8 @@ export class Renderer {
     this.lastPos.set(u.id, { x, y });
     const fighting = u.state === 'attack' || u.state === 'heal' || u.state === 'convert';
     const working = u.state === 'gather' || u.state === 'build' || u.state === 'repair' || fighting;
-    // Engines are only ever drawn side-on.
-    if (UNIT_DEFS[u.type].classes.includes('siege') && view.view !== 'side') view = { view: 'side', left: u.face < 0 };
+    // Engines and aircraft are only ever drawn side-on.
+    if ((UNIT_DEFS[u.type].classes.includes('siege') || UNIT_DEFS[u.type].air) && view.view !== 'side') view = { view: 'side', left: u.face < 0 };
     if (working) {
       // Work plays side-on, facing the job.
       const j = this.jobPoint(u);
@@ -809,9 +828,11 @@ export class Renderer {
       const seq = tool === 'bow' ? [3, 0, 1, 2] : [2, 3, 0, 1];
       frame = seq[q < 0.15 ? 0 : q < 0.35 ? 1 : q < 0.7 ? 2 : 3];
     }
+    // Rotors never stop turning.
+    if (UNIT_DEFS[u.type].air && !working) frame = Math.floor(t * 14) % 6;
     return {
       ...view,
-      anim: working ? 'work' : moving ? 'walk' : 'idle',
+      anim: working ? 'work' : moving || UNIT_DEFS[u.type].air ? 'walk' : 'idle',
       frame,
       tool,
       carry: u.carry && u.carry.amount > 0 && !working ? u.carry.res : null,

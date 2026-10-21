@@ -5,6 +5,26 @@ const svg = (body: string, vb = '0 0 24 24') =>
 const INK = '#0a1018';
 
 export const ICONS = {
+  plan: svg(`
+    <rect x="3" y="3" width="18" height="18" rx="2" fill="#16222e" stroke="#7fd8f5" stroke-width="1.4"/>
+    <path d="M6 17c3-1 4-5 7-6s4-3 5-5" fill="none" stroke="#e9fbff" stroke-width="1.4" stroke-dasharray="2 1.6"/>
+    <path d="M15.5 4.5l3 1.5-1.5 3" fill="none" stroke="#ff6a4a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="6" cy="17" r="1.6" fill="#45adda"/><path d="M8 7l2 2M10 7l-2 2" stroke="#ffc83a" stroke-width="1.3" stroke-linecap="round"/>`),
+  loose: svg(`
+    <g fill="#45adda" stroke="${INK}" stroke-width=".8"><circle cx="6" cy="8" r="2.2"/><circle cx="15" cy="5.5" r="2.2"/><circle cx="18" cy="13" r="2.2"/><circle cx="9" cy="15" r="2.2"/><circle cx="13" cy="19.5" r="2.2"/></g>`),
+  escort: svg(`
+    <path d="M3 9.5h18" stroke="#7a8058" stroke-width="5" stroke-linecap="round"/>
+    <g fill="#7a8058" stroke="${INK}" stroke-width=".9"><rect x="2.5" y="7" width="5" height="5" rx="1"/><rect x="9.5" y="7" width="5" height="5" rx="1"/><rect x="16.5" y="7" width="5" height="5" rx="1"/></g>
+    <g fill="#ffc83a" stroke="${INK}" stroke-width=".8"><circle cx="8" cy="17.5" r="2.2"/><circle cx="16" cy="17.5" r="2.2"/></g>
+    <path d="M12 2.5v3M10 4l2-2 2 2" stroke="#e9fbff" stroke-width="1.3" fill="none" stroke-linecap="round"/>`),
+  waves: svg(`
+    <path d="M3 18l5-5M3 12l5-5" stroke="#45adda" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M10 18l5-5M10 12l5-5" stroke="#7fd8f5" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M17 18l4-4M17 12l4-4" stroke="#e9fbff" stroke-width="2.4" stroke-linecap="round"/>`),
+  fallback: svg(`
+    <path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" fill="#3a4450" stroke="${INK}" stroke-width="1.1"/>
+    <path d="M15.5 12H8.5M11 9l-3 3 3 3" fill="none" stroke="#ffc83a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M10.5 6.5h3M12 5v3" stroke="#e8402e" stroke-width="1.4"/>`),
   defense: svg(`
     <path d="M2 21v-9h4v-2h3v2h6v-2h3v2h4v9z" fill="#9f9c93" stroke="${INK}" stroke-width="1.1" stroke-linejoin="round"/>
     <path d="M5 4h6v8H5z" fill="#7f878d" stroke="${INK}" stroke-width="1"/><path d="M11 6.5h6" stroke="${INK}" stroke-width="1.8" stroke-linecap="round"/>

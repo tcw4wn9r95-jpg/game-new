@@ -1,5 +1,7 @@
-// Player preferences kept on the device: game speed, sound and which hand the
-// HUD is laid out for. Changes apply at once and are remembered.
+// Player preferences kept on the device: game speed, sound, which hand the
+// HUD is laid out for, and the battle plan for army orders. Changes apply at
+// once and are remembered.
+import { DEFAULT_TACTICS, type Tactics } from '../sim/tactics';
 
 const KEY = 'ss.settings';
 
@@ -15,9 +17,19 @@ export interface Settings {
   lefty: boolean;
   /** The tutorial has been offered (finished or skipped). */
   tutorialSeen: boolean;
+  /** Battle plan given with army move and attack orders. */
+  tactics: Tactics;
 }
 
-const DEFAULTS: Settings = { speed: 1, volume: 0.65, lefty: false, tutorialSeen: false };
+const DEFAULTS: Settings = { speed: 1, volume: 0.65, lefty: false, tutorialSeen: false, tactics: DEFAULT_TACTICS };
+
+function loadTactics(t: Partial<Tactics> | undefined): Tactics {
+  return {
+    formation: t?.formation === 'escort' ? 'escort' : 'loose',
+    waves: t?.waves === 2 || t?.waves === 3 ? t.waves : 1,
+    fallback: !!t?.fallback,
+  };
+}
 
 function load(): Settings {
   try {
@@ -27,6 +39,7 @@ function load(): Settings {
       volume: typeof s.volume === 'number' && s.volume >= 0 && s.volume <= 1 ? s.volume : DEFAULTS.volume,
       lefty: !!s.lefty,
       tutorialSeen: !!s.tutorialSeen,
+      tactics: loadTactics(s.tactics),
     };
   } catch {
     return { ...DEFAULTS };

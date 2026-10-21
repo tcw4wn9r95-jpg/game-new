@@ -7,14 +7,15 @@ import { FlowField } from './flowfield';
 import { WALL_TYPES, canShelter, placeWall, setGateLock, shelterRoom, townBell, ungarrison } from './fortify';
 import { buildingCost, buildingMaxHp, unitStats } from './techs';
 import { canEngage, landRegion, startFerry, transportsNear } from './naval';
-import { BUILDING_DEFS, type BuildingType, type GatherTarget, type Stance, UNIT_DEFS, type Unit, type UnitType, isShip, navOf } from './entities';
+import { BUILDING_DEFS, type BuildingType, type GatherTarget, type Stance, UNIT_DEFS, type Unit, type UnitType, canHit, isAir, isShip, navOf } from './entities';
 import { cancelQueued, canAfford, enqueue, enqueueTech, pay, trade } from './production';
 import type { TechId } from './techs';
 import { carried, isRelic } from './modes';
 import type { World } from './world';
+import { type Exec, type SquadOrder, type Tactics, clearTactics, orderWithTactics } from './tactics';
 
 export type Command =
-  | { type: 'move'; ids: number[]; x: number; y: number }
+  | { type: 'move'; ids: number[]; x: number; y: number; tactics?: Tactics }
   | { type: 'gather'; ids: number[]; target: GatherTarget }
   | { type: 'build'; ids: number[]; building: BuildingType; x: number; y: number }
   | { type: 'help'; ids: number[]; id: number }
@@ -25,7 +26,7 @@ export type Command =
   | { type: 'repeat'; id: number; on: boolean }
   | { type: 'delete'; ids: number[] }
   | { type: 'autoReseed'; on: boolean }
-  | { type: 'attack'; ids: number[]; id: number }
+  | { type: 'attack'; ids: number[]; id: number; tactics?: Tactics }
   | { type: 'stance'; ids: number[]; stance: Stance }
   | { type: 'research'; id: number; tech: TechId }
   | { type: 'trade'; id: number; action: 'buy' | 'sell'; res: 'food' | 'wood' | 'stone' }
@@ -43,14 +44,12 @@ export type Command =
 export function applyCommand(w: World, player: number, cmd: Command): void {
   const ids = 'ids' in cmd ? cmd.ids : [];
   const units = ids.map((id) => w.unit(id)).filter((u): u is Unit => !!u && u.owner === player);
+  // A new order replaces any battle plan these units were following (a plan comes with it again if given).
+  if (cmd.type !== 'stance' && cmd.type !== 'delete') for (const u of units) clearTactics(u);
   switch (cmd.type) {
-    case 'move': {
-      // Ships and soldiers go their separate ways; soldiers bound across water take a boat.
-      const ships = units.filter(isShip), land = units.filter((u) => !isShip(u));
-      if (ships.length) moveGroup(w, ships, cmd.x, cmd.y);
-      if (land.length) moveLand(w, player, land, cmd.x, cmd.y);
-      return;
-    }
+    case 'move':
+      if (cmd.tactics && isPlan(cmd.tactics)) return orderWithTactics(w, player, units, { kind: 'move', x: cmd.x, y: cmd.y }, cmd.tactics, squadExec(w, player));
+      return moveAll(w, player, units, cmd.x, cmd.y);
     case 'unload':
       for (const u of units) {
         if (!isShip(u) || !UNIT_DEFS[u.type].cargo) continue;
@@ -66,25 +65,10 @@ export function applyCommand(w: World, player: number, cmd: Command): void {
         w.events.push({ type: 'error', owner: player, message: `Peace Treaty: no attacks for ${m} more minute${m === 1 ? '' : 's'}` });
         return;
       }
-      for (const u of units) {
-        const def = UNIT_DEFS[u.type];
-        if (!w.isEnemy(player, t.owner)) {
-          // Monks heal friends; nobody attacks their own side or an ally.
-          if (def.healer && t.kind === 'unit') setOrder(u, { type: 'heal', id: t.id });
-          continue;
-        }
-        if (def.converter) {
-          if (t.kind === 'unit') setOrder(u, { type: 'convert', id: t.id });
-          continue;
-        }
-        if (def.attack <= 0) continue;
-        // Swordsmen can't wade out to a ship.
-        if (!canEngage(w, u, t, unitStats(w, u.owner, u.type).range)) continue;
-        setOrder(u, { type: 'attack', id: t.id });
-        u.resume = null;
-        u.guard = null;
-      }
-      return;
+      const at = t.kind === 'building' ? { x: t.x + t.size / 2, y: t.y + t.size / 2 } : { x: t.x, y: t.y };
+      if (cmd.tactics && isPlan(cmd.tactics) && w.isEnemy(player, t.owner))
+        return orderWithTactics(w, player, units, { kind: 'attack', id: t.id, ...at }, cmd.tactics, squadExec(w, player));
+      return attackWith(w, player, units, t.id);
     }
     case 'stance':
       for (const u of units) setStance(u, cmd.stance);
@@ -265,6 +249,50 @@ export function applyCommand(w: World, player: number, cmd: Command): void {
   }
 }
 
+/** Every unit that can, attacks the target (healers heal a friend, agents turn an enemy). */
+function attackWith(w: World, player: number, units: Unit[], id: number): void {
+  const t = w.get(id);
+  if (!t || t.kind === 'resource') return;
+  for (const u of units) {
+    const def = UNIT_DEFS[u.type];
+    if (!w.isEnemy(player, t.owner)) {
+      // Monks heal friends; nobody attacks their own side or an ally.
+      if (def.healer && t.kind === 'unit') setOrder(u, { type: 'heal', id: t.id });
+      continue;
+    }
+    if (def.converter) {
+      if (t.kind === 'unit') setOrder(u, { type: 'convert', id: t.id });
+      continue;
+    }
+    if (def.attack <= 0) continue;
+    // Only anti-air reaches aircraft, and AA fires at nothing else.
+    if (!canHit(unitStats(w, u.owner, u.type), t)) continue;
+    // Swordsmen can't wade out to a ship.
+    if (!canEngage(w, u, t, unitStats(w, u.owner, u.type).range)) continue;
+    setOrder(u, { type: 'attack', id: t.id });
+    u.resume = null;
+    u.guard = null;
+  }
+}
+
+/** Ships, aircraft and soldiers go their separate ways; soldiers bound across water take a boat. */
+function moveAll(w: World, player: number, units: Unit[], x: number, y: number): void {
+  const ships = units.filter(isShip), air = units.filter(isAir), land = units.filter((u) => !isShip(u) && !isAir(u));
+  if (ships.length) moveGroup(w, ships, x, y);
+  if (air.length) moveGroup(w, air, x, y);
+  if (land.length) moveLand(w, player, land, x, y);
+}
+
+const isPlan = (t: Tactics) => t.formation === 'escort' || t.waves > 1 || t.fallback;
+
+/** Plain group orders, for battle plans to send their squads and waves off with. */
+export function squadExec(w: World, player: number): Exec {
+  return (units: Unit[], order: SquadOrder) => {
+    if (order.kind === 'move') moveAll(w, player, units, order.x, order.y);
+    else attackWith(w, player, units, order.id);
+  };
+}
+
 /** Groups this size or larger share one flow field instead of searching a path each. */
 const FLOW_GROUP = 5;
 
@@ -279,7 +307,7 @@ export function moveGroup(w: World, units: Unit[], x: number, y: number): void {
     return { x: x + ox * 0.9, y: y + oy * 0.9 };
   });
   let field: FlowField | null = null;
-  if (units.length >= FLOW_GROUP) {
+  if (units.length >= FLOW_GROUP && !isAir(units[0])) {
     const owner = navOf(units[0]);
     const goals = slots.map((s) => ({ x: Math.floor(s.x), y: Math.floor(s.y) })).filter((g) => w.grid.isWalkable(g.x, g.y, owner));
     if (goals.length) {

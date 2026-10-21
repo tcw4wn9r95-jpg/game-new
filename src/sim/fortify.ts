@@ -2,7 +2,7 @@
 // garrisons (which add arrows and shelter units), and villagers repairing.
 import { DT, type ResourceKind, TICK_RATE } from './constants';
 import { setOrder } from './economy';
-import { BUILDING_DEFS, type Building, type BuildingType, UNIT_DEFS, type Unit, distToRect } from './entities';
+import { BUILDING_DEFS, type Building, type BuildingType, UNIT_DEFS, type Unit, distToRect, isAir } from './entities';
 import { buildingAttack, buildingCost, buildingMaxHp, unitStats } from './techs';
 import type { World } from './world';
 
@@ -18,7 +18,7 @@ const SHELTER_HEAL = 1;
 /** Can this unit shelter in this building? Towers take villagers and foot soldiers; castles anyone but siege and horse. */
 export function canShelter(b: Building, u: Unit): boolean {
   const def = BUILDING_DEFS[b.type];
-  if (!def.garrison || !b.complete || b.owner !== u.owner) return false;
+  if (!def.garrison || !b.complete || b.owner !== u.owner || isAir(u)) return false;
   const cls = UNIT_DEFS[u.type].classes;
   if (cls.includes('siege')) return false;
   // The King shelters only behind stone: Castles and towers.
@@ -187,12 +187,16 @@ export function towerTick(w: World): void {
     const targets: Array<{ u: Unit; d: number }> = [];
     w.spatial.query(cx, cy, reachR + 1, (o) => {
       if (!w.canFight(b.owner, o.owner) || o.inside || (fog && !fog.isVisible(o.x, o.y))) return;
+      // Anti-air: most guns can't reach aircraft; a SAM site fires at nothing else.
+      const air = isAir(o);
+      if (air ? !a.air : a.air === 'only') return;
       const d = distToRect(o.x, o.y, b.x, b.y, b.size);
       if (d > a.range || d < a.minRange) return;
       targets.push({ u: o, d });
     });
     if (!targets.length) continue;
-    targets.sort((p, q) => p.d - q.d);
+    // Air defences take aircraft first.
+    targets.sort((p, q) => (isAir(q.u) ? 1 : 0) - (isAir(p.u) ? 1 : 0) || p.d - q.d);
     const arrows = a.arrows + extraArrows(w, b);
     if (arrows <= 0) continue;
     b.cooldown = Math.round(a.reload * TICK_RATE);
@@ -204,7 +208,7 @@ export function towerTick(w: World): void {
       const ticks = Math.max(1, Math.round((dist / 8) * TICK_RATE));
       w.projectiles.push({
         id: w.nextProjectileId++,
-        from: 'archer',
+        from: a.air === 'only' ? 'aa_trooper' : 'archer',
         owner: b.owner,
         shooter: b.id,
         target: t.id,
@@ -214,10 +218,12 @@ export function towerTick(w: World): void {
         ty: t.y,
         t: 0,
         dt: 1 / ticks,
-        arc: 0.6 + dist * 0.05,
         // Heated Shot: red-hot arrows set ships' timbers alight.
         damage: heated && UNIT_DEFS[t.type].naval ? a.attack * 2 : a.attack,
         height: b.type === 'castle' ? 2 : b.type === 'town_center' ? 1.4 : 1.6,
+        homing: isAir(t) || undefined,
+        endHeight: UNIT_DEFS[t.type].altitude,
+        arc: isAir(t) ? 0.3 : 0.6 + dist * 0.05,
       });
     }
   }

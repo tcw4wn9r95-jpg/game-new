@@ -14,7 +14,9 @@ import {
   type UnitClass,
   type UnitDef,
   type UnitType,
+  canHit,
   distToRect,
+  isAir,
   isShip,
   navOf,
 } from './entities';
@@ -63,6 +65,10 @@ export interface Projectile {
   splash?: number;
   /** A bolt that hits every enemy along its line. */
   pierce?: boolean;
+  /** A guided missile: follows its target (anything fired at an aircraft). */
+  homing?: boolean;
+  /** Height in tiles where it ends (an aircraft's altitude). */
+  endHeight?: number;
 }
 
 const isCombatOrder = (o: Order | null): o is Extract<Order, { type: 'attack' | 'heal' | 'convert' | 'attackGround' }> =>
@@ -144,6 +150,7 @@ export function combatThink(w: World, u: Unit): boolean {
   const valid =
     t &&
     t.kind !== 'resource' &&
+    (o.type === 'heal' ? !isAir(t as Unit) : canHit(unitStats(w, u.owner, u.type), t)) &&
     !(UNIT_DEFS[u.type].buildingsOnly && t.kind === 'unit') &&
     !(t.kind === 'unit' && t.inside) &&
     (o.type === 'heal' ? t.kind === 'unit' && t.owner === u.owner && t.hp < unitStats(w, t.owner, t.type).hp : w.canFight(u.owner, t.owner)) &&
@@ -258,6 +265,14 @@ function chase(w: World, u: Unit, t: Unit | Building): void {
   u.state = 'walk';
   const c = centre(t);
   const d = Math.hypot(c.x - u.x, c.y - u.y);
+  if (isAir(u)) {
+    // Aircraft fly straight at it, stopping at range.
+    const r = Math.max(0, unitStats(w, u.owner, u.type).range - 0.5);
+    const k = d > r ? (d - r) / d : 0;
+    u.path = [{ x: u.x + (c.x - u.x) * k, y: u.y + (c.y - u.y) * k }];
+    u.pathIdx = 0;
+    return;
+  }
   // Close and in the open: run straight at it.
   if (t.kind === 'unit' && d < 3 && clearLine(w, u.x, u.y, t.x, t.y, navOf(u))) {
     u.path = [{ x: t.x, y: t.y }];
@@ -329,7 +344,7 @@ function acquire(w: World, u: Unit): void {
     let best: Unit | null = null;
     let bd = Infinity;
     w.spatial.query(u.x, u.y, def.los, (o, d) => {
-      if (o.owner !== u.owner || o.id === u.id || o.hp >= unitStats(w, o.owner, o.type).hp) return;
+      if (o.owner !== u.owner || o.id === u.id || isAir(o) || o.hp >= unitStats(w, o.owner, o.type).hp) return;
       if (d < bd) (bd = d), (best = o);
     });
     if (best) setOrder(u, { type: 'heal', id: (best as Unit).id, auto: true });
@@ -352,7 +367,7 @@ function acquire(w: World, u: Unit): void {
   const radius = u.stance === 'stand' ? (def.range > 0 ? def.range + 0.5 : 1) : u.stance === 'defensive' ? Math.min(def.los, 6) : def.los;
   if (u.attackedAt >= w.tick - TICK_RATE * 2) {
     const a = w.get(u.attackedBy);
-    if (a && hostile(w, u, a) && a.kind === 'unit' && Math.hypot(a.x - u.x, a.y - u.y) <= radius + 2) {
+    if (a && hostile(w, u, a) && a.kind === 'unit' && canHit(def, a) && Math.hypot(a.x - u.x, a.y - u.y) <= radius + 2) {
       setOrder(u, { type: 'attack', id: a.id, auto: true });
       return;
     }
@@ -362,14 +377,16 @@ function acquire(w: World, u: Unit): void {
   let bs = Infinity;
   const ship = isShip(u);
   w.spatial.query(u.x, u.y, radius, (o, d) => {
-    if (!w.canFight(u.owner, o.owner) || (fog && !fog.isVisible(o.x, o.y))) return;
+    if (!w.canFight(u.owner, o.owner) || (fog && !fog.isVisible(o.x, o.y)) || !canHit(def, o)) return;
     if (def.minRange && d < def.minRange + 0.5) return;
     // Across the water's edge only if something can actually be done about it.
     if (isShip(o) !== ship && !canEngage(w, u, o, def.range)) return;
     // Prefer armed enemies and those we counter; villagers last.
     const threat = UNIT_DEFS[o.type].gatherer ? 3 : 0;
     const counter = (def.bonus[UNIT_DEFS[o.type].classes[0]] ?? 1) > 1 ? -1.5 : 0;
-    const score = d + threat + counter;
+    // Unarmed drones come after anything that shoots back (AA aside, which has nothing else to do).
+    const drone = UNIT_DEFS[o.type].attack <= 0 && isAir(o) && !def.airOnly ? 4 : 0;
+    const score = d + threat + counter + drone;
     if (score < bs) (bs = score), (best = o);
   });
   if (best) {
@@ -377,7 +394,7 @@ function acquire(w: World, u: Unit): void {
     return;
   }
   // Warships with nothing to fight bombard buildings along the shore within range.
-  if (ship && def.range >= 2) {
+  if (ship && def.range >= 2 && !def.airOnly) {
     let bb: Building | null = null;
     let bd = def.range + 0.5;
     for (const b of w.buildings()) {
@@ -412,6 +429,8 @@ function launch(w: World, u: Unit, target: number, tx: number, ty: number): void
   const dist = Math.hypot(tx - u.x, ty - u.y);
   const ticks = Math.max(1, Math.round((dist / (def.projectileSpeed ?? 7)) * TICK_RATE));
   const t = { id: target };
+  const aim = target ? w.unit(target) : undefined;
+  const atAir = !!aim && isAir(aim);
   w.projectiles.push({
     id: w.nextProjectileId++,
     from: u.type,
@@ -424,10 +443,13 @@ function launch(w: World, u: Unit, target: number, tx: number, ty: number): void
     ty,
     t: 0,
     dt: 1 / ticks,
-    arc: def.splash ? 0.6 + dist * 0.18 : def.pierce ? 0.1 + dist * 0.02 : 0.25 + dist * 0.08,
-    splash: def.splash,
-    pierce: def.pierce,
-    height: def.packs ? 1.6 : def.splash ? 0.9 : undefined,
+    arc: atAir || def.air ? 0.1 + dist * 0.02 : def.splash ? 0.6 + dist * 0.18 : def.pierce ? 0.1 + dist * 0.02 : 0.25 + dist * 0.08,
+    // A missile at an aircraft hits it directly: no blast on the ground, no bolt through a line.
+    splash: atAir ? undefined : def.splash,
+    pierce: atAir ? undefined : def.pierce,
+    homing: atAir || undefined,
+    endHeight: atAir ? UNIT_DEFS[aim!.type].altitude : undefined,
+    height: def.air ? def.altitude : def.packs ? 1.6 : def.splash ? 0.9 : undefined,
   });
 }
 
@@ -436,6 +458,11 @@ export function projectileTick(w: World): void {
   const keep: Projectile[] = [];
   for (const p of w.projectiles) {
     p.t += p.dt;
+    if (p.homing) {
+      // Guided: the aim point follows the target.
+      const t = w.unit(p.target);
+      if (t) (p.tx = t.x), (p.ty = t.y);
+    }
     if (p.t < 1) {
       keep.push(p);
       continue;

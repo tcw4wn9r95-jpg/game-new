@@ -26,8 +26,8 @@ import {
   OUT,
 } from './figures';
 
-type Kit = 'breacher' | 'commando' | 'at' | 'rifle' | 'shield' | 'sniper' | 'agent' | 'sapper' | 'commander';
-type Gun = 'rifle' | 'dmr' | 'shotgun' | 'lmg' | 'sniper' | 'rpg' | 'atgm' | 'pistol';
+type Kit = 'breacher' | 'commando' | 'at' | 'rifle' | 'shield' | 'sniper' | 'agent' | 'sapper' | 'commander' | 'aa';
+type Gun = 'rifle' | 'dmr' | 'shotgun' | 'lmg' | 'sniper' | 'rpg' | 'atgm' | 'pistol' | 'manpads';
 
 const GUNMETAL = '#25292e';
 const POLYMER = '#33383e';
@@ -52,6 +52,7 @@ const KIT_CAMO: Record<Kit, keyof typeof CAMO> = {
   agent: 'night',
   sapper: 'desert',
   commander: 'wood',
+  aa: 'desert',
 };
 
 // ---------- helpers ----------
@@ -288,6 +289,14 @@ function gunShape(g: G, kind: Gun, elite: boolean): { muzzle: number; support: n
       dark([[1, -9.5], [6, -9.5], [6, -5.5], [1, -5.5]], '#1c1f22');
       return { muzzle: 32, support: 8 };
     }
+    case 'manpads':
+      // A slim launch tube with a grip stock, sight and seeker cap.
+      dark([[-18, -5], [24, -5], [24, -0.5], [-18, -0.5]], '#56603f');
+      poly(g, [[24, -5.5], [28, -4.8], [28, -0.7], [24, 0]], '#e8eaea');
+      dark([[-1, -0.5], [2, -0.5], [1.5, 5], [-1.5, 5]], POLYMER);
+      dark([[4, -11], [10, -11], [10, -5], [4, -5]], '#2a2f34');
+      blob(g, 7, -8, 1.4, 1.4, '#ff5a4a', 0, false);
+      return { muzzle: 28, support: 9 };
     case 'atgm':
       // Fat launch tube with a command-launch unit on the side.
       dark([[-14, -7], [24, -7], [24, 0], [-14, 0]], '#5c6146');
@@ -347,7 +356,7 @@ function placeGun(g: G, kind: Gun, grip: P, deg: number, elite: boolean, flash: 
   g.rotate(Math.atan2(uy, ux));
   const { muzzle, support } = gunShape(g, kind, elite);
   if (flash) {
-    if (kind === 'rpg' || kind === 'atgm') {
+    if (kind === 'rpg' || kind === 'atgm' || kind === 'manpads') {
       // Backblast out of the rear of the tube, and the motor's flare at the front.
       muzzleFlash(g, muzzle, -3, 0.8);
       g.save();
@@ -427,6 +436,7 @@ const GUN_OF: Partial<Record<Kit, Gun>> = {
   shield: 'pistol',
   sniper: 'sniper',
   sapper: 'rifle',
+  aa: 'manpads',
 };
 
 function drawTrooper(g: G, f: FigureSpec, kit: Kit): void {
@@ -491,8 +501,9 @@ function drawTrooper(g: G, f: FigureSpec, kit: Kit): void {
     };
     if (gun && kit !== 'shield') {
       // Aim on the strike; otherwise carry at the low ready (muzzle forward and down).
-      const shoulderGun = gun === 'rpg' || gun === 'atgm';
-      const aim = acting ? (shoulderGun ? 92 : 91) : walking ? 66 : 70;
+      const shoulderGun = gun === 'rpg' || gun === 'atgm' || gun === 'manpads';
+      // AA troopers aim high, at the sky.
+      const aim = acting ? (gun === 'manpads' ? 122 : shoulderGun ? 92 : 91) : walking ? 66 : 70;
       const recoil = flash ? -2 : 0;
       const pocket: P = shoulderGun ? [sh[0] + 2 + recoil, sh[1] - 1] : [sh[0] + 3 + recoil, sh[1] + 4];
       const back = shoulderGun ? 6 : 14;
@@ -555,8 +566,8 @@ function drawTrooper(g: G, f: FigureSpec, kit: Kit): void {
     if (kit !== 'commander') backPack();
     arm(g, pose, 'back', sh, look, sleeve, 'far');
     arm(g, pose, 'back', sh, look, sleeve, 'near');
-    if (gun && kit !== 'shield' && kit !== 'at') placeGun(g, gun, [sh[0] - 6, sh[1] + 20], 140, !!f.elite, false);
-    if (kit === 'at') placeGun(g, gun!, [sh[0] + 2, sh[1] + 2], 100, !!f.elite, false);
+    if (gun && kit !== 'shield' && kit !== 'at' && kit !== 'aa') placeGun(g, gun, [sh[0] - 6, sh[1] + 20], 140, !!f.elite, false);
+    if (kit === 'at' || kit === 'aa') placeGun(g, gun!, [sh[0] + 2, sh[1] + 2], 100, !!f.elite, false);
     const [hx, hy] = headC;
     head(g, 'back', hx, hy, look, f.team);
     if (kit === 'commander') beret(g, 'back', hx, hy, f.team);
@@ -611,7 +622,7 @@ function drawTrooper(g: G, f: FigureSpec, kit: Kit): void {
   if (gun) {
     // Held across the chest at port arms.
     const grip: P = [sh[0] + 6, sh[1] + 18];
-    const deg = gun === 'rpg' || gun === 'atgm' ? 150 : 135;
+    const deg = gun === 'rpg' || gun === 'atgm' || gun === 'manpads' ? 150 : 135;
     const dry = placeGunDry(gun, grip, deg);
     placeGun(g, gun, grip, deg, !!f.elite, false);
     ikArm(g, shL, dry.support, shade(sleeve, 0.85));
@@ -630,7 +641,7 @@ function drawTrooper(g: G, f: FigureSpec, kit: Kit): void {
 /** Where the support hand would land on a gun, without drawing it. */
 function placeGunDry(kind: Gun, grip: P, deg: number): { support: P } {
   const ux = Math.sin(deg * D2R), uy = Math.cos(deg * D2R);
-  const support = kind === 'pistol' ? 0 : kind === 'rpg' ? 8 : kind === 'atgm' ? 6 : kind === 'sniper' ? 10 : kind === 'lmg' ? 12 : kind === 'shotgun' ? 11 : 13;
+  const support = kind === 'pistol' ? 0 : kind === 'rpg' ? 8 : kind === 'manpads' ? 9 : kind === 'atgm' ? 6 : kind === 'sniper' ? 10 : kind === 'lmg' ? 12 : kind === 'shotgun' ? 11 : 13;
   return { support: [grip[0] + ux * support + uy * 1.5, grip[1] + uy * support - ux * -1.5] };
 }
 
@@ -655,3 +666,5 @@ export const drawMonk = (g: G, f: FigureSpec) => drawTrooper(g, f, 'agent');
 export const drawArbalest = (g: G, f: FigureSpec) => drawTrooper(g, f, 'sniper');
 export const drawKing = (g: G, f: FigureSpec) => drawTrooper(g, f, 'commander');
 export const drawPetard = (g: G, f: FigureSpec) => drawTrooper(g, f, 'sapper');
+
+export const drawAATrooper = (g: G, f: FigureSpec) => drawTrooper(g, f, 'aa');

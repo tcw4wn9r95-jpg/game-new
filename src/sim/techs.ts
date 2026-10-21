@@ -5,7 +5,7 @@ import ages from '../data/ages.json';
 import factions from '../data/factions.json';
 import techs from '../data/techs.json';
 import type { ResourceKind } from './constants';
-import { BUILDING_DEFS, type Building, type BuildingType, UNIT_DEFS, type UnitClass, type UnitDef, type UnitType } from './entities';
+import { BUILDING_DEFS, type Building, type BuildingDef, type BuildingType, UNIT_DEFS, type UnitClass, type UnitDef, type UnitType } from './entities';
 import type { World } from './world';
 
 export type TechId = keyof typeof techs;
@@ -299,7 +299,7 @@ export function buildingMaxHp(w: World, b: Building): number {
 }
 
 /** A building's arrows after research, or null if it doesn't shoot. */
-export function buildingAttack(w: World, b: Building): { attack: number; range: number; reload: number; arrows: number; minRange: number } | null {
+export function buildingAttack(w: World, b: Building): NonNullable<BuildingDef['attack']> | null {
   const a = BUILDING_DEFS[b.type].attack;
   if (!a) return null;
   const d = w.players[b.owner]?.mods.defense;

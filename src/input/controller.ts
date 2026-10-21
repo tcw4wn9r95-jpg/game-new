@@ -6,6 +6,7 @@ import type { Effect } from '../render/renderer';
 import { canBuild, isGatherer, sourceOf } from '../sim/economy';
 import { WATER } from '../sim/grid';
 import { BUILDING_DEFS, type Building, type BuildingType, type Entity, type GatherTarget, UNIT_DEFS, type Unit } from '../sim/entities';
+import { settings } from '../ui/settings';
 import { UNIT_K, unitHeight } from '../render/unitSprites';
 import { ZK } from '../render/iso3d';
 import type { Command } from '../sim/commands';
@@ -378,6 +379,8 @@ export class Controller {
       if (e.kind !== 'unit' || e.inside) continue;
       if (e.owner !== this.host.player && !fog.isVisible(e.x, e.y)) continue;
       const p = camera.tileToScreen(e.x, e.y);
+      // Aircraft are drawn up at their flying height.
+      p.y -= (UNIT_DEFS[e.type].altitude ?? 0) * ZK * Z;
       const h = Math.max(unitHeight(e.type) * UNIT_K * Z, 26);
       // Ships are long: a wider target.
       const tx = UNIT_DEFS[e.type].naval ? Math.max(tolX, (e.type === 'demolition_raft' ? 0.8 : 1.2) * Z) : tolX;
@@ -540,6 +543,12 @@ export class Controller {
   }
 
   private issue(cmd: Command): void {
+    // Army orders carry the battle plan chosen in the Tactics panel.
+    if ((cmd.type === 'move' || cmd.type === 'attack') && cmd.ids.some((id) => {
+      const u = this.world.unit(id);
+      return !!u && !UNIT_DEFS[u.type].gatherer;
+    }))
+      cmd = { ...cmd, tactics: settings.tactics };
     this.world.issue(this.host.player, cmd);
     if (cmd.type === 'attack' || cmd.type === 'attackGround') audio.play('attackOrder');
     else if (ORDER_SOUNDS.has(cmd.type)) audio.play('order');

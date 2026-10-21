@@ -536,8 +536,9 @@
       "galley"
     ],
     "description": "Fast warship with a deck gun. Holds the sea lanes and harries the shore.",
-    "strong": "Drone Boats, Gunboats at range, units on the shore",
-    "weak": "Destroyers, Gunboats up close"
+    "strong": "Drone Boats, Gunboats at range, units on the shore, aircraft",
+    "weak": "Destroyers, Gunboats up close",
+    "antiAir": true
   },
   "fire_ship": {
     "pop": 1,
@@ -644,7 +645,8 @@
     "groundAttack": true,
     "description": "A guided-missile destroyer. Batters coastal walls and buildings from long range.",
     "strong": "Coastal buildings and walls (3x), Gunboats",
-    "weak": "Patrol Boats, anything inside its minimum range"
+    "weak": "Patrol Boats, anything inside its minimum range",
+    "antiAir": true
   },
   "claymore": {
     "pop": 1,
@@ -774,6 +776,175 @@
     "description": "Iron Ridge super-heavy tank: slow, armoured, very hard to kill.",
     "strong": "Riflemen, artillery, buildings",
     "weak": "AT troopers, agents"
+  },
+  "aa_trooper": {
+    "name": "AA Trooper",
+    "hp": 35,
+    "speed": 0.95,
+    "los": 8,
+    "radius": 0.22,
+    "pop": 1,
+    "cost": {
+      "food": 40,
+      "wood": 30,
+      "gold": 40
+    },
+    "trainTime": 26,
+    "attack": 6,
+    "reload": 3,
+    "attackType": "pierce",
+    "meleeArmor": 0,
+    "pierceArmor": 1,
+    "range": 6,
+    "projectileSpeed": 10,
+    "age": 1,
+    "classes": [
+      "archer"
+    ],
+    "bonus": {
+      "air": 3
+    },
+    "stance": "aggressive",
+    "antiAir": true,
+    "airOnly": true,
+    "description": "Infantry with a shoulder-fired homing missile. Only fires at aircraft.",
+    "strong": "Aircraft (3x)",
+    "weak": "Every ground unit; it cannot fire at them"
+  },
+  "aa_vehicle": {
+    "name": "AA Vehicle",
+    "hp": 170,
+    "speed": 1.15,
+    "los": 9,
+    "radius": 0.5,
+    "pop": 2,
+    "cost": {
+      "wood": 150,
+      "gold": 120
+    },
+    "trainTime": 40,
+    "attack": 7,
+    "reload": 1.2,
+    "attackType": "pierce",
+    "meleeArmor": 1,
+    "pierceArmor": 5,
+    "range": 7,
+    "projectileSpeed": 12,
+    "age": 2,
+    "classes": [
+      "siege"
+    ],
+    "bonus": {
+      "air": 2.5
+    },
+    "stance": "aggressive",
+    "antiAir": true,
+    "airOnly": true,
+    "description": "A tracked twin-cannon and missile carrier that shreds aircraft. Only fires at aircraft.",
+    "strong": "Aircraft (2.5x)",
+    "weak": "Every ground unit; escort it"
+  },
+  "recon_drone": {
+    "name": "Recon Drone",
+    "hp": 35,
+    "speed": 2.4,
+    "los": 11,
+    "radius": 0.3,
+    "pop": 1,
+    "cost": {
+      "wood": 50,
+      "gold": 25
+    },
+    "trainTime": 20,
+    "attack": 0,
+    "reload": 2,
+    "attackType": "pierce",
+    "meleeArmor": 0,
+    "pierceArmor": 1,
+    "range": 0,
+    "age": 1,
+    "classes": [
+      "air"
+    ],
+    "bonus": {},
+    "stance": "passive",
+    "air": true,
+    "altitude": 0.8,
+    "description": "An unarmed quadcopter that flies over walls and water and sees far. Only anti-air can bring it down.",
+    "strong": "Scouting",
+    "weak": "Anti-air"
+  },
+  "attack_heli": {
+    "name": "Attack Helicopter",
+    "hp": 140,
+    "speed": 1.75,
+    "los": 8,
+    "radius": 0.55,
+    "pop": 2,
+    "cost": {
+      "wood": 140,
+      "gold": 150
+    },
+    "trainTime": 45,
+    "attack": 8,
+    "reload": 2,
+    "attackType": "pierce",
+    "meleeArmor": 3,
+    "pierceArmor": 3,
+    "range": 4,
+    "projectileSpeed": 9,
+    "age": 2,
+    "classes": [
+      "air"
+    ],
+    "bonus": {
+      "cavalry": 2.5,
+      "siege": 2,
+      "ship": 1.5
+    },
+    "stance": "aggressive",
+    "air": true,
+    "altitude": 1,
+    "description": "A gunship with rockets and a chin cannon. Flies over everything; only anti-air can hit it.",
+    "strong": "Vehicles, artillery, ships",
+    "weak": "AA troopers, AA vehicles, SAM sites, jets"
+  },
+  "strike_jet": {
+    "name": "Strike Jet",
+    "hp": 120,
+    "speed": 2.8,
+    "los": 9,
+    "radius": 0.6,
+    "pop": 2,
+    "cost": {
+      "wood": 160,
+      "gold": 220
+    },
+    "trainTime": 55,
+    "attack": 14,
+    "reload": 4,
+    "attackType": "pierce",
+    "meleeArmor": 2,
+    "pierceArmor": 4,
+    "range": 5,
+    "projectileSpeed": 10,
+    "splash": 0.9,
+    "age": 3,
+    "classes": [
+      "air"
+    ],
+    "bonus": {
+      "building": 2.5,
+      "siege": 2,
+      "air": 1.5
+    },
+    "stance": "aggressive",
+    "air": true,
+    "altitude": 1.3,
+    "antiAir": true,
+    "description": "A fast fighter-bomber: bombs buildings and groups, and fires missiles at other aircraft.",
+    "strong": "Buildings, artillery, helicopters",
+    "weak": "SAM sites, AA vehicles"
   },
   "king": {
     "pop": 1,

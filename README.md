@@ -51,6 +51,32 @@ describes the rules). Everything the player sees was rebuilt for the 21st centur
 | Ages I–IV | Foundation, Expansion, Network, Autonomy |
 | Regicide, Domination modes | Commander, Control modes |
 
+## Air power and air defence
+
+An **Airfield** (Expansion Age) builds **Recon Drones** (unarmed, long sight), **Attack
+Helicopters** (Network Age; strong against vehicles, artillery and ships) and **Strike Jets**
+(Autonomy Age; bomb buildings and shoot down other aircraft). Aircraft fly straight over walls,
+water and terrain, and only anti-air weapons can hit them:
+
+- **AA Trooper** (Firing Range) and **AA Vehicle** (Vehicle Factory): fire homing missiles and
+  cannon at aircraft only.
+- **SAM Site** (Network Age, Defence tab): long-range missile battery, aircraft only.
+- Sentry towers, Fortresses, Patrol Boats, Destroyers and Strike Jets also engage aircraft.
+
+## Tactics
+
+Select an army and tap **Tactics** to set the battle plan used for every army move and attack:
+
+- **Formation: Escort**: tanks and close-quarters troops march in front, with shooters,
+  artillery and medics behind them, all at the pace of the slowest unit. When a protected unit
+  is hit, its escorts turn on the attacker, then return to formation.
+- **Waves: 2 or 3**: the army splits into mixed waves. The first goes at once; each next wave
+  follows 20 seconds later, or sooner if the wave ahead is cut down.
+- **Wounded: Fall back**: units below 30% health retreat to where the order was given.
+
+The AI uses escort formation for its attacks (Hard also pulls back its wounded), counters enemy
+aircraft with AA troops, AA vehicles and SAM sites, and fields its own helicopters and jets.
+
 Buildings restyle by age: containers and corrugated metal, then precast concrete, then concrete
 and glass, then glass with solar roofs and lit trims. Combat shows tracer fire, muzzle flashes,
 artillery shells, missiles with exhaust trails and explosions. The UI is a dark tactical theme

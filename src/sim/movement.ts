@@ -1,5 +1,5 @@
 import { DT } from './constants';
-import { UNIT_DEFS, type Unit, navOf } from './entities';
+import { UNIT_DEFS, type Unit, isAir, navOf } from './entities';
 import { readyToMove, speedOf } from './siege';
 import type { World } from './world';
 
@@ -16,10 +16,11 @@ export function moveUnit(w: World, u: Unit): void {
   if (u.flow) return flowMove(w, u);
   if (!u.path) return;
   let step = speedOf(w, u) * DT;
+  const air = isAir(u);
   while (step > 0 && u.pathIdx < u.path.length) {
     const wp = u.path[u.pathIdx];
-    // A building or other obstacle appeared on the route: plan again.
-    if (!w.grid.isWalkable(Math.floor(wp.x), Math.floor(wp.y), navOf(u))) {
+    // A building or other obstacle appeared on the route: plan again (aircraft fly over).
+    if (!air && !w.grid.isWalkable(Math.floor(wp.x), Math.floor(wp.y), navOf(u))) {
       u.path = null;
       return;
     }
@@ -114,8 +115,8 @@ export function separate(w: World): void {
         if (!b) continue;
         for (const o of b) {
           if (o.id <= u.id) continue;
-          // Ships and people on the shore don't jostle each other.
-          if (!!UNIT_DEFS[o.type].naval !== !!UNIT_DEFS[u.type].naval) continue;
+          // Ships and people on the shore don't jostle each other; aircraft only each other.
+          if (!!UNIT_DEFS[o.type].naval !== !!UNIT_DEFS[u.type].naval || isAir(o) !== isAir(u)) continue;
           const min = ru + UNIT_DEFS[o.type].radius;
           const ox = u.x - o.x, oy = u.y - o.y;
           const d = Math.hypot(ox, oy);
@@ -145,6 +146,13 @@ export function separate(w: World): void {
 function nudge(w: World, u: Unit, dx: number, dy: number): void {
   if (!dx && !dy) return;
   const nx = u.x + dx, ny = u.y + dy;
+  if (isAir(u)) {
+    // Aircraft drift freely, but stay over the map.
+    const N = w.map.size;
+    u.x = Math.max(0.5, Math.min(N - 0.5, nx));
+    u.y = Math.max(0.5, Math.min(N - 0.5, ny));
+    return;
+  }
   const tx = Math.floor(nx), ty = Math.floor(ny);
   // Never shove a unit into a separate pocket (e.g. diagonally between two trees).
   const sameTile = tx === Math.floor(u.x) && ty === Math.floor(u.y);

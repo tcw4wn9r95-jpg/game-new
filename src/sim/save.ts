@@ -9,6 +9,7 @@ import { baseMods, applyEffects, buildingMaxHp } from './techs';
 import type { GameMap } from './terrain';
 import type { GameMode, ModeState, VictoryReason } from './modes';
 import type { ScenarioState } from './scenario';
+import type { WavePlan } from './tactics';
 
 export const SAVE_VERSION = 1;
 
@@ -33,6 +34,9 @@ export interface SaveData {
   modeState?: ModeState;
   victoryReason?: VictoryReason | null;
   scenario?: ScenarioState | null;
+  /** Battle plans: squads issued, and waves still to launch. */
+  squadSeq?: number;
+  waves?: WavePlan[];
 }
 
 // ---------- typed arrays <-> base64 ----------
@@ -96,6 +100,8 @@ export function saveWorld(w: World): SaveData {
     modeState: w.modeState,
     victoryReason: w.victoryReason,
     scenario: w.scenario,
+    squadSeq: w.squadSeq,
+    waves: w.waves,
   };
 }
 
@@ -130,6 +136,8 @@ export function loadWorld(d: SaveData): World {
   w.victoryReason = d.victoryReason ?? null;
   if (d.modeState) w.modeState = d.modeState;
   w.scenario = d.scenario ?? null;
+  w.squadSeq = d.squadSeq ?? 0;
+  w.waves = d.waves ?? [];
   d.players.forEach((p, i) => {
     const mods = baseMods(p.faction);
     for (const t of p.techs) applyEffects(mods, t);

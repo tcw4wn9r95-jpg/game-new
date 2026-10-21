@@ -10,6 +10,17 @@ import { AGES, TECH_DEFS, type TechId, buildingCost, buildingMaxHp, researchBloc
 import type { World } from '../sim/world';
 import { ICONS } from './icons';
 import { artIcon, portrait, techArt } from './portraits';
+import { settings, updateSettings } from './settings';
+import { type Tactics, WAVE_GAP_S, pendingWave } from '../sim/tactics';
+
+const planCaption = () => {
+  const t = settings.tactics;
+  return t.formation === 'loose' && t.waves === 1 && !t.fallback ? 'None' : [t.formation === 'escort' ? 'Esc' : '', t.waves > 1 ? `${t.waves}w` : '', t.fallback ? 'Fb' : ''].filter(Boolean).join('·');
+};
+const planSummary = () => {
+  const t = settings.tactics;
+  return [t.formation === 'escort' ? 'escort formation' : 'loose', t.waves > 1 ? `${t.waves} waves` : 'all at once', t.fallback ? 'wounded fall back' : 'wounded fight on'].join(', ');
+};
 import { hideTip, tip } from './tooltip';
 
 const RES_NAMES = { food: 'Food', wood: 'Wood', gold: 'Gold', stone: 'Stone' } as const;
@@ -20,8 +31,8 @@ const CAP = 10;
 /** Build tabs; buildings arrive in later milestones and simply join their tab. */
 const TABS: Array<{ key: string; name: string; icon: string; types: BuildingType[] }> = [
   { key: 'economy', name: 'Economy', icon: ICONS.economy, types: ['house', 'farm', 'mill', 'lumber_camp', 'mining_camp', 'market', 'wonder'] },
-  { key: 'military', name: 'Military', icon: ICONS.military, types: ['barracks', 'archery_range', 'stable', 'blacksmith', 'monastery', 'university', 'siege_workshop'] },
-  { key: 'defense', name: 'Defense', icon: ICONS.defense, types: ['palisade_wall', 'palisade_gate', 'stone_wall', 'gate', 'watch_tower', 'castle'] },
+  { key: 'military', name: 'Military', icon: ICONS.military, types: ['barracks', 'archery_range', 'stable', 'blacksmith', 'monastery', 'university', 'siege_workshop', 'airfield'] },
+  { key: 'defense', name: 'Defense', icon: ICONS.defense, types: ['palisade_wall', 'palisade_gate', 'stone_wall', 'gate', 'watch_tower', 'sam_site', 'castle'] },
   { key: 'naval', name: 'Naval', icon: ICONS.ship, types: ['dock'] },
   // Fishing ships' own short list.
   { key: 'water', name: 'Water', icon: ICONS.fish_trap, types: ['fish_trap'] },
@@ -62,10 +73,12 @@ function status(w: World, u: Unit): string {
   const o = u.order;
   if (u.state === 'pack') return u.packed ? 'Unpacking…' : 'Stowing…';
   if (u.cargo.length) return `${u.cargo.length} aboard`;
+  const wave = u.squad ? pendingWave(w, u.squad) : null;
+  if (wave) return `Wave ${wave.index}: goes in ${wave.seconds}s`;
   if (!o) return UNIT_DEFS[u.type].packs ? (u.packed ? 'Packed' : 'Ready to fire') : 'Idle';
   switch (o.type) {
     case 'move':
-      return 'Moving';
+      return u.role === 'retreat' ? 'Falling back' : u.role === 'screen' ? 'Escorting' : u.role === 'ward' ? 'Marching under escort' : 'Moving';
     case 'gather':
       return `${u.state === 'gather' ? 'Gathering' : 'Heading to'} ${RES_NAMES[o.res]}`;
     case 'dropoff': {
@@ -197,6 +210,7 @@ export class CommandCenter {
     const fishers = own.some((u) => isGatherer(u) && UNIT_DEFS[u.type].naval);
     const landBuilders = own.some((u) => isGatherer(u) && !UNIT_DEFS[u.type].naval);
     const res = this.world.players[this.player].resources;
+    if (this.tab === 'plan') return this.planCommands();
     if (this.tab && (landBuilders || fishers)) {
       const tab = TABS.find((t) => t.key === this.tab)!;
       const age = this.world.players[this.player].age;
@@ -267,6 +281,14 @@ export class CommandCenter {
       };
       slots.push(btn);
     }
+    if (soldiers.length && !villagers)
+      slots.push({
+        icon: ICONS.plan,
+        label: 'Tactics',
+        caption: planCaption(),
+        run: () => ((this.tab = 'plan'), (this.page = 0)),
+        tip: () => tipHtml('Tactics', `How this army moves and attacks: ${planSummary()}.<br><i>Applies to every army order you give.</i>`),
+      });
     // Siege: bombard a spot, pack or unpack, let riders out.
     if (!villagers && soldiers.some((u) => UNIT_DEFS[u.type].groundAttack))
       slots.push({
@@ -305,6 +327,52 @@ export class CommandCenter {
     slots.push(own.length ? this.deleteCmd() : null);
     slots.push({ icon: ICONS.close, label: 'Deselect', run: () => ctl.deselect() });
     return slots;
+  }
+
+  /** The Tactics panel: formation, waves and falling back, kept for every army order. */
+  private planCommands(): Array<Cmd | null> {
+    const t = () => settings.tactics;
+    const set = (patch: Partial<Tactics>) => {
+      updateSettings({ tactics: { ...t(), ...patch } });
+      this.shown = '';
+    };
+    return [
+      {
+        icon: t().formation === 'escort' ? ICONS.escort : ICONS.loose,
+        label: 'Formation',
+        caption: t().formation === 'escort' ? 'Escort' : 'Loose',
+        active: () => t().formation === 'escort',
+        run: () => set({ formation: t().formation === 'escort' ? 'loose' : 'escort' }),
+        tip: () =>
+          tipHtml(
+            `Formation: ${t().formation === 'escort' ? 'Escort' : 'Loose'}`,
+            'Escort: tanks and close-quarters troops march in front, shooters, artillery and medics behind them, all at the pace of the slowest; when a ward is hit, its escorts turn on the attacker.<br>Loose: everyone goes at their own speed.<br><i>Tap to switch.</i>',
+          ),
+      },
+      {
+        icon: ICONS.waves,
+        label: 'Waves',
+        caption: t().waves === 1 ? 'All at once' : `${t().waves} waves`,
+        active: () => t().waves > 1,
+        run: () => set({ waves: (t().waves % 3) + 1 }),
+        tip: () =>
+          tipHtml(
+            `Attack: ${t().waves === 1 ? 'all at once' : `${t().waves} waves`}`,
+            `Split the army into mixed waves: the first goes at once, the next ${WAVE_GAP_S} seconds later, or sooner if the wave ahead is cut down.<br><i>Tap to cycle 1, 2, 3.</i>`,
+          ),
+      },
+      {
+        icon: ICONS.fallback,
+        label: 'Wounded',
+        caption: t().fallback ? 'Fall back' : 'Fight on',
+        active: () => t().fallback,
+        run: () => set({ fallback: !t().fallback }),
+        tip: () => tipHtml(`Wounded: ${t().fallback ? 'fall back' : 'fight on'}`, 'Fall back: units below 30% health retreat to where the order was given (send medics there).<br><i>Tap to switch.</i>'),
+      },
+      null,
+      null,
+      { icon: ICONS.back, label: 'Back', run: () => ((this.tab = null), (this.page = 0)) },
+    ];
   }
 
   /** The single building of yours that is selected, if that is the selection. */

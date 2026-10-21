@@ -17,6 +17,7 @@ import { CAPTURE_TIME, type Site, carried, kingOf, relics } from '../modes';
 import { canShelter, shelterRoom } from '../fortify';
 import { Terrain } from '../terrain';
 import type { World } from '../world';
+import type { Command } from '../commands';
 import { type BotProfile, EconomyBot, NORMAL } from './bot';
 
 export type Difficulty = 'easy' | 'normal' | 'hard';
@@ -164,6 +165,7 @@ const COUNTERS: Partial<Record<UnitClass, UnitType[]>> = {
   infantry: ['archer'],
   siege: ['knight', 'scout'],
   monk: ['knight', 'scout'],
+  air: ['aa_trooper', 'aa_vehicle'],
 };
 
 /** Where each unit is trained. */
@@ -303,6 +305,23 @@ export class Opponent extends EconomyBot {
     }
     const naval = m.starts.some((s, i) => w.isEnemy(this.player, i) && !seen[s.y * N + s.x]);
     return { water: naval || deep > 60, naval };
+  }
+
+  /** Enemy aircraft have been seen (and are still about). */
+  private enemyAir(): boolean {
+    for (const t of this.seen.values()) if (UNIT_DEFS[t].air) return true;
+    return false;
+  }
+
+  /**
+   * Orders for an attacking wave go out with a battle plan: Normal and Hard
+   * march in escort formation (shooters and siege behind the tanks); Hard also
+   * pulls its badly wounded back.
+   */
+  protected override issue(w: World, cmd: Command): void {
+    if ((cmd.type === 'move' || cmd.type === 'attack') && this.difficulty !== 'easy' && this.wave && cmd.ids.length > 1 && cmd.ids.every((id) => this.wave!.ids.has(id)))
+      cmd = { ...cmd, tactics: { formation: 'escort', waves: 1, fallback: this.difficulty === 'hard' } };
+    super.issue(w, cmd);
   }
 
   /** Remembers enemy units in sight (for counters). */
@@ -469,6 +488,9 @@ export class Opponent extends EconomyBot {
     if (p.age >= 2 && this.ai.siege) want.push(['siege_workshop', 1]);
     if (p.age >= 2 && this.ai.siege && this.difficulty === 'hard') want.push(['castle', 1]);
     if (p.age >= 3 && this.ai.siege && this.enemyWalls(w).length) want.push(['castle', 1]);
+    // An air arm from the Network Age, and missile batteries once enemy aircraft have been seen.
+    if (p.age >= 2 && this.difficulty !== 'easy') want.push(['airfield', 1]);
+    if (p.age >= 2 && this.enemyAir()) want.push(['sam_site', this.difficulty === 'hard' ? 2 : 1]);
     // Keep enough back to advance first.
     for (const [t, n] of want) {
       if (have(t) >= n || BUILDING_DEFS[t].age > p.age) continue;
@@ -590,9 +612,19 @@ export class Opponent extends EconomyBot {
       if (p.age >= 3) base.trebuchet = walls ? 0.06 : 0.04;
       else if (walls) base.mangonel = 0.05;
     }
-    // Siege outlives the soldiers around it: never more than a handful.
+    // Enemy aircraft: anti-air troops, and AA vehicles once there is a factory for them.
+    if (this.enemyAir() && p.age >= 1) {
+      base.aa_trooper = 0.22;
+      if (p.age >= 2) base.aa_vehicle = 0.1;
+    }
+    // Normal and Hard field helicopters, then jets.
+    if (this.difficulty !== 'easy' && p.age >= 2) {
+      base.attack_heli = 0.1;
+      if (p.age >= 3) base.strike_jet = 0.06;
+    }
+    // Siege outlives the soldiers around it: never more than a handful; the same goes for aircraft.
     const count = (t: UnitType) => this.army(w).filter((u) => u.type === t).length;
-    for (const [t, max] of [['ram', 4], ['trebuchet', 3], ['mangonel', 2]] as const) if (count(t) >= max) delete base[t];
+    for (const [t, max] of [['ram', 4], ['trebuchet', 3], ['mangonel', 2], ['attack_heli', 5], ['strike_jet', 3], ['aa_vehicle', 3]] as const) if (count(t) >= max) delete base[t];
     return base;
   }
 

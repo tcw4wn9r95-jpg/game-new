@@ -65,6 +65,14 @@ export interface UnitDef {
   faction?: string;
   /** Attack the counter bonuses multiply (Blacksmith upgrades add on top, unmultiplied). */
   baseAttack?: number;
+  /** Flies: ignores terrain, walls and water; only anti-air weapons can hit it. */
+  air?: boolean;
+  /** Flying height in tiles (drawing, and where shots at it end). */
+  altitude?: number;
+  /** Can fire at aircraft. */
+  antiAir?: boolean;
+  /** Fires at aircraft only (AA troopers and vehicles). */
+  airOnly?: boolean;
 }
 
 export type UnitClass =
@@ -88,7 +96,8 @@ export type UnitClass =
   | 'barge'
   | 'transport'
   | 'king'
-  | 'wonder';
+  | 'wonder'
+  | 'air';
 
 /** aggressive: chase anything seen; defensive: chase a short way then return; stand: hold position; passive: never attack. */
 export type Stance = 'aggressive' | 'defensive' | 'stand' | 'passive';
@@ -124,7 +133,7 @@ export interface BuildingDef {
   /** A gate segment: open to its owner. */
   gate?: boolean;
   /** Arrows the building shoots (towers, castles, town centres). */
-  attack?: { attack: number; range: number; reload: number; arrows: number; minRange: number };
+  attack?: { attack: number; range: number; reload: number; arrows: number; minRange: number; air?: 'also' | 'only' };
   /** How many units fit inside. */
   garrison?: number;
   /** Stands on deep water and is built by ships (fish traps). */
@@ -213,6 +222,16 @@ export interface Unit {
   ferry: Ferry | null;
   /** Villagers sheltering at the town bell: what they were doing, to go back to it. */
   bell?: { order: Order | null; resume: Order | null } | null;
+  /** The group this unit was ordered with under a battle plan (0 = none). */
+  squad?: number;
+  /** Escort formation: screens stand in front and defend the wards behind them; retreat: falling back. */
+  role?: 'screen' | 'ward' | 'retreat';
+  /** Speed cap while marching with its squad (the slowest member's pace). */
+  pace?: number;
+  /** Where its squad was sent; it heads back there after breaking off to fight. */
+  dest?: { x: number; y: number } | null;
+  /** Fall back here when badly hurt (once per order). */
+  fallback?: { x: number; y: number } | null;
 }
 
 export interface Ferry {
@@ -223,6 +242,16 @@ export interface Ferry {
   dest: { x: number; y: number } | null;
   /** Match time the ferry was arranged (it stops waiting for stragglers after a while). */
   since?: number;
+}
+
+/** Aircraft fly over everything. */
+export const isAir = (u: { type: UnitType }): boolean => !!UNIT_DEFS[u.type].air;
+
+/** Can an attacker with these stats hit this target? Only anti-air reaches aircraft; AA fires at nothing else. */
+export function canHit(a: UnitDef, t: Unit | Building): boolean {
+  const air = t.kind === 'unit' && isAir(t);
+  if (a.airOnly) return air;
+  return !air || !!a.antiAir;
 }
 
 /** Navigation layer a unit moves on: ships the water, everyone else their own side's land. */

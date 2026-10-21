@@ -228,7 +228,14 @@ export class Game {
         this.addEffect({ kind: 'blast', x: ev.x, y: ev.y, color: '', size: ev.size });
         continue;
       }
-      if (ev.type === 'death') this.renderer.addDeath(ev, this.deaths++, nowS);
+      if (ev.type === 'death') {
+        this.renderer.addDeath(ev, this.deaths++, nowS);
+        // A downed aircraft crashes in a fireball.
+        if (UNIT_DEFS[ev.unit].air) {
+          this.addEffect({ kind: 'blast', x: ev.x, y: ev.y, color: '', size: 1.1 });
+          audio.play('boom', this.heard(ev.x, ev.y));
+        }
+      }
       else if (ev.type === 'destroyed') this.renderer.addRuin(ev, nowS);
       if (ev.type === 'converted' && ev.from === this.player) this.alert('A unit was turned by an enemy agent!', ev.x, ev.y, nowS, true, 'convert');
       if (ev.type === 'victory' && this.world.scenario) {

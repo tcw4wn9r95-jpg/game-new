@@ -1,6 +1,7 @@
 import economy from '../data/economy.json';
 import mapsData from '../data/maps.json';
-import { applyCommand, type Command } from './commands';
+import { applyCommand, type Command, squadExec } from './commands';
+import { type WavePlan, tacticsTick } from './tactics';
 import { combatThink, type Projectile, projectileTick } from './combat';
 import { towerTick, ungarrison } from './fortify';
 import { carryRiders, unload } from './siege';
@@ -15,6 +16,7 @@ import {
   UNIT_DEFS,
   type Unit,
   type UnitType,
+  isAir,
   navOf,
 } from './entities';
 import { Fog, type VisionSource } from './fog';
@@ -37,6 +39,21 @@ const CONQUEST_BUILDINGS = new Set<BuildingType>(['town_center', 'castle', 'dock
 /** 1v1: two teams; 1v2: the human alone against two; 2v2: slots 0-1 against 2-3. */
 export function defaultTeams(players: number): number[] {
   return players === 2 ? [0, 1] : players === 3 ? [0, 1, 1] : [0, 0, 1, 1];
+}
+
+/** Where an aircraft's order takes it (clamped to the map). */
+function airGoal(w: World, u: Unit): { x: number; y: number } | null {
+  const o = u.order;
+  if (!o) return null;
+  const N = w.map.size;
+  const clamp = (p: { x: number; y: number }) => ({ x: Math.max(0.5, Math.min(N - 0.5, p.x)), y: Math.max(0.5, Math.min(N - 0.5, p.y)) });
+  if (o.type === 'move' || o.type === 'attackGround') return clamp(o);
+  if ('id' in o) {
+    const t = w.get(o.id);
+    if (!t) return null;
+    return clamp(t.kind === 'building' ? { x: t.x + t.size / 2, y: t.y + t.size / 2 } : { x: t.x, y: t.y });
+  }
+  return null;
 }
 
 /** Path searches run per tick; the rest wait for the next tick (keeps ticks bounded). */
@@ -124,6 +141,9 @@ export class World {
   /** The campaign chapter being played, if any. */
   scenario: ScenarioState | null = null;
   nextProjectileId = 1;
+  /** Battle-plan squads issued so far (ids), and waves still waiting to go. */
+  squadSeq = 0;
+  waves: WavePlan[] = [];
   private nextId = 1;
   private pending: Array<{ player: number; cmd: Command }> = [];
   private pathQueue: number[] = [];
@@ -352,7 +372,7 @@ export class World {
     this.grid.setBuilding(x, y, def.size, b.id, !def.walkable);
     // Anyone standing on the new footprint steps off it.
     for (const u of this.units()) {
-      if (def.walkable || this.grid.building[Math.floor(u.y) * this.map.size + Math.floor(u.x)] !== b.id) continue;
+      if (def.walkable || isAir(u) || this.grid.building[Math.floor(u.y) * this.map.size + Math.floor(u.x)] !== b.id) continue;
       const out = this.grid.nearestWalkable(u.x, u.y, -1, def.size + 4, navOf(u));
       if (out) {
         u.x = u.px = out.x + 0.5;
@@ -381,6 +401,15 @@ export class World {
   /** Queues a path search for a unit; the goal is read from its order when the search runs. */
   requestPath(u: Unit): void {
     if (u.pathPending) return;
+    if (isAir(u)) {
+      // Aircraft fly straight there: no search needed.
+      const to = airGoal(this, u);
+      if (to) {
+        u.path = [to];
+        u.pathIdx = 0;
+      } else if (u.order?.type === 'move') unreachable(this, u);
+      return;
+    }
     u.pathPending = true;
     this.pathQueue.push(u.id);
   }
@@ -420,6 +449,7 @@ export class World {
   step(): void {
     for (const { player, cmd } of this.pending) applyCommand(this, player, cmd);
     this.pending = [];
+    tacticsTick(this, (player) => squadExec(this, player));
 
     this.builders.clear();
     this.spatial.rebuild(this.field());

@@ -525,3 +525,139 @@ export function drawTrebuchet(g: G, f: FigureSpec): void {
   antenna(g, 66, -52, 20, f.team);
   for (const x of wheels) tyre(g, x, -11, 11, turn);
 }
+
+// ---------- anti-air and aircraft ----------
+
+/** AA vehicle: a tracked carrier with a twin-cannon turret raised high and a spinning search radar. */
+export function drawAAVehicle(g: G, f: FigureSpec): void {
+  const moving = f.anim === 'walk';
+  const firing = f.anim === 'work' && (f.frame === 2 || f.frame === 0);
+  const hull = paint(f.team, 0.45);
+  shadow(g, 56, 8, 4);
+  track(g, -46, 42, 15, moving ? f.frame * 1.5 : 0, true);
+  poly(g, [[-50, -14], [-48, -30], [34, -30], [46, -20], [44, -14]], hull);
+  g.fillStyle = shade(f.team, 1.1);
+  g.fillRect(-48, -22, 90, 2.6);
+  // Turret with twin cannons at a steep angle.
+  const a = (-58 * Math.PI) / 180, ux = Math.cos(a), uy = Math.sin(a);
+  const rec = firing ? 3 : 0;
+  for (const dx of [-2, 3]) {
+    const ox = -4 + dx, oy = -44;
+    limb(g, [ox + ux * (4 - rec), oy + uy * (4 - rec)], [ox + ux * (42 - rec), oy + uy * (42 - rec)], 3, STEEL_D, 1);
+  }
+  poly(g, [[-24, -30], [-22, -52], [14, -52], [20, -30]], shade(hull, 1.05));
+  // Missile pods either side of the turret.
+  poly(g, [[-30, -48], [-22, -48], [-22, -38], [-30, -38]], '#4b5258');
+  for (const y of [-45, -41]) blob(g, -29, y, 1.2, 1.2, '#e8eaea', 0, false);
+  chevron(g, -2, -40, 1.1, f.team);
+  // Search radar on a mast, turned by the frame.
+  limb(g, [8, -52], [8, -64], 2, STEEL_D, 1);
+  const turn = Math.cos((f.frame / 6) * Math.PI * 2);
+  poly(g, [[8 - 11 * turn, -68], [8 + 11 * turn, -68], [8 + 11 * turn, -63], [8 - 11 * turn, -63]], '#c9cdd0');
+  crewHead(g, -14, -56, f.look.skin, f.team);
+  if (firing)
+    for (const dx of [-2, 3]) muzzleFlash(g, -4 + dx + ux * 44, -44 + uy * 44, 0.8);
+  track(g, -44, 44, 15, moving ? f.frame * 1.5 : 0);
+}
+
+/** Recon drone: a quadcopter with spinning rotors, a camera gimbal and a team light. */
+export function drawDrone(g: G, f: FigureSpec): void {
+  const spin = f.frame;
+  // Arms and rotors (far pair first).
+  for (const [x, far] of [[-20, true], [20, true], [-14, false], [14, false]] as const) {
+    const y = far ? -22 : -18;
+    stroke(g, [0, -16], [x, y], 2.2, far ? '#2a2e33' : '#3a4048');
+    limb(g, [x, y], [x, y - 3], 2.4, '#1d1f22', 1);
+    const w = 12 * (0.6 + 0.4 * Math.abs(Math.cos(spin + x)));
+    g.fillStyle = 'rgba(200,210,220,0.35)';
+    g.beginPath();
+    g.ellipse(x, y - 4, w, 1.6, 0, 0, Math.PI * 2);
+    g.fill();
+    stroke(g, [x - w, y - 4], [x + w, y - 4], 0.8, 'rgba(30,30,30,0.6)');
+  }
+  // Body shell and the camera ball under it.
+  poly(g, [[-10, -19], [10, -19], [12, -13], [-12, -13]], '#e2e4e6');
+  g.fillStyle = shade(f.team, 1.1);
+  g.fillRect(-9, -17.5, 18, 2);
+  blob(g, 4, -9, 3.6, 3.6, '#2a2e33');
+  blob(g, 5.5, -9.3, 1.4, 1.4, '#3b86c4', 0, false);
+  blob(g, -9, -14, 1, 1, spin % 2 ? '#ff3a2a' : '#7fff6a', 0, false);
+}
+
+/** Attack helicopter: tandem cockpit, stub wings with rocket pods, a chin cannon and spinning rotors. */
+export function drawHeli(g: G, f: FigureSpec): void {
+  const body = paint(f.team, 0.55);
+  const firing = f.anim === 'work' && f.frame === 2;
+  const spin = (f.frame / 6) * Math.PI * 2;
+  // Tail boom, fin and tail rotor.
+  poly(g, [[-58, -40], [-50, -40], [-2, -30], [-2, -24], [-50, -32]], shade(body, 0.9));
+  poly(g, [[-62, -54], [-54, -54], [-48, -36], [-58, -36]], body);
+  const tr = 9 * Math.abs(Math.cos(spin * 2));
+  g.fillStyle = 'rgba(200,210,220,0.35)';
+  g.beginPath();
+  g.ellipse(-60, -46, 2.2, 10, 0, 0, Math.PI * 2);
+  g.fill();
+  stroke(g, [-60, -46 - tr], [-60, -46 + tr], 1, 'rgba(30,30,30,0.7)');
+  // Skids.
+  limb(g, [-14, -8], [26, -8], 1.6, '#2a2d31', 1);
+  for (const x of [-6, 16]) stroke(g, [x, -8], [x + 2, -16], 1.4, '#2a2d31');
+  // Fuselage with a tapered nose.
+  poly(g, [[-8, -16], [-6, -34], [16, -36], [34, -28], [40, -20], [34, -14], [8, -12]], body);
+  // Tandem cockpit glazing.
+  poly(g, [[10, -34], [26, -33], [36, -24], [24, -24], [12, -26]], GLASS);
+  g.fillStyle = 'rgba(170,210,240,0.4)';
+  g.fillRect(14, -32, 6, 2);
+  g.fillStyle = shade(f.team, 1.1);
+  g.fillRect(-6, -22, 30, 2.4);
+  chevron(g, 2, -27, 1, f.team);
+  // Stub wing and rocket pod, chin cannon.
+  poly(g, [[-2, -22], [12, -22], [12, -19], [-2, -19]], STEEL_D);
+  poly(g, [[0, -19], [14, -19], [16, -15], [0, -15]], '#4b5258');
+  for (const y of [-18, -16]) blob(g, 16, y, 1, 0.9, '#d8c060', 0, false);
+  limb(g, [30, -14], [40, -12], 1.6, '#1d1f22', 1);
+  if (firing) muzzleFlash(g, 42, -12, 0.8);
+  // Engine housing, mast and the main rotor: a blur disc with two blades.
+  poly(g, [[-4, -34], [12, -36], [14, -40], [-2, -40]], shade(body, 0.8));
+  limb(g, [6, -40], [6, -46], 2.2, STEEL_D, 1);
+  g.fillStyle = 'rgba(200,210,220,0.28)';
+  g.beginPath();
+  g.ellipse(6, -47, 52, 4, 0, 0, Math.PI * 2);
+  g.fill();
+  for (const k of [0, Math.PI / 2]) {
+    const l = 52 * Math.cos(spin + k);
+    stroke(g, [6 - l, -47 - Math.sin(spin + k) * 2], [6 + l, -47 + Math.sin(spin + k) * 2], 1.4, 'rgba(25,28,32,0.85)');
+  }
+}
+
+/** Strike jet: pointed nose, bubble canopy, tail fin, wing and missiles, an afterburner when moving. */
+export function drawJet(g: G, f: FigureSpec): void {
+  const body = paint(f.team, 0.6);
+  const moving = f.anim === 'walk' || f.anim === 'work';
+  const firing = f.anim === 'work' && f.frame === 2;
+  if (moving) {
+    const fl = g.createLinearGradient(-80, 0, -56, 0);
+    fl.addColorStop(0, 'rgba(255,120,30,0)');
+    fl.addColorStop(0.6, 'rgba(255,170,60,0.8)');
+    fl.addColorStop(1, 'rgba(255,250,220,1)');
+    g.fillStyle = fl;
+    g.beginPath();
+    g.ellipse(-64 - (f.frame % 2) * 2, -22, 14 + (f.frame % 3) * 2, 3.4, 0, 0, Math.PI * 2);
+    g.fill();
+  }
+  // Far wing, fuselage, near wing, tail.
+  poly(g, [[-20, -26], [10, -26], [-30, -38], [-40, -38]], shade(body, 0.7));
+  poly(g, [[-56, -26], [-56, -18], [30, -16], [62, -21], [30, -28], [-30, -28]], body);
+  poly(g, [[-56, -26], [-46, -26], [-36, -48], [-46, -48]], shade(body, 0.85));
+  poly(g, [[-30, -22], [20, -22], [-14, -8], [-28, -8]], shade(body, 1.05));
+  // Canopy and intakes.
+  poly(g, [[22, -27], [36, -31], [46, -26], [24, -25]], GLASS);
+  g.fillStyle = 'rgba(170,210,240,0.45)';
+  g.fillRect(30, -30, 6, 1.6);
+  poly(g, [[0, -24], [10, -24], [10, -19], [0, -19]], '#2a2d31');
+  g.fillStyle = shade(f.team, 1.1);
+  g.fillRect(-40, -23, 50, 2);
+  chevron(g, -40, -36, 0.9, f.team);
+  // Missiles under the wing.
+  if (!firing) for (const x of [-22, -6]) poly(g, [[x, -10], [x + 14, -10], [x + 17, -8.5], [x + 14, -7], [x, -7]], '#e8eaea');
+  else muzzleFlash(g, 8, -8, 0.9);
+}

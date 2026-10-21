@@ -1359,6 +1359,86 @@ const PAINTERS: Record<BuildingType, Painter> = {
       flag(g, n - 0.5, n - 0.5, 30, team, 1.1);
     });
   },
+  airfield: (g, n, team) => {
+    apron(g, n, '#7f817e', 0.3, 'concrete');
+    // A runway strip across the front, with a centreline and threshold bars.
+    onGround(g, 0, 0, () => {
+      const W = n * 32;
+      g.fillStyle = mat(g, 'membrane', '#3b3f44', 5);
+      g.fillRect(4, W * 0.62, W - 8, W * 0.3);
+      g.fillStyle = 'rgba(240,240,235,0.85)';
+      for (let x = 14; x < W - 14; x += 10) g.fillRect(x, W * 0.765, 5, 1.2);
+      for (let k = 0; k < 4; k++) {
+        g.fillRect(7, W * 0.65 + k * 5, 6, 2.4);
+        g.fillRect(W - 13, W * 0.65 + k * 5, 6, 2.4);
+      }
+      g.fillStyle = '#e8c22a';
+      g.fillRect(4, W * 0.62, W - 8, 0.8);
+    });
+    // Hangar with a curved metal roof and its doors open toward the runway.
+    boxShadow(g, 0.25, 0.25, n - 1.3, 2.2, 40);
+    box(g, 0.25, 0.25, n - 1.3, 2.2, 22, CLAD, {
+      left: (len) => {
+        rollDoor(g, len * 0.5, len * 0.62, 18, true);
+        sign(g, len * 0.88, 14, 6, 5, team);
+      },
+      right: (len) => band(g, 3, len - 3, 15, 3),
+    }, 81);
+    gableRoof(g, 0.2, 0.2, n - 1.25, 2.25, 22, 12, { color: ROOF, kind: 'metal' }, 'y', 0.06, 83);
+    // Control tower with a glass cab, a windsock and floodlights.
+    slab(g, n - 1.0, 0.35, n - 0.35, 1.0, 34, PANEL, { left: (len) => band(g, len / 2 - 2, len / 2 + 2, 6, 20) }, 'concrete', '#9a978e', 85);
+    at(g, 34, () => {
+      slab(g, n - 1.1, 0.25, n - 0.25, 1.1, 10, GLASS, {}, 'metal', '#3f454c', 87);
+      trim(g, n - 1.1, 0.25, n - 0.25, 1.1, 10, team);
+      mast(g, n - 0.65, 0.7, 10, 18, team, false);
+    });
+    post(g, n - 0.3, n - 1.6, 16, 1, '#9aa1a6');
+    const [wx, wy] = P(n - 0.3, n - 1.6, 16);
+    g.fillStyle = '#ff7a1a';
+    g.beginPath();
+    g.moveTo(wx, wy);
+    g.lineTo(wx + 9, wy + 1);
+    g.lineTo(wx + 9, wy + 3);
+    g.lineTo(wx, wy + 4);
+    g.closePath();
+    g.fill();
+    floodlight(g, 0.3, n - 0.3, 32);
+    flag(g, n - 0.5, 1.6, 0, team, 1);
+  },
+  sam_site: (g, n, team) => {
+    apron(g, n, '#7a7c76', 0.2, 'concrete');
+    // A sandbag revetment around a launcher of four canisters raised toward the sky, and a radar.
+    sandbagRun(g, [0.1, 0.1], [n - 0.1, 0.1], 2);
+    sandbagRun(g, [0.1, 0.1], [0.1, n - 0.1], 2);
+    slab(g, 0.45, 0.45, 1.35, 1.35, 6, DARK_METAL, {}, 'metal', '#6b737b', 91);
+    for (const [dx, dy] of [[0, 0], [0.22, 0], [0, 0.22], [0.22, 0.22]] as const) {
+      const x = 0.62 + dx, y = 0.62 + dy;
+      line3(g, [x, y, 7], [x - 0.35, y - 0.35, 34], '#2a2f34', 4.2);
+      line3(g, [x, y, 7], [x - 0.35, y - 0.35, 34], shadeColor(team, 0.75), 3.2);
+      const [tx, ty] = P(x - 0.35, y - 0.35, 34);
+      g.fillStyle = '#e8eaea';
+      g.beginPath();
+      g.arc(tx, ty, 1.6, 0, Math.PI * 2);
+      g.fill();
+    }
+    // Radar trailer.
+    slab(g, 1.25, 1.2, 1.85, 1.85, 9, METAL, {}, 'metal', '#9aa1a6', 93);
+    at(g, 9, () => {
+      post(g, 1.55, 1.5, 8, 1.2, '#59606a');
+      const [rx, ry] = P(1.55, 1.5, 16);
+      g.fillStyle = '#d8dcde';
+      g.fillRect(rx - 7, ry - 6, 14, 6);
+      g.strokeStyle = 'rgba(40,40,40,0.5)';
+      g.lineWidth = 0.4;
+      for (let k = 1; k < 5; k++) {
+        g.beginPath();
+        g.moveTo(rx - 7 + k * 2.8, ry - 6);
+        g.lineTo(rx - 7 + k * 2.8, ry);
+        g.stroke();
+      }
+    });
+    flag(g, n - 0.2, 0.25, 0, team, 0.8);
+  },
   siege_workshop: (g, n, team) => {
     apron(g, n, '#72746f', 0.25);
     // Vehicle factory: a tall hall with a sawtooth roof, a big door, stacks and a gantry crane outside.

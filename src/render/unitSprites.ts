@@ -2,8 +2,8 @@
 import type { ResourceKind } from '../sim/constants';
 import type { UnitType } from '../sim/entities';
 import { type Anim, CLOTHS, type FigureSpec, HAIRS, type Look, SKINS, type Tool, type View, drawVillager } from './figures';
-import { drawArbalest, drawArcher, drawClaymore, drawKing, drawMilitia, drawMonk, drawPetard, drawSkirmisher, drawSpearman } from './troops';
-import { drawHorseArcher, drawIronBear, drawKnight, drawMangonel, drawRam, drawScorpion, drawScout, drawSiegeTower, drawTrebuchet } from './vehicles';
+import { drawAATrooper, drawArbalest, drawArcher, drawClaymore, drawKing, drawMilitia, drawMonk, drawPetard, drawSkirmisher, drawSpearman } from './troops';
+import { drawAAVehicle, drawDrone, drawHeli, drawHorseArcher, drawIronBear, drawJet, drawKnight, drawMangonel, drawRam, drawScorpion, drawScout, drawSiegeTower, drawTrebuchet } from './vehicles';
 import { grade } from './materials';
 import { SHIP_TYPES, type ShipType, shipPortrait, shipSprite } from './shipFigures';
 import { PLAYER_COLORS } from './palette';
@@ -30,6 +30,11 @@ const DEFS: Record<Exclude<UnitType, ShipType>, { tilesPer100: number; x0: numbe
   arbalest_guard: { tilesPer100: 0.86, x0: -50, x1: 90, y0: -150, y1: 12, draw: drawArbalest },
   iron_bear: { tilesPer100: 1.25, x0: -85, x1: 140, y0: -115, y1: 14, draw: drawIronBear },
   king: { tilesPer100: 0.9, x0: -45, x1: 55, y0: -150, y1: 12, draw: drawKing },
+  aa_trooper: { tilesPer100: 0.86, x0: -50, x1: 70, y0: -160, y1: 12, draw: drawAATrooper },
+  aa_vehicle: { tilesPer100: 0.95, x0: -60, x1: 60, y0: -110, y1: 14, draw: drawAAVehicle },
+  recon_drone: { tilesPer100: 1.0, x0: -38, x1: 38, y0: -34, y1: 2, draw: drawDrone },
+  attack_heli: { tilesPer100: 1.05, x0: -66, x1: 62, y0: -58, y1: 2, draw: drawHeli },
+  strike_jet: { tilesPer100: 1.0, x0: -82, x1: 66, y0: -52, y1: 2, draw: drawJet },
 };
 
 /**
@@ -46,7 +51,7 @@ export const unitHeight = (type: UnitType) =>
       : type === 'fishing_ship'
         ? 1.4
         : 1.9
-    : type === 'siege_tower' ? 0.75 : type === 'trebuchet' ? 1.2 : type === 'scout' || type === 'horse_archer' ? 0.85 : type === 'knight' || type === 'iron_bear' ? 0.85 : type === 'ram' || type === 'mangonel' ? 0.95 : type === 'scorpion' ? 0.7 : type === 'villager' ? 0.85 : 0.9;
+    : type === 'recon_drone' ? 0.45 : type === 'attack_heli' ? 0.65 : type === 'strike_jet' ? 0.55 : type === 'aa_vehicle' ? 0.9 : type === 'siege_tower' ? 0.75 : type === 'trebuchet' ? 1.2 : type === 'scout' || type === 'horse_archer' ? 0.85 : type === 'knight' || type === 'iron_bear' ? 0.85 : type === 'ram' || type === 'mangonel' ? 0.95 : type === 'scorpion' ? 0.7 : type === 'villager' ? 0.85 : 0.9;
 
 /** Eight preset looks so crowds vary; picked by unit id. */
 const LOOKS: Look[] = Array.from({ length: 8 }, (_, i) => ({
@@ -131,7 +136,7 @@ export class UnitSprites {
     c.width = c.height = px;
     const g = c.getContext('2d')!;
     // Frame foot soldiers from the waist up; vehicles and heavy weapons are shown whole.
-    const engine = ['ram', 'mangonel', 'scorpion', 'siege_tower', 'trebuchet', 'scout', 'knight', 'horse_archer', 'iron_bear'].includes(type);
+    const engine = ['ram', 'mangonel', 'scorpion', 'siege_tower', 'trebuchet', 'scout', 'knight', 'horse_archer', 'iron_bear', 'aa_vehicle', 'recon_drone', 'attack_heli', 'strike_jet'].includes(type);
     if (engine) {
       const k = Math.min(px / (d.x1 - d.x0), px / (d.y1 - d.y0)) * 0.95;
       g.translate(px / 2 - ((d.x0 + d.x1) / 2) * k, px / 2 - ((d.y0 + d.y1) / 2) * k);

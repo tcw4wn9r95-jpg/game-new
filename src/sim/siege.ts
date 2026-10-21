@@ -4,7 +4,7 @@
 // including unloading over an enemy wall.
 import { TICK_RATE } from './constants';
 import { setOrder } from './economy';
-import { BUILDING_DEFS, type Building, UNIT_DEFS, type Unit, distToRect, isShip, navOf } from './entities';
+import { BUILDING_DEFS, type Building, UNIT_DEFS, type Unit, distToRect, isAir, isShip, navOf } from './entities';
 import { landRegion } from './naval';
 import { unitStats } from './techs';
 import type { World } from './world';
@@ -51,7 +51,9 @@ export function readyToMove(u: Unit): boolean {
 
 /** Movement speed, with riders pushing a ram along. */
 export function speedOf(w: World, u: Unit): number {
-  const s = unitStats(w, u.owner, u.type).speed;
+  let s = unitStats(w, u.owner, u.type).speed;
+  // Marching in an escort: no faster than the slowest of the squad.
+  if (u.pace && u.order?.type === 'move') s = Math.min(s, u.pace);
   return u.cargo.length && u.type === 'ram' ? s * (1 + RIDER_SPEED * u.cargo.length) : s;
 }
 
@@ -88,7 +90,8 @@ export function splash(
 ): void {
   const victims: Array<[Unit, number]> = [];
   w.spatial.query(x, y, radius + 0.5, (u, d) => {
-    if (u.id === except || u.inside) return;
+    // Blasts on the ground don't reach aircraft overhead.
+    if (u.id === except || u.inside || isAir(u)) return;
     const edge = Math.max(0, d - UNIT_DEFS[u.type].radius);
     if (edge <= radius) victims.push([u, edge]);
   });
@@ -113,7 +116,7 @@ export function boltVictims(w: World, sx: number, sy: number, tx: number, ty: nu
   const ex = sx + ux * (range + 0.5), ey = sy + uy * (range + 0.5);
   const out: Unit[] = [];
   w.spatial.query((sx + ex) / 2, (sy + ey) / 2, (range + 1) / 2 + 1, (u) => {
-    if (!w.isEnemy(owner, u.owner) || u.inside) return;
+    if (!w.isEnemy(owner, u.owner) || u.inside || isAir(u)) return;
     const along = (u.x - sx) * ux + (u.y - sy) * uy;
     if (along < 0.3 || along > range + 0.5) return;
     const off = Math.abs((u.x - sx) * uy - (u.y - sy) * ux);
@@ -126,7 +129,7 @@ export function boltVictims(w: World, sx: number, sy: number, tx: number, ty: nu
 
 export function canBoard(carrier: Unit, u: Unit): boolean {
   const cap = UNIT_DEFS[carrier.type].cargo ?? 0;
-  if (!cap || carrier.owner !== u.owner || carrier.id === u.id || carrier.cargo.length >= cap) return false;
+  if (!cap || isAir(u) || carrier.owner !== u.owner || carrier.id === u.id || carrier.cargo.length >= cap) return false;
   // Transports take anyone who walks.
   if (isShip(carrier)) return !isShip(u);
   const cls = UNIT_DEFS[u.type].classes;

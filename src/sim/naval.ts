@@ -3,7 +3,7 @@
 // can actually get at across the water's edge.
 import { moveGroup } from './commands';
 import { setOrder } from './economy';
-import { BUILDING_DEFS, type Building, type Order, UNIT_DEFS, type Unit, distToRect, isShip, navOf } from './entities';
+import { BUILDING_DEFS, type Building, type Order, UNIT_DEFS, type Unit, distToRect, isAir, isShip, navOf } from './entities';
 import { WATER } from './grid';
 import type { Goal } from './pathfinding';
 import { unload } from './siege';
@@ -154,6 +154,8 @@ export function unloadThink(w: World, u: Unit, o: Extract<Order, { type: 'unload
  * within range.
  */
 export function canEngage(w: World, u: Unit, t: Unit | Building, range: number): boolean {
+  // Aircraft go anywhere, and are reached from anywhere within range.
+  if (isAir(u) || (t.kind === 'unit' && isAir(t))) return true;
   const ship = isShip(u);
   if (t.kind === 'unit') {
     if (ship === isShip(t)) return true;
